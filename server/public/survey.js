@@ -13,6 +13,11 @@
     })
 
     if (!response.ok) {
+      console.error(
+        'Failed to submit survey:',
+        response.status,
+        response.statusText,
+      )
       throw new Error('Network response was not ok')
     }
 

@@ -32,7 +32,7 @@ app.use(
 
 app.use(express.static(path.join(__dirname, 'public')))
 
-// survey.js와 SurveyPopup.css를 제공하는 경로 추가
+// survey.js와 survey.css를 제공하는 경로 추가
 app.get('/survey.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'survey.js'))
 })
@@ -44,6 +44,12 @@ app.get('/survey.css', (req, res) => {
 app.use('/', indexRouter)
 app.use('/example', exampleRouter)
 app.use('/api/appliedSurvey', appliedSurveyRouter)
+
+// 에러 핸들링 미들웨어 추가
+app.use((err, req, res, next) => {
+  console.error(err.stack)
+  res.status(500).send('Something broke!')
+})
 
 mongodb.runAfterAllConnected(() => {
   app.listen(configs.port, () => {
