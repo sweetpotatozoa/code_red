@@ -10,10 +10,9 @@ class appliedSurveyRepo {
     const result = await this.collection.find({}).toArray()
     return result
   }
-
   async addSurvey(survey) {
     const result = await this.collection.insertOne(survey)
-    return result.ops[0] // 추가한 설문조사의 내용을 반환
+    return { ...survey, _id: result.insertedId } // 추가한 설문조사의 내용과 _id를 반환
   }
 }
 
