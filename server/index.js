@@ -9,7 +9,7 @@ const configs = require('./src/utils/configs')
 const mongodb = require('./src/utils/mongodb')
 const indexRouter = require('./src/routes/index')
 const exampleRouter = require('./src/routes/Example_Route')
-const appliedSurveyRouter = require('.src/routes/Applied_Survey_Route')
+const appliedSurveyRouter = require('./src/routes/Applied_Survey_Route')
 
 app.use(cors())
 app.set('view engine', 'ejs')
