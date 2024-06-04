@@ -29,9 +29,21 @@ app.use(
     parameterLimit: 50000,
   }),
 )
+
+// 정적 파일 제공 경로 설정
 app.use(express.static(path.join(__dirname, 'public')))
 app.use('/static', express.static(path.join(__dirname, 'public')))
 
+// survey.js와 SurveyPopup.css를 제공하는 경로 추가
+app.get('/survey.js', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'survey.js'))
+})
+
+app.get('/SurveyPopup.css', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'SurveyPopup.css'))
+})
+
+// API 라우트 설정
 app.use('/', indexRouter)
 app.use('/example', exampleRouter)
 app.use('/api/appliedSurvey', appliedSurveyRouter)

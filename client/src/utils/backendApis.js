@@ -32,12 +32,8 @@ class BackendApis {
     return result
   }
 
-  async getSurveys() {
-    return await fetcher('/api/appliedSurvey', this.token, 'GET')
-  }
-
   async submitSurvey(data) {
-    return await fetcher('/api/appliedSurvey', this.token, 'POST', data)
+    return fetcher('/api/appliedSurvey', this.token, 'POST', data)
   }
 }
 

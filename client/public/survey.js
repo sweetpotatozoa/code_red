@@ -2,8 +2,7 @@
   console.log('Survey script loaded') // 스크립트 로드 확인
 
   async function submitSurvey(data) {
-    const API_URI =
-      'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/api/survey'
+    const API_URI = 'https://your-server-address/api/appliedSurvey'
     const response = await fetch(API_URI, {
       method: 'POST',
       headers: {
@@ -21,31 +20,30 @@
     const link = document.createElement('link')
     link.rel = 'stylesheet'
     link.type = 'text/css'
-    link.href =
-      'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/SurveyPopup.css'
+    link.href = 'https://your-server-address/SurveyPopup.css'
     document.head.appendChild(link)
 
     const surveyContainer = document.createElement('div')
     surveyContainer.innerHTML = `
-        <div id="survey-popup">
-          <form id="surveyForm">
-            <label for="question">제품에 만족하시나요?</label>
-            <div>
-              <span class="star-rating">
-                ${[1, 2, 3, 4, 5]
-                  .map(
-                    (i) => `
-                  <input type="radio" name="rating" value="${i}" id="rating-${i}">
-                  <label for="rating-${i}">★</label>
-                `,
-                  )
-                  .join('')}
-              </span>
-            </div>
-            <button type="submit">제출</button>
-          </form>
-        </div>
-      `
+          <div id="survey-popup">
+            <form id="surveyForm">
+              <label for="question">제품에 만족하시나요?</label>
+              <div>
+                <span class="star-rating">
+                  ${[1, 2, 3, 4, 5]
+                    .map(
+                      (i) => `
+                    <input type="radio" name="rating" value="${i}" id="rating-${i}">
+                    <label for="rating-${i}">★</label>
+                  `,
+                    )
+                    .join('')}
+                </span>
+              </div>
+              <button type="submit">제출</button>
+            </form>
+          </div>
+        `
     console.log('Survey container created', surveyContainer) // 컨테이너 생성 확인
 
     document.body.appendChild(surveyContainer)
