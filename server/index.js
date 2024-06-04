@@ -30,6 +30,7 @@ app.use(
   }),
 )
 app.use(express.static(path.join(__dirname, 'public')))
+app.use('/static', express.static(path.join(__dirname, 'public')))
 
 app.use('/', indexRouter)
 app.use('/example', exampleRouter)
