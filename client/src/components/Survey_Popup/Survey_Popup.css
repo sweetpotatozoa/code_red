@@ -1,0 +1,46 @@
+#survey-popup {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: white;
+  border: 1px solid black;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.star-rating input[type='radio'] {
+  display: none;
+}
+
+.star-rating label {
+  font-size: 2rem;
+  color: #ddd;
+  cursor: pointer;
+}
+
+.star-rating input[type='radio']:checked ~ label {
+  color: #f5b301;
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+  color: #f5b301;
+}
+
+button {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.error {
+  color: red;
+}
