@@ -31,10 +31,6 @@ class BackendApis {
     if (result?.status === 200) this.token = result.token
     return result
   }
-
-  async submitSurvey(data) {
-    return fetcher('/api/appliedSurvey', this.token, 'POST', data)
-  }
 }
 
 export default new BackendApis()

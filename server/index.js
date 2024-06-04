@@ -6,7 +6,7 @@ const cors = require('cors')
 const path = require('path')
 
 const configs = require('./src/utils/configs')
-const mongodb = require('./src/utils/mongodb')
+const mongodb = require('./src/utils/mongodb/index')
 const indexRouter = require('./src/routes/index')
 const exampleRouter = require('./src/routes/Example_Route')
 const appliedSurveyRouter = require('./src/routes/Applied_Survey_Route')
@@ -30,4 +30,14 @@ app.use(
   }),
 )
 
-//
+app.use(express.static(path.join(__dirname, 'public')))
+
+app.use('/', indexRouter)
+app.use('/example', exampleRouter)
+app.use('/api/appliedSurvey', appliedSurveyRouter)
+
+mongodb.runAfterAllConnected(() => {
+  app.listen(configs.port, () => {
+    console.log(`Server is running on port ${configs.port}`)
+  })
+})
