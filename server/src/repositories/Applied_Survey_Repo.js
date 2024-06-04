@@ -13,7 +13,7 @@ class appliedSurveyRepo {
 
   async addSurvey(survey) {
     const result = await this.collection.insertOne(survey)
-    return result
+    return result.ops[0] // 추가한 설문조사의 내용을 반환
   }
 }
 

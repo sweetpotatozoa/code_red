@@ -18,7 +18,7 @@ router.post(
   wrapAsync(async (req, res) => {
     const surveyData = req.body
     const newSurvey = await appliedSurveyRepo.addSurvey(surveyData)
-    res.status(201).json(newSurvey)
+    res.status(201).json({ status: 201, data: newSurvey })
   }),
 )
 

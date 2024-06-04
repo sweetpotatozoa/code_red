@@ -37,8 +37,8 @@ app.get('/survey.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'survey.js'))
 })
 
-app.get('/SurveyPopup.css', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'SurveyPopup.css'))
+app.get('/survey.css', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'survey.css'))
 })
 
 app.use('/', indexRouter)
