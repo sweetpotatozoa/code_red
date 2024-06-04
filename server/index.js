@@ -6,7 +6,7 @@ const cors = require('cors')
 const path = require('path')
 
 const configs = require('./src/utils/configs')
-const mongodb = require('./src/utils/mongodb/index')
+const mongodb = require('./src/utils/mongodb')
 const indexRouter = require('./src/routes/index')
 const exampleRouter = require('./src/routes/Example_Route')
 const appliedSurveyRouter = require('./src/routes/Applied_Survey_Route')
@@ -31,6 +31,15 @@ app.use(
 )
 
 app.use(express.static(path.join(__dirname, 'public')))
+
+// survey.js와 SurveyPopup.css를 제공하는 경로 추가
+app.get('/survey.js', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'survey.js'))
+})
+
+app.get('/SurveyPopup.css', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'SurveyPopup.css'))
+})
 
 app.use('/', indexRouter)
 app.use('/example', exampleRouter)
