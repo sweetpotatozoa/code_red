@@ -1,20 +1,30 @@
 const mongodb = require('../utils/mongodb')
 
-class appliedSurveyRepo {
+class AppliedSurveyRepo {
   constructor() {
     this.db = mongodb.mainDb
     this.collection = this.db.collection('surveys')
   }
 
   async getAllSurveys() {
-    const result = await this.collection.find({}).toArray()
-    return result
+    try {
+      const result = await this.collection.find({}).toArray()
+      return result
+    } catch (error) {
+      console.error('Error retrieving surveys:', error)
+      throw new Error('Could not retrieve surveys')
+    }
   }
 
   async addSurvey(survey) {
-    const result = await this.collection.insertOne(survey)
-    return result
+    try {
+      const result = await this.collection.insertOne(survey)
+      return result
+    } catch (error) {
+      console.error('Error adding survey:', error)
+      throw new Error('Could not add survey')
+    }
   }
 }
 
-module.exports = new appliedSurveyRepo()
+module.exports = new AppliedSurveyRepo()

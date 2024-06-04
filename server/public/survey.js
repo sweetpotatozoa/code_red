@@ -22,7 +22,7 @@
     link.rel = 'stylesheet'
     link.type = 'text/css'
     link.href =
-      'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/Survey_Popup.css'
+      'https://https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/SurveyPopup.css'
     document.head.appendChild(link)
 
     const surveyContainer = document.createElement('div')
