@@ -41,6 +41,14 @@ app.get('/survey.css', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'survey.css'))
 })
 
+app.get('/survey-choice.js', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'survey-choice.js'));
+});
+
+app.get('/survey-choice.css', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'survey-choice.css'));
+});
+
 app.use('/', indexRouter)
 app.use('/example', exampleRouter)
 app.use('/api/appliedSurvey', appliedSurveyRouter)
