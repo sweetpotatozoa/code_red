@@ -3,7 +3,7 @@
   
     async function submitSurvey(data) {
       const API_URI =
-        'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/api/appliedSurvey';
+        'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/api/appliedSurvey/choice';
       const response = await fetch(API_URI, {
         method: 'POST',
         headers: {

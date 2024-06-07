@@ -22,6 +22,15 @@ router.post(
   }),
 )
 
+router.post(
+  '/choice',
+  wrapAsync(async (req, res) => {
+    const surveyData = req.body;
+    const newSurvey = await appliedSurveyRepo.addChoiceSurvey(surveyData);
+    res.status(201).json(newSurvey);
+  })
+);
+
 function wrapAsync(fn) {
   return (req, res, next) => {
     fn(req, res, next).catch(next)
