@@ -22,12 +22,13 @@ router.post(
   }),
 )
 
+// 새로운 객관식 설문조사 추가
 router.post(
   '/choice',
   wrapAsync(async (req, res) => {
     const surveyData = req.body
-    const newSurvey = await appliedSurveyRepo.addChoiceSurvey(surveyData)
-    res.status(201).json(newSurvey)
+    const newSurvey = await appliedSurveyRepo.addSurvey(surveyData)
+    res.status(201).json({ status: 201, data: newSurvey })
   }),
 )
 
