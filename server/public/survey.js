@@ -25,7 +25,11 @@
     return response.json()
   }
 
-  function loadSurvey(survey) {
+  function loadSurvey(surveys) {
+    if (!surveys.length) {
+      throw new Error('No surveys found for this customer')
+    }
+    const survey = surveys[0] // 첫 번째 설문조사를 사용
     console.log('Loading survey', survey) // 설문조사 로드 확인
 
     const link = document.createElement('link')
@@ -120,8 +124,8 @@
       throw new Error('Customer ID is not provided in the URL')
     }
     try {
-      const survey = await fetchSurvey(customerId)
-      loadSurvey(survey.data)
+      const surveyData = await fetchSurvey(customerId)
+      loadSurvey(surveyData.data)
     } catch (error) {
       console.error('Error fetching survey:', error)
     }
