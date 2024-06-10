@@ -45,19 +45,6 @@ app.use('/', indexRouter)
 app.use('/example', exampleRouter)
 app.use('/api/appliedSurvey', appliedSurveyRouter)
 
-// 설문조사 데이터를 불러오는 API 추가
-app.get('/api/appliedSurvey/:customerId', async (req, res) => {
-  const { customerId } = req.params
-  const survey = await mongodb.mainDb
-    .collection('surveys')
-    .findOne({ customerId })
-  if (survey) {
-    res.status(200).json(survey)
-  } else {
-    res.status(404).json({ error: 'Survey not found' })
-  }
-})
-
 // 에러 핸들링 미들웨어 추가
 app.use((err, req, res, next) => {
   console.error(err.stack)

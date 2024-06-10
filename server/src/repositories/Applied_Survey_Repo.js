@@ -1,5 +1,4 @@
 const mongodb = require('../utils/mongodb')
-const ChoiceSurvey = require('../models/choiceSurvey') // 필요한 경우 경로 확인
 
 class AppliedSurveyRepo {
   constructor() {

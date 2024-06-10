@@ -1,11 +1,12 @@
 const mongoose = require('mongoose')
 
 const surveySchema = new mongoose.Schema({
-  type: { type: String, enum: ['rating', 'choice'], required: true },
+  customerId: { type: String, required: true },
   question: { type: String, required: true },
-  options: [String], // 객관식 선택지
   response: { type: String, default: '' },
-  rating: { type: Number },
+  rating: { type: Number }, // 별점 질문을 위한 필드
+  options: { type: [String] }, // 객관식 질문을 위한 필드
+  type: { type: String, required: true }, // 'rating' 또는 'choice' 유형 구분
 })
 
 module.exports = mongoose.model('Survey', surveySchema)

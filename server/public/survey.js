@@ -3,7 +3,7 @@
 
   async function loadSurvey(customerId) {
     const response = await fetch(
-      `https://your-server-url/api/appliedSurvey/${customerId}`,
+      `https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/${customerId}`,
     )
     if (!response.ok) {
       throw new Error('Network response was not ok')
@@ -13,7 +13,8 @@
     const link = document.createElement('link')
     link.rel = 'stylesheet'
     link.type = 'text/css'
-    link.href = 'https://your-server-url/survey.css'
+    link.href =
+      'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/survey.css'
     document.head.appendChild(link)
 
     const surveyContainer = document.createElement('div')
@@ -79,7 +80,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const customerId = 'abcd' // 고객사에서 설정한 고객 ID (추후 동적으로 설정 가능)
+    const customerId = window.surveyConfig.customerId // 고객사에서 설정한 고객 ID
     loadSurvey(customerId)
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
@@ -123,7 +124,7 @@
 
   function init() {
     console.log('Initializing survey script') // 초기화 확인
-    const customerId = 'abcd' // 고객사에서 설정한 고객 ID (추후 동적으로 설정 가능)
+    const customerId = window.surveyConfig.customerId // 고객사에서 설정한 고객 ID
     document.addEventListener('DOMContentLoaded', () => loadSurvey(customerId))
   }
 

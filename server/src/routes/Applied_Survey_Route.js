@@ -13,14 +13,14 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   const surveyData = req.body
   const newSurvey = await appliedSurveyRepo.addSurvey(surveyData)
-  res.status(201).json(newSurvey)
+  res.status(201).json({ status: 201, data: newSurvey })
 })
 
-// 새로운 응답 추가
+// 설문조사 응답 추가
 router.post('/response', async (req, res) => {
   const responseData = req.body
   const newResponse = await appliedSurveyRepo.addResponse(responseData)
-  res.status(201).json(newResponse)
+  res.status(201).json({ status: 201, data: newResponse })
 })
 
 module.exports = router
