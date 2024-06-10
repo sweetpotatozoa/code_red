@@ -108,6 +108,7 @@
   async function init() {
     console.log('Initializing survey script') // 초기화 확인
     const customerId = getCustomerIdFromUrl()
+    console.log('Customer ID from URL:', customerId) // customerId 확인
     if (!customerId) {
       throw new Error('Customer ID is not provided in the URL')
     }
