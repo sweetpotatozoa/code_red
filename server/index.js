@@ -41,17 +41,22 @@ app.get('/survey.css', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'survey.css'))
 })
 
-app.get('/survey-choice.js', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'survey-choice.js'))
-})
-
-app.get('/survey-choice.css', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'survey-choice.css'))
-})
-
 app.use('/', indexRouter)
 app.use('/example', exampleRouter)
 app.use('/api/appliedSurvey', appliedSurveyRouter)
+
+// 설문조사 데이터를 불러오는 API 추가
+app.get('/api/appliedSurvey/:customerId', async (req, res) => {
+  const { customerId } = req.params
+  const survey = await mongodb.mainDb
+    .collection('surveys')
+    .findOne({ customerId })
+  if (survey) {
+    res.status(200).json(survey)
+  } else {
+    res.status(404).json({ error: 'Survey not found' })
+  }
+})
 
 // 에러 핸들링 미들웨어 추가
 app.use((err, req, res, next) => {

@@ -1,52 +1,40 @@
 ;(function () {
   console.log('Survey script loaded') // 스크립트 로드 확인
 
-  async function submitSurvey(data) {
-    const API_URI =
-      'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/api/appliedSurvey'
-    const response = await fetch(API_URI, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-
+  async function loadSurvey(customerId) {
+    const response = await fetch(
+      `https://your-server-url/api/appliedSurvey/${customerId}`,
+    )
     if (!response.ok) {
-      console.error(
-        'Failed to submit survey:',
-        response.status,
-        response.statusText,
-      )
       throw new Error('Network response was not ok')
     }
-
-    return response.json()
-  }
-
-  function loadSurvey() {
-    console.log('Loading survey') // 설문조사 로드 확인
+    const survey = await response.json()
 
     const link = document.createElement('link')
     link.rel = 'stylesheet'
     link.type = 'text/css'
-    link.href =
-      'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/survey.css'
+    link.href = 'https://your-server-url/survey.css'
     document.head.appendChild(link)
 
     const surveyContainer = document.createElement('div')
-    surveyContainer.innerHTML = `
+    surveyContainer.innerHTML = generateSurveyHTML(survey)
+    document.body.appendChild(surveyContainer)
+  }
+
+  function generateSurveyHTML(survey) {
+    if (survey.type === 'rating') {
+      return `
         <div id="survey-popup">
           <form id="surveyForm">
-            <label for="question">제품에 만족하시나요?</label>
+            <label for="question">${survey.question}</label>
             <div>
               <span class="star-rating">
                 ${[1, 2, 3, 4, 5]
                   .map(
                     (i) => `
-                  <input type="radio" name="rating" value="${i}" id="rating-${i}">
-                  <label for="rating-${i}">★</label>
-                `,
+                    <input type="radio" name="rating" value="${i}" id="rating-${i}">
+                    <label for="rating-${i}">★</label>
+                  `,
                   )
                   .join('')}
               </span>
@@ -55,27 +43,69 @@
           </form>
         </div>
       `
-    console.log('Survey container created', surveyContainer) // 컨테이너 생성 확인
+    } else if (survey.type === 'choice') {
+      return `
+        <div id="survey-popup">
+          <form id="surveyForm">
+            <label for="question">${survey.question}</label>
+            <div class="choice-container">
+              ${survey.options
+                .map(
+                  (option, index) => `
+                  <input type="radio" name="choice" value="${option}" id="choice-${index}">
+                  <label for="choice-${index}">${option}</label>
+                `,
+                )
+                .join('')}
+            </div>
+            <button type="submit">제출</button>
+          </form>
+        </div>
+      `
+    }
+  }
 
-    document.body.appendChild(surveyContainer)
-    console.log('Survey container appended to body') // 컨테이너 추가 확인
+  async function submitSurvey(responseData) {
+    const API_URI = 'https://your-server-url/api/appliedSurvey/response'
+    const response = await fetch(API_URI, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(responseData),
+    })
+
+    return response.json()
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const customerId = 'abcd' // 고객사에서 설정한 고객 ID (추후 동적으로 설정 가능)
+    loadSurvey(customerId)
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
+      const surveyData = {
+        customerId: customerId,
+        surveyId: 'survey_a', // 설문조사 ID를 동적으로 설정해야 함
+        answers: [],
+      }
       const rating = document.querySelector('input[name="rating"]:checked')
-      if (!rating) {
-        alert('Please select a rating')
-        return
+      if (rating) {
+        surveyData.answers.push({
+          question: '만족도를 평가해주세요',
+          answer: rating.value,
+        })
+      } else {
+        const choice = document.querySelector('input[name="choice"]:checked')
+        if (choice) {
+          surveyData.answers.push({
+            question: '제 제품에 만족하시는 이유가 무엇인가요?',
+            answer: choice.value,
+          })
+        }
       }
-      const data = {
-        question: '제품에 만족하시나요?',
-        response: '',
-        rating: rating.value,
-      }
-      console.log('Submitting survey:', data) // 제출 데이터 확인
-
       try {
-        const result = await submitSurvey(data)
+        const result = await submitSurvey(surveyData)
         if (result && result.status === 201) {
           alert('설문조사가 성공적으로 제출되었습니다.')
           document.getElementById('survey-popup').style.display = 'none'
@@ -89,11 +119,12 @@
         )
       }
     }
-  }
+  })
 
   function init() {
     console.log('Initializing survey script') // 초기화 확인
-    document.addEventListener('DOMContentLoaded', loadSurvey)
+    const customerId = 'abcd' // 고객사에서 설정한 고객 ID (추후 동적으로 설정 가능)
+    document.addEventListener('DOMContentLoaded', () => loadSurvey(customerId))
   }
 
   init()
