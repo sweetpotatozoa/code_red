@@ -124,11 +124,10 @@
       throw new Error('Customer ID is not provided in the URL')
     }
 
-    // 특정 버튼 클릭 이벤트 추가
+    // 특정 버튼 클릭 시 설문조사 띄우기
     const button = document.querySelector('.Cta_ctaButton__37LVK')
     if (button) {
       button.addEventListener('click', async () => {
-        console.log('CTA button clicked')
         try {
           const surveyData = await fetchSurvey(customerId)
           loadSurvey(surveyData.data)
@@ -136,6 +135,8 @@
           console.error('Error fetching survey:', error)
         }
       })
+    } else {
+      console.error('CTA button not found')
     }
   }
 
