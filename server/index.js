@@ -41,13 +41,17 @@ app.get('/survey.css', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'survey.css'))
 })
 
-app.get('/survey-choice.js', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'survey-choice.js'));
-});
+app.get('/surveychoice.js', (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'surveychoice.js')
+  console.log(`Serving file: ${filePath}`)
+  res.sendFile(filePath)
+})
 
-app.get('/survey-choice.css', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'survey-choice.css'));
-});
+app.get('/surveychoice.css', (req, res) => {
+  const filePath = path.join(__dirname, 'public', 'surveychoice.css')
+  console.log(`Serving file: ${filePath}`)
+  res.sendFile(filePath)
+})
 
 app.use('/', indexRouter)
 app.use('/example', exampleRouter)
