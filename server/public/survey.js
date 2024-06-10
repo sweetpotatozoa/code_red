@@ -123,11 +123,19 @@
     if (!customerId) {
       throw new Error('Customer ID is not provided in the URL')
     }
-    try {
-      const surveyData = await fetchSurvey(customerId)
-      loadSurvey(surveyData.data)
-    } catch (error) {
-      console.error('Error fetching survey:', error)
+
+    // 특정 버튼 클릭 이벤트 추가
+    const button = document.querySelector('.Cta_ctaButton__37LVK')
+    if (button) {
+      button.addEventListener('click', async () => {
+        console.log('CTA button clicked')
+        try {
+          const surveyData = await fetchSurvey(customerId)
+          loadSurvey(surveyData.data)
+        } catch (error) {
+          console.error('Error fetching survey:', error)
+        }
+      })
     }
   }
 
