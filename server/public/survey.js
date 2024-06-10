@@ -101,8 +101,15 @@
   }
 
   function getCustomerIdFromUrl() {
-    const urlParams = new URLSearchParams(window.location.search)
-    return urlParams.get('customerId')
+    const scriptElements = document.getElementsByTagName('script')
+    for (let script of scriptElements) {
+      const src = script.src
+      const match = src.match(/customerId=([^&]+)/)
+      if (match) {
+        return match[1]
+      }
+    }
+    return null
   }
 
   async function init() {
