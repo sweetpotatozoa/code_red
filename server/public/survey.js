@@ -1,10 +1,20 @@
-;(function () {
+;(async function () {
   console.log('Survey script loaded') // 스크립트 로드 확인
 
+  const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
+
+  async function fetchSurvey(customerId) {
+    const response = await fetch(
+      `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
+    )
+    if (!response.ok) {
+      throw new Error('Network response was not ok')
+    }
+    return response.json()
+  }
+
   async function submitSurvey(data) {
-    const API_URI =
-      'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/api/appliedSurvey'
-    const response = await fetch(API_URI, {
+    const response = await fetch(`${API_URI}/api/appliedSurvey/response`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -12,44 +22,49 @@
       body: JSON.stringify(data),
     })
 
-    if (!response.ok) {
-      console.error(
-        'Failed to submit survey:',
-        response.status,
-        response.statusText,
-      )
-      throw new Error('Network response was not ok')
-    }
-
     return response.json()
   }
 
-  function loadSurvey() {
-    console.log('Loading survey') // 설문조사 로드 확인
+  function loadSurvey(surveys) {
+    if (!surveys.length) {
+      throw new Error('No surveys found for this customer')
+    }
+    const survey = surveys[0] // 첫 번째 설문조사를 사용
+    console.log('Loading survey', survey) // 설문조사 로드 확인
 
     const link = document.createElement('link')
     link.rel = 'stylesheet'
     link.type = 'text/css'
-    link.href =
-      'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/survey.css'
+    link.href = `${API_URI}/survey.css`
     document.head.appendChild(link)
 
     const surveyContainer = document.createElement('div')
     surveyContainer.innerHTML = `
         <div id="survey-popup">
           <form id="surveyForm">
-            <label for="question">제품에 만족하시나요?</label>
+            <label for="question">${survey.question}</label>
             <div>
-              <span class="star-rating">
-                ${[1, 2, 3, 4, 5]
-                  .map(
-                    (i) => `
-                  <input type="radio" name="rating" value="${i}" id="rating-${i}">
-                  <label for="rating-${i}">★</label>
-                `,
-                  )
-                  .join('')}
-              </span>
+              ${
+                survey.type === 'rating'
+                  ? `<span class="star-rating">
+                      ${[1, 2, 3, 4, 5]
+                        .map(
+                          (i) => `
+                          <input type="radio" name="rating" value="${i}" id="rating-${i}">
+                          <label for="rating-${i}">★</label>
+                        `,
+                        )
+                        .join('')}
+                    </span>`
+                  : survey.options
+                      .map(
+                        (option, index) => `
+                        <input type="radio" name="choice" value="${option}" id="choice-${index}">
+                        <label for="choice-${index}">${option}</label>
+                      `,
+                      )
+                      .join('')
+              }
             </div>
             <button type="submit">제출</button>
           </form>
@@ -63,14 +78,12 @@
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
       const rating = document.querySelector('input[name="rating"]:checked')
-      if (!rating) {
-        alert('Please select a rating')
-        return
-      }
+      const choice = document.querySelector('input[name="choice"]:checked')
       const data = {
-        question: '제품에 만족하시나요?',
-        response: '',
-        rating: rating.value,
+        customerId: survey.customerId,
+        question: survey.question,
+        response: rating ? '' : choice ? choice.value : '',
+        rating: rating ? rating.value : null,
       }
       console.log('Submitting survey:', data) // 제출 데이터 확인
 
@@ -91,9 +104,31 @@
     }
   }
 
-  function init() {
+  function getCustomerIdFromUrl() {
+    const scriptElements = document.getElementsByTagName('script')
+    for (let script of scriptElements) {
+      const src = script.src
+      const match = src.match(/customerId=([^&]+)/)
+      if (match) {
+        return match[1]
+      }
+    }
+    return null
+  }
+
+  async function init() {
     console.log('Initializing survey script') // 초기화 확인
-    document.addEventListener('DOMContentLoaded', loadSurvey)
+    const customerId = getCustomerIdFromUrl()
+    console.log('Customer ID from URL:', customerId) // customerId 확인
+    if (!customerId) {
+      throw new Error('Customer ID is not provided in the URL')
+    }
+    try {
+      const surveyData = await fetchSurvey(customerId)
+      loadSurvey(surveyData.data)
+    } catch (error) {
+      console.error('Error fetching survey:', error)
+    }
   }
 
   init()

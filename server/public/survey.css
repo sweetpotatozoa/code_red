@@ -1,3 +1,4 @@
+/* 별점 설문조사 스타일 */
 #survey-popup {
   position: fixed;
   bottom: 20px;
@@ -43,4 +44,32 @@ button:hover {
 
 .error {
   color: red;
+}
+
+/* 객관식 설문조사 스타일 */
+.choice-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.choice-container input[type='radio'] {
+  display: none;
+}
+
+.choice-container label {
+  padding: 10px;
+  margin-bottom: 5px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.choice-container input[type='radio']:checked + label {
+  background-color: #e9ecef;
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.choice-container label:hover {
+  background-color: #f8f9fa;
+  border-color: #007bff;
 }
