@@ -5,8 +5,16 @@ const router = express.Router()
 
 // 모든 설문조사 가져오기
 router.get('/', async (req, res) => {
-  const { customerId } = req.query
-  const surveys = await appliedSurveyRepo.getSurveysByCustomerId(customerId)
+  const { customerId, trigger } = req.query
+  let surveys
+  if (trigger) {
+    surveys = await appliedSurveyRepo.getSurveysByCustomerAndTrigger(
+      customerId,
+      trigger,
+    )
+  } else {
+    surveys = await appliedSurveyRepo.getSurveysByCustomerId(customerId)
+  }
   res.status(200).json({ status: 200, data: surveys })
 })
 

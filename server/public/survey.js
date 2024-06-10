@@ -3,9 +3,9 @@
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
 
-  async function fetchSurvey(customerId) {
+  async function fetchSurvey(customerId, trigger) {
     const response = await fetch(
-      `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
+      `${API_URI}/api/appliedSurvey?customerId=${customerId}&trigger=${trigger}`,
     )
     if (!response.ok) {
       throw new Error('Network response was not ok')
@@ -116,6 +116,41 @@
     return null
   }
 
+  function setupTriggers(customerId) {
+    const triggers = [
+      { type: 'newSession', event: 'DOMContentLoaded', condition: () => true },
+      {
+        type: 'exitIntent',
+        event: 'mouseleave',
+        condition: (e) => e.clientY <= 0,
+      },
+      {
+        type: 'scroll',
+        event: 'scroll',
+        condition: () => window.scrollY / document.body.scrollHeight >= 0.5,
+      },
+      {
+        type: 'click',
+        event: 'click',
+        condition: (e) => e.target.matches('.Cta_ctaButton__37LVK'),
+      },
+      // 여기에 다른 트리거 추가 가능
+    ]
+
+    triggers.forEach((trigger) => {
+      document.addEventListener(trigger.event, async (e) => {
+        if (trigger.condition(e)) {
+          try {
+            const surveyData = await fetchSurvey(customerId, trigger.type)
+            loadSurvey(surveyData.data)
+          } catch (error) {
+            console.error('Error fetching survey:', error)
+          }
+        }
+      })
+    })
+  }
+
   async function init() {
     console.log('Initializing survey script') // 초기화 확인
     const customerId = getCustomerIdFromUrl()
@@ -123,21 +158,7 @@
     if (!customerId) {
       throw new Error('Customer ID is not provided in the URL')
     }
-
-    // 특정 버튼 클릭 시 설문조사 띄우기
-    const button = document.querySelector('.Cta_ctaButton__37LVK')
-    if (button) {
-      button.addEventListener('click', async () => {
-        try {
-          const surveyData = await fetchSurvey(customerId)
-          loadSurvey(surveyData.data)
-        } catch (error) {
-          console.error('Error fetching survey:', error)
-        }
-      })
-    } else {
-      console.error('CTA button not found')
-    }
+    setupTriggers(customerId)
   }
 
   init()
