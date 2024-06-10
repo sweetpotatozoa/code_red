@@ -12,6 +12,11 @@ class AppliedSurveyRepo {
     return result
   }
 
+  async getSurveysByCustomerId(customerId) {
+    const result = await this.collection.find({ customerId }).toArray()
+    return result
+  }
+
   async addSurvey(survey) {
     const result = await this.collection.insertOne(survey)
     return { ...survey, _id: result.insertedId } // 추가한 설문조사의 내용과 _id를 반환
