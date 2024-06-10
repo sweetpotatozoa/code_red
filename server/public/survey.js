@@ -3,9 +3,9 @@
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
 
-  async function fetchSurvey(environmentId) {
+  async function fetchSurvey(customerId) {
     const response = await fetch(
-      `${API_URI}/api/appliedSurvey?environmentId=${environmentId}`,
+      `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
     )
     if (!response.ok) {
       throw new Error('Network response was not ok')
@@ -27,7 +27,7 @@
 
   function loadSurvey(surveys) {
     if (!surveys.length) {
-      throw new Error('No surveys found for this environment')
+      throw new Error('No surveys found for this customer')
     }
     const survey = surveys[0] // 첫 번째 설문조사를 사용
     console.log('Loading survey', survey) // 설문조사 로드 확인
@@ -80,7 +80,7 @@
       const rating = document.querySelector('input[name="rating"]:checked')
       const choice = document.querySelector('input[name="choice"]:checked')
       const data = {
-        environmentId: survey.environmentId,
+        customerId: survey.customerId,
         question: survey.question,
         response: rating ? '' : choice ? choice.value : '',
         rating: rating ? rating.value : null,
@@ -104,15 +104,27 @@
     }
   }
 
+  function getCustomerIdFromUrl() {
+    const scriptElements = document.getElementsByTagName('script')
+    for (let script of scriptElements) {
+      const src = script.src
+      const match = src.match(/customerId=([^&]+)/)
+      if (match) {
+        return match[1]
+      }
+    }
+    return null
+  }
+
   async function init() {
     console.log('Initializing survey script') // 초기화 확인
-    if (!window.environmentId) {
-      throw new Error('Environment ID is not provided')
+    const customerId = getCustomerIdFromUrl()
+    console.log('Customer ID from URL:', customerId) // customerId 확인
+    if (!customerId) {
+      throw new Error('Customer ID is not provided in the URL')
     }
-    const environmentId = window.environmentId
-    console.log('Environment ID from script:', environmentId) // environmentId 확인
     try {
-      const surveyData = await fetchSurvey(environmentId)
+      const surveyData = await fetchSurvey(customerId)
       loadSurvey(surveyData.data)
     } catch (error) {
       console.error('Error fetching survey:', error)
