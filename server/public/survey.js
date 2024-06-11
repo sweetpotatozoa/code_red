@@ -187,7 +187,7 @@
       // 특정 텍스트가 포함된 버튼을 클릭했을 때
       if (trigger.type === 'innerText') {
         document.querySelectorAll('button, a, div').forEach((element) => {
-          if (element.innerText.includes(trigger.text)) {
+          if (element.innerText === trigger.text) {
             element.addEventListener('click', showSurvey)
           }
         })
