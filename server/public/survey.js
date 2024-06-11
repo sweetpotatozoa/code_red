@@ -170,32 +170,43 @@
         }
       }
 
-      document.getElementById('surveyForm')?.onsubmit = async function (event) {
-        event.preventDefault()
-        const rating = document.querySelector('input[name="rating"]:checked')
-        const choice = document.querySelector('input[name="choice"]:checked')
-        const textResponse = document.querySelector('textarea[name="text-response"]')
+      const surveyForm = document.getElementById('surveyForm')
+      if (surveyForm) {
+        surveyForm.onsubmit = async function (event) {
+          event.preventDefault()
+          const rating = document.querySelector('input[name="rating"]:checked')
+          const choice = document.querySelector('input[name="choice"]:checked')
+          const textResponse = document.querySelector(
+            'textarea[name="text-response"]',
+          )
 
-        const data = {
-          customerId: survey.customerId,
-          question: step.question,
-          response: rating ? '' : choice ? choice.value : textResponse ? textResponse.value : '',
-          rating: rating ? rating.value : null,
-        }
-
-        console.log('Submitting survey') // 제출 데이터 확인
-
-        try {
-          const result = await submitSurvey(data)
-          if (result && result.status === 201) {
-            console.log('Survey submitted successfully') // 제출 성공 확인
-            currentStep++
-            renderStep()
-          } else {
-            throw new Error('Network response was not ok')
+          const data = {
+            customerId: survey.customerId,
+            question: step.question,
+            response: rating
+              ? ''
+              : choice
+              ? choice.value
+              : textResponse
+              ? textResponse.value
+              : '',
+            rating: rating ? rating.value : null,
           }
-        } catch (error) {
-          console.error('Error submitting survey:', error)
+
+          console.log('Submitting survey') // 제출 데이터 확인
+
+          try {
+            const result = await submitSurvey(data)
+            if (result && result.status === 201) {
+              console.log('Survey submitted successfully') // 제출 성공 확인
+              currentStep++
+              renderStep()
+            } else {
+              throw new Error('Network response was not ok')
+            }
+          } catch (error) {
+            console.error('Error submitting survey:', error)
+          }
         }
       }
     }
