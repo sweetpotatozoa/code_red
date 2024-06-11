@@ -1,11 +1,9 @@
 ;(async function () {
-  // 스크립트 로드 확인
   console.log('Survey script loaded')
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
   let isSurveyOpen = false
 
-  // URL에서 customerId 가져오기
   function getCustomerIdFromUrl() {
     const scriptElements = document.getElementsByTagName('script')
     for (let script of scriptElements) {
@@ -18,7 +16,6 @@
     return null
   }
 
-  // 설문조사 데이터 가져오기
   async function fetchSurvey(customerId) {
     const response = await fetch(
       `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
@@ -29,7 +26,6 @@
     return response.json()
   }
 
-  // 설문조사 응답 제출
   async function submitSurvey(data) {
     const response = await fetch(`${API_URI}/api/appliedSurvey/response`, {
       method: 'POST',
@@ -42,14 +38,46 @@
     return response.json()
   }
 
-  // 설문조사 로드
+  function createStepHtml(question, type, options) {
+    let optionsHtml = ''
+    if (type === 'rating') {
+      optionsHtml = `
+        <span class="star-rating">
+          ${[1, 2, 3, 4, 5]
+            .map(
+              (i) => `
+              <input type="radio" name="rating" value="${i}" id="rating-${i}">
+              <label for="rating-${i}">★</label>
+            `,
+            )
+            .join('')}
+        </span>`
+    } else {
+      optionsHtml = options
+        .map(
+          (option, index) => `
+            <input type="radio" name="choice" value="${option}" id="choice-${index}">
+            <label for="choice-${index}">${option}</label>
+          `,
+        )
+        .join('')
+    }
+
+    return `
+      <div class="survey-step">
+        <label for="question">${question}</label>
+        <div>${optionsHtml}</div>
+      </div>
+    `
+  }
+
   function loadSurvey(survey) {
     if (isSurveyOpen) {
       return
     }
     isSurveyOpen = true
 
-    console.log('Loading survey') // 설문조사 로드 확인
+    console.log('Loading survey')
 
     const link = document.createElement('link')
     link.rel = 'stylesheet'
@@ -58,67 +86,86 @@
     document.head.appendChild(link)
 
     const surveyContainer = document.createElement('div')
+    surveyContainer.id = 'survey-popup'
     surveyContainer.innerHTML = `
-        <div id="survey-popup">
-          <form id="surveyForm">
-            <label for="question">${survey.question}</label>
-            <div>
-              ${
-                survey.type === 'rating'
-                  ? `<span class="star-rating">
-                      ${[1, 2, 3, 4, 5]
-                        .map(
-                          (i) => `
-                          <input type="radio" name="rating" value="${i}" id="rating-${i}">
-                          <label for="rating-${i}">★</label>
-                        `,
-                        )
-                        .join('')}
-                    </span>`
-                  : survey.options
-                      .map(
-                        (option, index) => `
-                        <input type="radio" name="choice" value="${option}" id="choice-${index}">
-                        <label for="choice-${index}">${option}</label>
-                      `,
-                      )
-                      .join('')
-              }
-            </div>
-            <button type="submit">제출</button>
-            <button type="button" id="closeSurvey">닫기</button>
-          </form>
+      <form id="surveyForm">
+        <div id="survey-steps">
+          ${survey.steps
+            .map((step) =>
+              createStepHtml(step.question, step.type, step.options),
+            )
+            .join('')}
         </div>
-      `
-    console.log('Survey container created') // 컨테이너 생성 확인
-
+        <button type="button" id="prevStep">Back</button>
+        <button type="button" id="nextStep">Next</button>
+        <button type="submit" id="submitSurvey">Finish</button>
+        <button type="button" id="closeSurvey">Close</button>
+      </form>
+    `
     document.body.appendChild(surveyContainer)
-    console.log('Survey container appended to body') // 컨테이너 추가 확인
+
+    let currentStep = 0
+    const steps = document.querySelectorAll('.survey-step')
+    const prevButton = document.getElementById('prevStep')
+    const nextButton = document.getElementById('nextStep')
+    const submitButton = document.getElementById('submitSurvey')
+
+    function showStep(stepIndex) {
+      steps.forEach((step, index) => {
+        step.style.display = index === stepIndex ? 'block' : 'none'
+      })
+      prevButton.style.display = stepIndex === 0 ? 'none' : 'inline-block'
+      nextButton.style.display =
+        stepIndex === steps.length - 1 ? 'none' : 'inline-block'
+      submitButton.style.display =
+        stepIndex === steps.length - 1 ? 'inline-block' : 'none'
+    }
+
+    prevButton.onclick = () => {
+      if (currentStep > 0) {
+        currentStep--
+        showStep(currentStep)
+      }
+    }
+
+    nextButton.onclick = () => {
+      if (currentStep < steps.length - 1) {
+        currentStep++
+        showStep(currentStep)
+      }
+    }
+
+    showStep(currentStep)
 
     document.getElementById('closeSurvey').onclick = () => {
       document.getElementById('survey-popup').remove()
       isSurveyOpen = false
-      console.log('Survey closed') // 설문조사 닫기 확인
+      console.log('Survey closed')
     }
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
-      const rating = document.querySelector('input[name="rating"]:checked')
-      const choice = document.querySelector('input[name="choice"]:checked')
       const data = {
         customerId: survey.customerId,
-        question: survey.question,
-        response: rating ? '' : choice ? choice.value : '',
-        rating: rating ? rating.value : null,
+        responses: Array.from(steps).map((step, index) => {
+          const rating = step.querySelector('input[name="rating"]:checked')
+          const choice = step.querySelector('input[name="choice"]:checked')
+          return {
+            step: index + 1,
+            question: step.querySelector('label').innerText,
+            response: rating ? '' : choice ? choice.value : '',
+            rating: rating ? rating.value : null,
+          }
+        }),
       }
-      console.log('Submitting survey') // 제출 데이터 확인
+      console.log('Submitting survey')
 
       try {
         const result = await submitSurvey(data)
         if (result && result.status === 201) {
           document.getElementById('survey-popup').style.display = 'none'
           isSurveyOpen = false
-          console.log('Survey submitted successfully') // 제출 성공 확인
+          console.log('Survey submitted successfully')
         } else {
           throw new Error('Network response was not ok')
         }
@@ -129,7 +176,6 @@
     }
   }
 
-  // 트리거 설정
   function setupTriggers(surveys) {
     surveys.forEach((survey) => {
       const trigger = survey.trigger
@@ -145,7 +191,6 @@
         }, 3000)
       }
 
-      // 특정 버튼 클릭 시
       if (trigger.type === 'cssSelector') {
         const button = document.querySelector(trigger.selector)
         if (button) {
@@ -153,7 +198,6 @@
         }
       }
 
-      // 스크롤 50% 이상 시
       if (trigger.type === 'scroll') {
         window.addEventListener('scroll', () => {
           if (
@@ -165,29 +209,24 @@
         })
       }
 
-      // 이탈 감지 시
       if (trigger.type === 'exitIntent') {
         document.addEventListener('mouseleave', (event) => {
           if (event.clientY <= 0) {
-            loadSurvey(survey)
-            localStorage.setItem(`survey-${survey._id}`, 'shown')
+            showSurvey()
           }
         })
       }
 
-      // 새 세션이 생성되었을 때
       if (trigger.type === 'newSession') {
         showSurvey()
       }
 
-      // 특정 URL을 방문했을 때
       if (trigger.type === 'url') {
         if (window.location.pathname === trigger.url) {
           showSurvey()
         }
       }
 
-      // 특정 텍스트가 포함된 버튼을 클릭했을 때
       if (trigger.type === 'innerText') {
         document.querySelectorAll('button, a, div').forEach((element) => {
           if (element.innerText.includes(trigger.text)) {
@@ -196,20 +235,19 @@
         })
       }
     })
-    console.log('Triggers set up') // 트리거 설정 확인
+    console.log('Triggers set up')
   }
 
-  // 스크립트 초기화
   async function init() {
-    console.log('Initializing survey script') // 초기화 확인
+    console.log('Initializing survey script')
     const customerId = getCustomerIdFromUrl()
     if (!customerId) {
       throw new Error('Customer ID is not provided in the URL')
     }
     try {
       const surveyData = await fetchSurvey(customerId)
-      setupTriggers(surveyData.data) // 트리거 설정
-      console.log('Survey script initialized') // 초기화 완료 확인
+      setupTriggers(surveyData.data)
+      console.log('Survey script initialized')
     } catch (error) {
       console.error('Error fetching survey:', error)
     }

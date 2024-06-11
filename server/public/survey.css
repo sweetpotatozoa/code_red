@@ -1,75 +1,74 @@
-/* 별점 설문조사 스타일 */
 #survey-popup {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: white;
-  border: 1px solid black;
-  padding: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  bottom: 10%;
+  right: 10%;
+  width: 300px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
+  padding: 20px;
 }
 
-.star-rating input[type='radio'] {
+#survey-popup h2 {
+  margin-top: 0;
+}
+
+.survey-step {
   display: none;
 }
 
-.star-rating label {
-  font-size: 2rem;
-  color: #ddd;
-  cursor: pointer;
-}
-
-.star-rating input[type='radio']:checked ~ label {
-  color: #f5b301;
-}
-
-.star-rating label:hover,
-.star-rating label:hover ~ label {
-  color: #f5b301;
-}
-
-button {
-  margin-top: 10px;
-  padding: 5px 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-.error {
-  color: red;
-}
-
-/* 객관식 설문조사 스타일 */
-.choice-container {
+#surveyForm {
   display: flex;
   flex-direction: column;
 }
 
-.choice-container input[type='radio'] {
+#surveyForm label {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+#surveyForm div {
+  margin-bottom: 20px;
+}
+
+.star-rating input {
   display: none;
 }
 
-.choice-container label {
-  padding: 10px;
-  margin-bottom: 5px;
-  border: 1px solid #ddd;
+.star-rating label {
+  font-size: 20px;
+  color: #ccc;
   cursor: pointer;
 }
 
-.choice-container input[type='radio']:checked + label {
-  background-color: #e9ecef;
-  border-color: #007bff;
-  color: #007bff;
+.star-rating input:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+  color: #f39c12;
 }
 
-.choice-container label:hover {
-  background-color: #f8f9fa;
-  border-color: #007bff;
+#prevStep,
+#nextStep,
+#submitSurvey,
+#closeSurvey {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  margin: 5px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+#prevStep:hover,
+#nextStep:hover,
+#submitSurvey:hover,
+#closeSurvey:hover {
+  background-color: #0056b3;
+}
+
+#prevStep {
+  display: none;
 }
