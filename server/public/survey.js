@@ -1,9 +1,11 @@
 ;(async function () {
-  console.log('Survey script loaded') // 스크립트 로드 확인
+  // 스크립트 로드 확인
+  console.log('Survey script loaded')
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
   let isSurveyOpen = false
 
+  // 설문조사 데이터 가져오기
   async function fetchSurvey(customerId) {
     const response = await fetch(
       `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
@@ -14,6 +16,7 @@
     return response.json()
   }
 
+  // 설문조사 응답 제출
   async function submitSurvey(data) {
     const response = await fetch(`${API_URI}/api/appliedSurvey/response`, {
       method: 'POST',
@@ -26,6 +29,7 @@
     return response.json()
   }
 
+  // 설문조사 로드
   function loadSurvey(survey) {
     if (isSurveyOpen) {
       console.log('Survey already open. Not opening another one.')
@@ -33,7 +37,7 @@
     }
     isSurveyOpen = true
 
-    console.log('Loading survey', survey) // 설문조사 로드 확인
+    console.log('Loading survey') // 설문조사 로드 확인
 
     const link = document.createElement('link')
     link.rel = 'stylesheet'
@@ -74,7 +78,7 @@
           </form>
         </div>
       `
-    console.log('Survey container created', surveyContainer) // 컨테이너 생성 확인
+    console.log('Survey container created') // 컨테이너 생성 확인
 
     document.body.appendChild(surveyContainer)
     console.log('Survey container appended to body') // 컨테이너 추가 확인
@@ -82,6 +86,7 @@
     document.getElementById('closeSurvey').onclick = () => {
       document.getElementById('survey-popup').remove()
       isSurveyOpen = false
+      console.log('Survey closed') // 설문조사 닫기 확인
     }
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
@@ -94,7 +99,7 @@
         response: rating ? '' : choice ? choice.value : '',
         rating: rating ? rating.value : null,
       }
-      console.log('Submitting survey:', data) // 제출 데이터 확인
+      console.log('Submitting survey') // 제출 데이터 확인
 
       try {
         const result = await submitSurvey(data)
@@ -102,6 +107,7 @@
           alert('설문조사가 성공적으로 제출되었습니다.')
           document.getElementById('survey-popup').style.display = 'none'
           isSurveyOpen = false
+          console.log('Survey submitted successfully') // 제출 성공 확인
         } else {
           throw new Error('Network response was not ok')
         }
@@ -115,6 +121,7 @@
     }
   }
 
+  // 트리거 설정
   function setupTriggers(surveys) {
     surveys.forEach((survey) => {
       const trigger = survey.trigger
@@ -179,8 +186,10 @@
         })
       }
     })
+    console.log('Triggers set up') // 트리거 설정 확인
   }
 
+  // URL에서 customerId 가져오기
   function getCustomerIdFromUrl() {
     const scriptElements = document.getElementsByTagName('script')
     for (let script of scriptElements) {
@@ -193,16 +202,17 @@
     return null
   }
 
+  // 스크립트 초기화
   async function init() {
     console.log('Initializing survey script') // 초기화 확인
     const customerId = getCustomerIdFromUrl()
-    console.log('Customer ID from URL:', customerId) // customerId 확인
     if (!customerId) {
       throw new Error('Customer ID is not provided in the URL')
     }
     try {
       const surveyData = await fetchSurvey(customerId)
       setupTriggers(surveyData.data) // 트리거 설정
+      console.log('Survey script initialized') // 초기화 완료 확인
     } catch (error) {
       console.error('Error fetching survey:', error)
     }
