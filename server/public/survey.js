@@ -3,9 +3,9 @@
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
 
-  async function fetchSurvey(customerId, trigger) {
+  async function fetchSurvey(customerId) {
     const response = await fetch(
-      `${API_URI}/api/appliedSurvey?customerId=${customerId}&trigger=${trigger}`,
+      `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
     )
     if (!response.ok) {
       throw new Error('Network response was not ok')
@@ -25,11 +25,7 @@
     return response.json()
   }
 
-  function loadSurvey(surveys) {
-    if (!surveys.length) {
-      throw new Error('No surveys found for this customer')
-    }
-    const survey = surveys[0] // 첫 번째 설문조사를 사용
+  function loadSurvey(survey) {
     console.log('Loading survey', survey) // 설문조사 로드 확인
 
     const link = document.createElement('link')
@@ -116,38 +112,59 @@
     return null
   }
 
-  function setupTriggers(customerId) {
-    const triggers = [
-      { type: 'newSession', event: 'DOMContentLoaded', condition: () => true },
-      {
-        type: 'exitIntent',
-        event: 'mouseleave',
-        condition: (e) => e.clientY <= 0,
-      },
-      {
-        type: 'scroll',
-        event: 'scroll',
-        condition: () => window.scrollY / document.body.scrollHeight >= 0.5,
-      },
-      {
-        type: 'click',
-        event: 'click',
-        condition: (e) => e.target.matches('.Cta_ctaButton__37LVK'),
-      },
-      // 여기에 다른 트리거 추가 가능
-    ]
+  function setupTriggers(surveys) {
+    surveys.forEach((survey) => {
+      const trigger = survey.trigger
 
-    triggers.forEach((trigger) => {
-      document.addEventListener(trigger.event, async (e) => {
-        if (trigger.condition(e)) {
-          try {
-            const surveyData = await fetchSurvey(customerId, trigger.type)
-            loadSurvey(surveyData.data)
-          } catch (error) {
-            console.error('Error fetching survey:', error)
-          }
+      // 특정 버튼 클릭 시
+      if (trigger.type === 'cssSelector') {
+        const button = document.querySelector(trigger.selector)
+        if (button) {
+          button.addEventListener('click', () => loadSurvey(survey))
         }
-      })
+      }
+
+      // 스크롤 50% 이상 시
+      if (trigger.type === 'scroll') {
+        window.addEventListener('scroll', () => {
+          if (
+            window.innerHeight + window.scrollY >=
+            document.body.offsetHeight * (trigger.percentage / 100)
+          ) {
+            loadSurvey(survey)
+          }
+        })
+      }
+
+      // 이탈 감지 시
+      if (trigger.type === 'exitIntent') {
+        document.addEventListener('mouseleave', (event) => {
+          if (event.clientY <= 0) {
+            loadSurvey(survey)
+          }
+        })
+      }
+
+      // 새 세션이 생성되었을 때
+      if (trigger.type === 'newSession') {
+        loadSurvey(survey) // 단순히 새 세션이 시작될 때 로드
+      }
+
+      // 특정 URL을 방문했을 때
+      if (trigger.type === 'url') {
+        if (window.location.pathname === trigger.url) {
+          loadSurvey(survey)
+        }
+      }
+
+      // 특정 텍스트가 포함된 버튼을 클릭했을 때
+      if (trigger.type === 'innerText') {
+        document.querySelectorAll('*').forEach((element) => {
+          if (element.innerText.includes(trigger.text)) {
+            element.addEventListener('click', () => loadSurvey(survey))
+          }
+        })
+      }
     })
   }
 
@@ -158,7 +175,16 @@
     if (!customerId) {
       throw new Error('Customer ID is not provided in the URL')
     }
-    setupTriggers(customerId)
+    try {
+      const surveyData = await fetchSurvey(customerId)
+      if (surveyData.data && surveyData.data.length) {
+        setupTriggers(surveyData.data)
+      } else {
+        console.log('No surveys found for this customer')
+      }
+    } catch (error) {
+      console.error('Error fetching survey:', error)
+    }
   }
 
   init()
