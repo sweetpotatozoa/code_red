@@ -100,18 +100,6 @@
     }
   }
 
-  function getCustomerIdFromUrl() {
-    const scriptElements = document.getElementsByTagName('script')
-    for (let script of scriptElements) {
-      const src = script.src
-      const match = src.match(/customerId=([^&]+)/)
-      if (match) {
-        return match[1]
-      }
-    }
-    return null
-  }
-
   function setupTriggers(surveys) {
     surveys.forEach((survey) => {
       const trigger = survey.trigger
@@ -159,13 +147,25 @@
 
       // 특정 텍스트가 포함된 버튼을 클릭했을 때
       if (trigger.type === 'innerText') {
-        document.querySelectorAll('*').forEach((element) => {
+        document.querySelectorAll('button, a, div').forEach((element) => {
           if (element.innerText.includes(trigger.text)) {
             element.addEventListener('click', () => loadSurvey(survey))
           }
         })
       }
     })
+  }
+
+  function getCustomerIdFromUrl() {
+    const scriptElements = document.getElementsByTagName('script')
+    for (let script of scriptElements) {
+      const src = script.src
+      const match = src.match(/customerId=([^&]+)/)
+      if (match) {
+        return match[1]
+      }
+    }
+    return null
   }
 
   async function init() {
@@ -177,11 +177,7 @@
     }
     try {
       const surveyData = await fetchSurvey(customerId)
-      if (surveyData.data && surveyData.data.length) {
-        setupTriggers(surveyData.data)
-      } else {
-        console.log('No surveys found for this customer')
-      }
+      setupTriggers(surveyData.data) // 트리거 설정
     } catch (error) {
       console.error('Error fetching survey:', error)
     }
