@@ -1,9 +1,11 @@
 ;(async function () {
+  // 스크립트 로드 확인
   console.log('Survey script loaded')
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
   let isSurveyOpen = false
 
+  // URL에서 customerId 가져오기
   function getCustomerIdFromUrl() {
     const scriptElements = document.getElementsByTagName('script')
     for (let script of scriptElements) {
@@ -16,6 +18,7 @@
     return null
   }
 
+  // 설문조사 데이터 가져오기
   async function fetchSurvey(customerId) {
     const response = await fetch(
       `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
@@ -26,6 +29,7 @@
     return response.json()
   }
 
+  // 설문조사 응답 제출
   async function submitSurvey(data) {
     const response = await fetch(`${API_URI}/api/appliedSurvey/response`, {
       method: 'POST',
@@ -38,77 +42,19 @@
     return response.json()
   }
 
-  function createStepHtml(step) {
-    switch (step.type) {
-      case 'welcomeCard':
-        return `
-          <div class="survey-step">
-            <h2>${step.title}</h2>
-            <p>${step.message}</p>
-            <button type="button" id="nextStep">${step.buttonText}</button>
-          </div>
-        `
-      case 'multipleChoice':
-        return `
-          <div class="survey-step">
-            <label for="question">${step.question}</label>
-            <div>
-              ${step.options
-                .map(
-                  (option, index) => `
-                  <input type="radio" name="choice" value="${option}" id="choice-${index}">
-                  <label for="choice-${index}">${option}</label>
-                `,
-                )
-                .join('')}
-            </div>
-            <button type="button" id="nextStep">Next</button>
-          </div>
-        `
-      case 'rating':
-        return `
-          <div class="survey-step">
-            <label for="question">${step.question}</label>
-            <div class="star-rating">
-              ${[1, 2, 3, 4, 5]
-                .map(
-                  (i) => `
-                  <input type="radio" name="rating" value="${i}" id="rating-${i}">
-                  <label for="rating-${i}">★</label>
-                `,
-                )
-                .join('')}
-            </div>
-            <button type="button" id="nextStep">Next</button>
-          </div>
-        `
-      case 'text':
-        return `
-          <div class="survey-step">
-            <label for="question">${step.question}</label>
-            <textarea name="response" rows="4"></textarea>
-            <button type="button" id="nextStep">Next</button>
-          </div>
-        `
-      case 'thankYouCard':
-        return `
-          <div class="survey-step">
-            <p>${step.message}</p>
-            <button type="submit">${step.buttonText}</button>
-          </div>
-        `
-      default:
-        return ''
-    }
-  }
-
+  // 설문조사 로드
   function loadSurvey(survey) {
+    if (!survey.steps || !Array.isArray(survey.steps)) {
+      console.error('Survey steps are not defined or not an array')
+      return
+    }
+
     if (isSurveyOpen) {
       return
     }
     isSurveyOpen = true
 
-    console.log('Loading survey')
+    console.log('Loading survey') // 설문조사 로드 확인
 
     const link = document.createElement('link')
     link.rel = 'stylesheet'
@@ -117,93 +63,148 @@
     document.head.appendChild(link)
 
     const surveyContainer = document.createElement('div')
-    surveyContainer.id = 'survey-popup'
-    surveyContainer.innerHTML = `
-      <form id="surveyForm">
-        <div id="survey-steps">
-          ${survey.steps.map((step) => createStepHtml(step)).join('')}
-        </div>
-        <button type="button" id="prevStep">Back</button>
-        <button type="button" id="nextStep">Next</button>
-        <button type="submit" id="submitSurvey">Finish</button>
-        <button type="button" id="closeSurvey">Close</button>
-      </form>
-    `
-    document.body.appendChild(surveyContainer)
+    surveyContainer.id = 'survey-container'
 
     let currentStep = 0
-    const steps = document.querySelectorAll('.survey-step')
-    const prevButton = document.getElementById('prevStep')
-    const nextButton = document.getElementById('nextStep')
-    const submitButton = document.getElementById('submitSurvey')
 
-    function showStep(stepIndex) {
-      steps.forEach((step, index) => {
-        step.style.display = index === stepIndex ? 'block' : 'none'
-      })
-      prevButton.style.display = stepIndex === 0 ? 'none' : 'inline-block'
-      nextButton.style.display =
-        stepIndex === steps.length - 1 ? 'none' : 'inline-block'
-      submitButton.style.display =
-        stepIndex === steps.length - 1 ? 'inline-block' : 'none'
-    }
+    function renderStep() {
+      const step = survey.steps[currentStep]
+      let stepHtml = ''
 
-    prevButton.onclick = () => {
-      if (currentStep > 0) {
-        currentStep--
-        showStep(currentStep)
+      switch (step.type) {
+        case 'welcome':
+          stepHtml = `
+            <div id="survey-popup">
+              <div class="welcome-card">
+                <h2>${step.title}</h2>
+                <p>${step.message}</p>
+                <button id="next-step">${step.buttonText}</button>
+              </div>
+            </div>
+          `
+          break
+        case 'choice':
+          stepHtml = `
+            <div id="survey-popup">
+              <form id="surveyForm">
+                <label for="question">${step.question}</label>
+                <div>
+                  ${step.options
+                    .map(
+                      (option, index) => `
+                      <input type="radio" name="choice" value="${option}" id="choice-${index}">
+                      <label for="choice-${index}">${option}</label>
+                    `,
+                    )
+                    .join('')}
+                </div>
+                <button type="submit">제출</button>
+                <button type="button" id="next-step">Next</button>
+              </form>
+            </div>
+          `
+          break
+        case 'rating':
+          stepHtml = `
+            <div id="survey-popup">
+              <form id="surveyForm">
+                <label for="question">${step.question}</label>
+                <div>
+                  <span class="star-rating">
+                    ${[1, 2, 3, 4, 5]
+                      .map(
+                        (i) => `
+                        <input type="radio" name="rating" value="${i}" id="rating-${i}">
+                        <label for="rating-${i}">★</label>
+                      `,
+                      )
+                      .join('')}
+                  </span>
+                </div>
+                <button type="submit">제출</button>
+                <button type="button" id="next-step">Next</button>
+              </form>
+            </div>
+          `
+          break
+        case 'text':
+          stepHtml = `
+            <div id="survey-popup">
+              <form id="surveyForm">
+                <label for="question">${step.question}</label>
+                <textarea name="text-response" rows="4" cols="50"></textarea>
+                <button type="submit">제출</button>
+                <button type="button" id="next-step">Next</button>
+              </form>
+            </div>
+          `
+          break
+        case 'thankYou':
+          stepHtml = `
+            <div id="survey-popup">
+              <div class="thank-you-card">
+                <p>${step.message}</p>
+                <button id="finish-survey">${step.buttonText}</button>
+              </div>
+            </div>
+          `
+          break
+        default:
+          console.error('Unknown step type:', step.type)
+          return
       }
-    }
 
-    nextButton.onclick = () => {
-      if (currentStep < steps.length - 1) {
-        currentStep++
-        showStep(currentStep)
-      }
-    }
+      surveyContainer.innerHTML = stepHtml
+      document.body.appendChild(surveyContainer)
 
-    showStep(currentStep)
-
-    document.getElementById('closeSurvey').onclick = () => {
-      document.getElementById('survey-popup').remove()
-      isSurveyOpen = false
-      console.log('Survey closed')
-    }
-
-    document.getElementById('surveyForm').onsubmit = async function (event) {
-      event.preventDefault()
-      const rating = document.querySelector('input[name="rating"]:checked')
-      const choice = document.querySelector('input[name="choice"]:checked')
-      const textResponse = document.querySelector('textarea[name="response"]')
-      const data = {
-        customerId: survey.customerId,
-        question: survey.steps[currentStep].question,
-        response: rating
-          ? rating.value
-          : choice
-          ? choice.value
-          : textResponse
-          ? textResponse.value
-          : '',
-      }
-      console.log('Submitting survey')
-
-      try {
-        const result = await submitSurvey(data)
-        if (result && result.status === 201) {
-          document.getElementById('survey-popup').remove()
-          isSurveyOpen = false
-          console.log('Survey submitted successfully')
-        } else {
-          throw new Error('Network response was not ok')
+      if (step.type !== 'thankYou') {
+        document.getElementById('next-step').onclick = () => {
+          currentStep++
+          renderStep()
         }
-      } catch (error) {
-        console.error('Error submitting survey:', error)
-        isSurveyOpen = false
+      } else {
+        document.getElementById('finish-survey').onclick = () => {
+          document.getElementById('survey-container').remove()
+          isSurveyOpen = false
+          console.log('Survey finished') // 설문조사 완료 확인
+        }
+      }
+
+      document.getElementById('surveyForm')?.onsubmit = async function (event) {
+        event.preventDefault()
+        const rating = document.querySelector('input[name="rating"]:checked')
+        const choice = document.querySelector('input[name="choice"]:checked')
+        const textResponse = document.querySelector('textarea[name="text-response"]')
+
+        const data = {
+          customerId: survey.customerId,
+          question: step.question,
+          response: rating ? '' : choice ? choice.value : textResponse ? textResponse.value : '',
+          rating: rating ? rating.value : null,
+        }
+
+        console.log('Submitting survey') // 제출 데이터 확인
+
+        try {
+          const result = await submitSurvey(data)
+          if (result && result.status === 201) {
+            console.log('Survey submitted successfully') // 제출 성공 확인
+            currentStep++
+            renderStep()
+          } else {
+            throw new Error('Network response was not ok')
+          }
+        } catch (error) {
+          console.error('Error submitting survey:', error)
+        }
       }
     }
+
+    renderStep()
+    console.log('Survey container created') // 컨테이너 생성 확인
   }
 
+  // 트리거 설정
   function setupTriggers(surveys) {
     surveys.forEach((survey) => {
       const trigger = survey.trigger
@@ -219,6 +220,7 @@
         }, 3000)
       }
 
+      // 특정 버튼 클릭 시
       if (trigger.type === 'cssSelector') {
         const button = document.querySelector(trigger.selector)
         if (button) {
@@ -226,6 +228,7 @@
         }
       }
 
+      // 스크롤 50% 이상 시
       if (trigger.type === 'scroll') {
         window.addEventListener('scroll', () => {
           if (
@@ -237,24 +240,29 @@
         })
       }
 
+      // 이탈 감지 시
       if (trigger.type === 'exitIntent') {
         document.addEventListener('mouseleave', (event) => {
           if (event.clientY <= 0) {
-            showSurvey()
+            loadSurvey(survey)
+            localStorage.setItem(`survey-${survey._id}`, 'shown')
           }
         })
       }
 
+      // 새 세션이 생성되었을 때
       if (trigger.type === 'newSession') {
-        showSurvey()
+        showSurvey() // 단순히 새 세션이 시작될 때 로드
       }
 
+      // 특정 URL을 방문했을 때
       if (trigger.type === 'url') {
         if (window.location.pathname === trigger.url) {
           showSurvey()
         }
       }
 
+      // 특정 텍스트가 포함된 버튼을 클릭했을 때
       if (trigger.type === 'innerText') {
         document.querySelectorAll('button, a, div').forEach((element) => {
           if (element.innerText.includes(trigger.text)) {
@@ -263,19 +271,20 @@
         })
       }
     })
-    console.log('Triggers set up')
+    console.log('Triggers set up') // 트리거 설정 확인
   }
 
+  // 스크립트 초기화
   async function init() {
-    console.log('Initializing survey script')
+    console.log('Initializing survey script') // 초기화 확인
     const customerId = getCustomerIdFromUrl()
     if (!customerId) {
       throw new Error('Customer ID is not provided in the URL')
     }
     try {
       const surveyData = await fetchSurvey(customerId)
-      setupTriggers(surveyData.data)
-      console.log('Survey script initialized')
+      setupTriggers(surveyData.data) // 트리거 설정
+      console.log('Survey script initialized') // 초기화 완료 확인
     } catch (error) {
       console.error('Error fetching survey:', error)
     }
