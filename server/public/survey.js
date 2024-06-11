@@ -139,8 +139,10 @@
       }
 
       const showSurvey = () => {
-        loadSurvey(survey)
-        localStorage.setItem(`survey-${survey._id}`, 'shown')
+        setTimeout(() => {
+          loadSurvey(survey)
+          localStorage.setItem(`survey-${survey._id}`, 'shown')
+        }, 3000)
       }
 
       // 특정 버튼 클릭 시
@@ -167,14 +169,15 @@
       if (trigger.type === 'exitIntent') {
         document.addEventListener('mouseleave', (event) => {
           if (event.clientY <= 0) {
-            showSurvey()
+            loadSurvey(survey)
+            localStorage.setItem(`survey-${survey._id}`, 'shown')
           }
         })
       }
 
       // 새 세션이 생성되었을 때
       if (trigger.type === 'newSession') {
-        showSurvey() // 단순히 새 세션이 시작될 때 로드
+        showSurvey()
       }
 
       // 특정 URL을 방문했을 때
@@ -187,7 +190,7 @@
       // 특정 텍스트가 포함된 버튼을 클릭했을 때
       if (trigger.type === 'innerText') {
         document.querySelectorAll('button, a, div').forEach((element) => {
-          if (element.innerText === trigger.text) {
+          if (element.innerText.includes(trigger.text)) {
             element.addEventListener('click', showSurvey)
           }
         })
