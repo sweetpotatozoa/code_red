@@ -4,6 +4,8 @@
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
   let isSurveyOpen = false
+  let currentStep = 0
+  let surveyResponses = []
 
   // URL에서 customerId 가져오기
   function getCustomerIdFromUrl() {
@@ -42,17 +44,23 @@
     return response.json()
   }
 
+  // 각 스텝의 응답을 저장
+  function saveResponse(surveyId, stepIndex, response) {
+    surveyResponses[stepIndex] = {
+      surveyId,
+      stepIndex,
+      response,
+    }
+  }
+
   // 설문조사 로드
   function loadSurvey(survey) {
-    if (!survey.steps || !Array.isArray(survey.steps)) {
-      console.error('Survey steps are not defined or not an array')
-      return
-    }
-
     if (isSurveyOpen) {
       return
     }
     isSurveyOpen = true
+    currentStep = 0
+    surveyResponses = []
 
     console.log('Loading survey') // 설문조사 로드 확인
 
@@ -63,156 +71,110 @@
     document.head.appendChild(link)
 
     const surveyContainer = document.createElement('div')
-    surveyContainer.id = 'survey-container'
+    surveyContainer.id = 'survey-popup'
+    document.body.appendChild(surveyContainer)
 
-    let currentStep = 0
+    showStep(survey, currentStep)
+    console.log('Survey container created and appended to body') // 컨테이너 생성 확인
+  }
 
-    function renderStep() {
-      const step = survey.steps[currentStep]
-      let stepHtml = ''
-
-      switch (step.type) {
-        case 'welcome':
-          stepHtml = `
-            <div id="survey-popup">
-              <div class="welcome-card">
-                <h2>${step.title}</h2>
-                <p>${step.message}</p>
-                <button id="next-step">${step.buttonText}</button>
-              </div>
-            </div>
-          `
-          break
-        case 'choice':
-          stepHtml = `
-            <div id="survey-popup">
-              <form id="surveyForm">
-                <label for="question">${step.question}</label>
-                <div>
-                  ${step.options
-                    .map(
-                      (option, index) => `
-                      <input type="radio" name="choice" value="${option}" id="choice-${index}">
-                      <label for="choice-${index}">${option}</label>
-                    `,
-                    )
-                    .join('')}
-                </div>
-                <button type="submit">제출</button>
-                <button type="button" id="next-step">Next</button>
-              </form>
-            </div>
-          `
-          break
-        case 'rating':
-          stepHtml = `
-            <div id="survey-popup">
-              <form id="surveyForm">
-                <label for="question">${step.question}</label>
-                <div>
-                  <span class="star-rating">
-                    ${[1, 2, 3, 4, 5]
-                      .map(
-                        (i) => `
-                        <input type="radio" name="rating" value="${i}" id="rating-${i}">
-                        <label for="rating-${i}">★</label>
-                      `,
-                      )
-                      .join('')}
-                  </span>
-                </div>
-                <button type="submit">제출</button>
-                <button type="button" id="next-step">Next</button>
-              </form>
-            </div>
-          `
-          break
-        case 'text':
-          stepHtml = `
-            <div id="survey-popup">
-              <form id="surveyForm">
-                <label for="question">${step.question}</label>
-                <textarea name="text-response" rows="4" cols="50"></textarea>
-                <button type="submit">제출</button>
-                <button type="button" id="next-step">Next</button>
-              </form>
-            </div>
-          `
-          break
-        case 'thankYou':
-          stepHtml = `
-            <div id="survey-popup">
-              <div class="thank-you-card">
-                <p>${step.message}</p>
-                <button id="finish-survey">${step.buttonText}</button>
-              </div>
-            </div>
-          `
-          break
-        default:
-          console.error('Unknown step type:', step.type)
-          return
-      }
-
-      surveyContainer.innerHTML = stepHtml
-      document.body.appendChild(surveyContainer)
-
-      if (step.type !== 'thankYou') {
-        document.getElementById('next-step').onclick = () => {
-          currentStep++
-          renderStep()
-        }
-      } else {
-        document.getElementById('finish-survey').onclick = () => {
-          document.getElementById('survey-container').remove()
-          isSurveyOpen = false
-          console.log('Survey finished') // 설문조사 완료 확인
-        }
-      }
-
-      const surveyForm = document.getElementById('surveyForm')
-      if (surveyForm) {
-        surveyForm.onsubmit = async function (event) {
-          event.preventDefault()
-          const rating = document.querySelector('input[name="rating"]:checked')
-          const choice = document.querySelector('input[name="choice"]:checked')
-          const textResponse = document.querySelector(
-            'textarea[name="text-response"]',
-          )
-
-          const data = {
-            customerId: survey.customerId,
-            question: step.question,
-            response: rating
-              ? ''
-              : choice
-              ? choice.value
-              : textResponse
-              ? textResponse.value
-              : '',
-            rating: rating ? rating.value : null,
-          }
-
-          console.log('Submitting survey') // 제출 데이터 확인
-
-          try {
-            const result = await submitSurvey(data)
-            if (result && result.status === 201) {
-              console.log('Survey submitted successfully') // 제출 성공 확인
-              currentStep++
-              renderStep()
-            } else {
-              throw new Error('Network response was not ok')
-            }
-          } catch (error) {
-            console.error('Error submitting survey:', error)
-          }
-        }
-      }
+  function showStep(survey, stepIndex) {
+    const step = survey.steps[stepIndex]
+    const surveyContainer = document.getElementById('survey-popup')
+    surveyContainer.innerHTML = `
+      <div class="survey-step">
+        <div class="survey-header">
+          <button type="button" id="closeSurvey" class="close-button">X</button>
+        </div>
+        <form id="surveyForm">
+          <label for="question">${step.question}</label>
+          <div>
+            ${generateStepContent(step)}
+          </div>
+          <button type="submit" id="submitSurvey">
+            ${stepIndex === survey.steps.length - 1 ? '제출하기' : '다음'}
+          </button>
+        </form>
+      </div>
+    `
+    document.getElementById('closeSurvey').onclick = () => {
+      document.getElementById('survey-popup').remove()
+      isSurveyOpen = false
+      console.log('Survey closed') // 설문조사 닫기 확인
     }
 
-    renderStep()
-    console.log('Survey container created') // 컨테이너 생성 확인
+    document.getElementById('surveyForm').onsubmit = async function (event) {
+      event.preventDefault()
+      const response = getResponse(step)
+      saveResponse(survey._id, stepIndex, response)
+
+      if (stepIndex === survey.steps.length - 1) {
+        try {
+          const result = await submitSurvey({
+            customerId: survey.customerId,
+            responses: surveyResponses,
+          })
+          if (result && result.status === 201) {
+            document.getElementById('survey-popup').remove()
+            isSurveyOpen = false
+            console.log('Survey submitted successfully') // 제출 성공 확인
+          } else {
+            throw new Error('Network response was not ok')
+          }
+        } catch (error) {
+          console.error('Error submitting survey:', error)
+        }
+      } else {
+        currentStep++
+        showStep(survey, currentStep)
+      }
+    }
+  }
+
+  function generateStepContent(step) {
+    switch (step.type) {
+      case 'welcome':
+        return `<button type="button" id="nextStep">참여하기</button>`
+      case 'choice':
+        return step.options
+          .map(
+            (option, index) => `
+          <input type="radio" name="choice" value="${option}" id="choice-${index}">
+          <label for="choice-${index}">${option}</label>
+        `,
+          )
+          .join('')
+      case 'rating':
+        return `<span class="star-rating">
+          ${[1, 2, 3, 4, 5]
+            .map(
+              (i) => `
+            <input type="radio" name="rating" value="${i}" id="rating-${i}">
+            <label for="rating-${i}">★</label>
+          `,
+            )
+            .join('')}
+        </span>`
+      case 'text':
+        return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
+      case 'thankyou':
+        return `<button type="button" id="closeSurvey">닫기</button>`
+      default:
+        return ''
+    }
+  }
+
+  function getResponse(step) {
+    switch (step.type) {
+      case 'choice':
+        return document.querySelector('input[name="choice"]:checked')?.value
+      case 'rating':
+        return document.querySelector('input[name="rating"]:checked')?.value
+      case 'text':
+        return document.getElementById('response').value
+      default:
+        return null
+    }
   }
 
   // 트리거 설정
@@ -228,7 +190,7 @@
         setTimeout(() => {
           loadSurvey(survey)
           localStorage.setItem(`survey-${survey._id}`, 'shown')
-        }, 3000)
+        }, 3000) // 3초 지연
       }
 
       // 특정 버튼 클릭 시
@@ -255,8 +217,7 @@
       if (trigger.type === 'exitIntent') {
         document.addEventListener('mouseleave', (event) => {
           if (event.clientY <= 0) {
-            loadSurvey(survey)
-            localStorage.setItem(`survey-${survey._id}`, 'shown')
+            showSurvey()
           }
         })
       }
