@@ -2,6 +2,7 @@
   console.log('Survey script loaded') // 스크립트 로드 확인
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
+  let isSurveyOpen = false
 
   async function fetchSurvey(customerId) {
     const response = await fetch(
@@ -26,6 +27,12 @@
   }
 
   function loadSurvey(survey) {
+    if (isSurveyOpen) {
+      console.log('Survey already open. Not opening another one.')
+      return
+    }
+    isSurveyOpen = true
+
     console.log('Loading survey', survey) // 설문조사 로드 확인
 
     const link = document.createElement('link')
@@ -63,6 +70,7 @@
               }
             </div>
             <button type="submit">제출</button>
+            <button type="button" id="closeSurvey">닫기</button>
           </form>
         </div>
       `
@@ -70,6 +78,11 @@
 
     document.body.appendChild(surveyContainer)
     console.log('Survey container appended to body') // 컨테이너 추가 확인
+
+    document.getElementById('closeSurvey').onclick = () => {
+      document.getElementById('survey-popup').remove()
+      isSurveyOpen = false
+    }
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
@@ -88,6 +101,7 @@
         if (result && result.status === 201) {
           alert('설문조사가 성공적으로 제출되었습니다.')
           document.getElementById('survey-popup').style.display = 'none'
+          isSurveyOpen = false
         } else {
           throw new Error('Network response was not ok')
         }
@@ -96,6 +110,7 @@
         alert(
           '설문조사를 제출하는 도중 문제가 발생했습니다. 다시 시도해 주세요.',
         )
+        isSurveyOpen = false
       }
     }
   }
@@ -104,11 +119,21 @@
     surveys.forEach((survey) => {
       const trigger = survey.trigger
 
+      if (localStorage.getItem(`survey-${survey._id}`)) {
+        console.log(`Survey ${survey._id} has already been shown. Skipping.`)
+        return
+      }
+
+      const showSurvey = () => {
+        loadSurvey(survey)
+        localStorage.setItem(`survey-${survey._id}`, 'shown')
+      }
+
       // 특정 버튼 클릭 시
       if (trigger.type === 'cssSelector') {
         const button = document.querySelector(trigger.selector)
         if (button) {
-          button.addEventListener('click', () => loadSurvey(survey))
+          button.addEventListener('click', showSurvey)
         }
       }
 
@@ -119,7 +144,7 @@
             window.innerHeight + window.scrollY >=
             document.body.offsetHeight * (trigger.percentage / 100)
           ) {
-            loadSurvey(survey)
+            showSurvey()
           }
         })
       }
@@ -128,20 +153,20 @@
       if (trigger.type === 'exitIntent') {
         document.addEventListener('mouseleave', (event) => {
           if (event.clientY <= 0) {
-            loadSurvey(survey)
+            showSurvey()
           }
         })
       }
 
       // 새 세션이 생성되었을 때
       if (trigger.type === 'newSession') {
-        loadSurvey(survey) // 단순히 새 세션이 시작될 때 로드
+        showSurvey() // 단순히 새 세션이 시작될 때 로드
       }
 
       // 특정 URL을 방문했을 때
       if (trigger.type === 'url') {
         if (window.location.pathname === trigger.url) {
-          loadSurvey(survey)
+          showSurvey()
         }
       }
 
@@ -149,7 +174,7 @@
       if (trigger.type === 'innerText') {
         document.querySelectorAll('button, a, div').forEach((element) => {
           if (element.innerText.includes(trigger.text)) {
-            element.addEventListener('click', () => loadSurvey(survey))
+            element.addEventListener('click', showSurvey)
           }
         })
       }
