@@ -38,37 +38,68 @@
     return response.json()
   }
 
-  function createStepHtml(question, type, options) {
-    let optionsHtml = ''
-    if (type === 'rating') {
-      optionsHtml = `
-        <span class="star-rating">
-          ${[1, 2, 3, 4, 5]
-            .map(
-              (i) => `
-              <input type="radio" name="rating" value="${i}" id="rating-${i}">
-              <label for="rating-${i}">★</label>
-            `,
-            )
-            .join('')}
-        </span>`
-    } else {
-      optionsHtml = options
-        .map(
-          (option, index) => `
-            <input type="radio" name="choice" value="${option}" id="choice-${index}">
-            <label for="choice-${index}">${option}</label>
-          `,
-        )
-        .join('')
+  function createStepHtml(step) {
+    switch (step.type) {
+      case 'welcomeCard':
+        return `
+          <div class="survey-step">
+            <h2>${step.title}</h2>
+            <p>${step.message}</p>
+            <button type="button" id="nextStep">${step.buttonText}</button>
+          </div>
+        `
+      case 'multipleChoice':
+        return `
+          <div class="survey-step">
+            <label for="question">${step.question}</label>
+            <div>
+              ${step.options
+                .map(
+                  (option, index) => `
+                  <input type="radio" name="choice" value="${option}" id="choice-${index}">
+                  <label for="choice-${index}">${option}</label>
+                `,
+                )
+                .join('')}
+            </div>
+            <button type="button" id="nextStep">Next</button>
+          </div>
+        `
+      case 'rating':
+        return `
+          <div class="survey-step">
+            <label for="question">${step.question}</label>
+            <div class="star-rating">
+              ${[1, 2, 3, 4, 5]
+                .map(
+                  (i) => `
+                  <input type="radio" name="rating" value="${i}" id="rating-${i}">
+                  <label for="rating-${i}">★</label>
+                `,
+                )
+                .join('')}
+            </div>
+            <button type="button" id="nextStep">Next</button>
+          </div>
+        `
+      case 'text':
+        return `
+          <div class="survey-step">
+            <label for="question">${step.question}</label>
+            <textarea name="response" rows="4"></textarea>
+            <button type="button" id="nextStep">Next</button>
+          </div>
+        `
+      case 'thankYouCard':
+        return `
+          <div class="survey-step">
+            <p>${step.message}</p>
+            <button type="submit">${step.buttonText}</button>
+          </div>
+        `
+      default:
+        return ''
     }
-
-    return `
-      <div class="survey-step">
-        <label for="question">${question}</label>
-        <div>${optionsHtml}</div>
-      </div>
-    `
   }
 
   function loadSurvey(survey) {
@@ -90,11 +121,7 @@
     surveyContainer.innerHTML = `
       <form id="surveyForm">
         <div id="survey-steps">
-          ${survey.steps
-            .map((step) =>
-              createStepHtml(step.question, step.type, step.options),
-            )
-            .join('')}
+          ${survey.steps.map((step) => createStepHtml(step)).join('')}
         </div>
         <button type="button" id="prevStep">Back</button>
         <button type="button" id="nextStep">Next</button>
@@ -145,25 +172,26 @@
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
+      const rating = document.querySelector('input[name="rating"]:checked')
+      const choice = document.querySelector('input[name="choice"]:checked')
+      const textResponse = document.querySelector('textarea[name="response"]')
       const data = {
         customerId: survey.customerId,
-        responses: Array.from(steps).map((step, index) => {
-          const rating = step.querySelector('input[name="rating"]:checked')
-          const choice = step.querySelector('input[name="choice"]:checked')
-          return {
-            step: index + 1,
-            question: step.querySelector('label').innerText,
-            response: rating ? '' : choice ? choice.value : '',
-            rating: rating ? rating.value : null,
-          }
-        }),
+        question: survey.steps[currentStep].question,
+        response: rating
+          ? rating.value
+          : choice
+          ? choice.value
+          : textResponse
+          ? textResponse.value
+          : '',
       }
       console.log('Submitting survey')
 
       try {
         const result = await submitSurvey(data)
         if (result && result.status === 201) {
-          document.getElementById('survey-popup').style.display = 'none'
+          document.getElementById('survey-popup').remove()
           isSurveyOpen = false
           console.log('Survey submitted successfully')
         } else {

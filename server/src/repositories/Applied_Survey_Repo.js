@@ -4,7 +4,7 @@ class AppliedSurveyRepo {
   constructor() {
     this.db = mongodb.mainDb
     this.collection = this.db.collection('surveys')
-    this.responsesCollection = this.db.collection('responses') // 응답 컬렉션 추가
+    this.responsesCollection = this.db.collection('responses')
   }
 
   async getAllSurveys() {
@@ -19,12 +19,12 @@ class AppliedSurveyRepo {
 
   async addSurvey(survey) {
     const result = await this.collection.insertOne(survey)
-    return { ...survey, _id: result.insertedId } // 추가한 설문조사의 내용과 _id를 반환
+    return { ...survey, _id: result.insertedId }
   }
 
   async addResponse(response) {
     const result = await this.responsesCollection.insertOne(response)
-    return { ...response, _id: result.insertedId } // 추가한 응답의 내용과 _id를 반환
+    return { ...response, _id: result.insertedId }
   }
 }
 

@@ -1,36 +1,22 @@
 #survey-popup {
   position: fixed;
-  bottom: 10%;
-  right: 10%;
-  width: 300px;
-  background-color: #fff;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background-color: white;
   border: 1px solid #ccc;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
   padding: 20px;
-}
-
-#survey-popup h2 {
-  margin-top: 0;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
 }
 
 .survey-step {
   display: none;
 }
 
-#surveyForm {
-  display: flex;
-  flex-direction: column;
-}
-
-#surveyForm label {
-  margin-bottom: 10px;
-  font-weight: bold;
-}
-
-#surveyForm div {
-  margin-bottom: 20px;
+.survey-step.active {
+  display: block;
 }
 
 .star-rating input {
@@ -38,26 +24,27 @@
 }
 
 .star-rating label {
-  font-size: 20px;
-  color: #ccc;
+  font-size: 2em;
+  color: #ddd;
   cursor: pointer;
 }
 
 .star-rating input:checked ~ label,
 .star-rating label:hover,
 .star-rating label:hover ~ label {
-  color: #f39c12;
+  color: #f5b301;
 }
 
 #prevStep,
 #nextStep,
 #submitSurvey,
 #closeSurvey {
-  background-color: #007bff;
+  display: inline-block;
+  padding: 10px 20px;
+  margin-top: 10px;
   color: white;
+  background-color: #007bff;
   border: none;
-  padding: 10px;
-  margin: 5px;
   cursor: pointer;
   border-radius: 5px;
 }
