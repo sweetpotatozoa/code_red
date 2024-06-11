@@ -5,6 +5,19 @@
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
   let isSurveyOpen = false
 
+  // URL에서 customerId 가져오기
+  function getCustomerIdFromUrl() {
+    const scriptElements = document.getElementsByTagName('script')
+    for (let script of scriptElements) {
+      const src = script.src
+      const match = src.match(/customerId=([^&]+)/)
+      if (match) {
+        return match[1]
+      }
+    }
+    return null
+  }
+
   // 설문조사 데이터 가져오기
   async function fetchSurvey(customerId) {
     const response = await fetch(
@@ -32,7 +45,6 @@
   // 설문조사 로드
   function loadSurvey(survey) {
     if (isSurveyOpen) {
-      console.log('Survey already open. Not opening another one.')
       return
     }
     isSurveyOpen = true
@@ -104,7 +116,6 @@
       try {
         const result = await submitSurvey(data)
         if (result && result.status === 201) {
-          alert('설문조사가 성공적으로 제출되었습니다.')
           document.getElementById('survey-popup').style.display = 'none'
           isSurveyOpen = false
           console.log('Survey submitted successfully') // 제출 성공 확인
@@ -113,9 +124,6 @@
         }
       } catch (error) {
         console.error('Error submitting survey:', error)
-        alert(
-          '설문조사를 제출하는 도중 문제가 발생했습니다. 다시 시도해 주세요.',
-        )
         isSurveyOpen = false
       }
     }
@@ -127,7 +135,6 @@
       const trigger = survey.trigger
 
       if (localStorage.getItem(`survey-${survey._id}`)) {
-        console.log(`Survey ${survey._id} has already been shown. Skipping.`)
         return
       }
 
@@ -187,19 +194,6 @@
       }
     })
     console.log('Triggers set up') // 트리거 설정 확인
-  }
-
-  // URL에서 customerId 가져오기
-  function getCustomerIdFromUrl() {
-    const scriptElements = document.getElementsByTagName('script')
-    for (let script of scriptElements) {
-      const src = script.src
-      const match = src.match(/customerId=([^&]+)/)
-      if (match) {
-        return match[1]
-      }
-    }
-    return null
   }
 
   // 스크립트 초기화
