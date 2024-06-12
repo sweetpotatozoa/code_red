@@ -47,17 +47,17 @@
 
   // 설문조사 응답 저장 (최초 생성)
   async function createResponse(customerId, surveyId, response) {
-    const response = await submitSurvey({
+    const result = await submitSurvey({
       customerId,
       surveyId,
       responses: [response],
     })
-    return response.data._id
+    return result.data._id
   }
 
   // 설문조사 응답 업데이트
   async function updateResponse(responseId, response) {
-    const response = await fetch(
+    const result = await fetch(
       `${API_URI}/api/appliedSurvey/response/${responseId}`,
       {
         method: 'PUT',
@@ -67,7 +67,7 @@
         body: JSON.stringify(response),
       },
     )
-    return response.json()
+    return result.json()
   }
 
   // 각 스텝의 응답을 저장
@@ -136,8 +136,8 @@
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
-      const response = getResponse(step)
-      saveResponse(survey._id, stepIndex, response)
+      const stepResponse = getResponse(step)
+      saveResponse(survey._id, stepIndex, stepResponse)
 
       if (surveyResponseId) {
         await updateResponse(surveyResponseId, {
