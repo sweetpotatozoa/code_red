@@ -9,10 +9,10 @@
 
   // 유저 식별 및 세션 관리
   function getOrCreateUserId() {
-    let userId = localStorage.getItem('userId')
+    let userId = localStorage.getItem('codeRed_userId')
     if (!userId) {
       userId = `user-${Math.random().toString(36).substr(2, 9)}`
-      localStorage.setItem('userId', userId)
+      localStorage.setItem('codeRed_userId', userId)
     }
     return userId
   }
@@ -55,6 +55,7 @@
       customerId,
       surveyId,
       responses: [response],
+      userId: getOrCreateUserId(),
     })
     return result.data._id
   }
@@ -135,14 +136,14 @@
       }
     }
 
-    document.getElementById('closeSurvey').onclick = () => {
+    document.getElementById('closeSurvey').onclick = async () => {
       if (currentStep > 0) {
         const stepResponse = getResponse(step)
         saveResponse(survey._id, stepIndex, stepResponse)
         if (surveyResponseId) {
-          updateResponse(surveyResponseId, { responses: surveyResponses })
+          await updateResponse(surveyResponseId, { responses: surveyResponses })
         } else {
-          surveyResponseId = createResponse(
+          surveyResponseId = await createResponse(
             getCustomerIdFromUrl(),
             survey._id,
             { responses: surveyResponses },

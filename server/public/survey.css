@@ -70,7 +70,8 @@ button {
   margin-top: 10px;
 }
 
-button#nextStep {
+button#nextStep,
+button#submitSurvey {
   width: 100%;
 }
 
