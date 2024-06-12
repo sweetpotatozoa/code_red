@@ -1,5 +1,4 @@
 ;(async function () {
-  // 스크립트 로드 확인
   console.log('Survey script loaded')
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
@@ -8,7 +7,16 @@
   let surveyResponseId = null
   let surveyResponses = []
 
-  // URL에서 customerId 가져오기
+  // 유저 식별 및 세션 관리
+  function getOrCreateUserId() {
+    let userId = localStorage.getItem('userId')
+    if (!userId) {
+      userId = `user-${Math.random().toString(36).substr(2, 9)}`
+      localStorage.setItem('userId', userId)
+    }
+    return userId
+  }
+
   function getCustomerIdFromUrl() {
     const scriptElements = document.getElementsByTagName('script')
     for (let script of scriptElements) {
@@ -21,7 +29,6 @@
     return null
   }
 
-  // 설문조사 데이터 가져오기
   async function fetchSurvey(customerId) {
     const response = await fetch(
       `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
@@ -32,7 +39,6 @@
     return response.json()
   }
 
-  // 설문조사 응답 제출
   async function submitSurvey(data) {
     const response = await fetch(`${API_URI}/api/appliedSurvey/response`, {
       method: 'POST',
@@ -41,11 +47,9 @@
       },
       body: JSON.stringify(data),
     })
-
     return response.json()
   }
 
-  // 설문조사 응답 저장 (최초 생성)
   async function createResponse(customerId, surveyId, response) {
     const result = await submitSurvey({
       customerId,
@@ -55,7 +59,6 @@
     return result.data._id
   }
 
-  // 설문조사 응답 업데이트
   async function updateResponse(responseId, response) {
     const result = await fetch(
       `${API_URI}/api/appliedSurvey/response/${responseId}`,
@@ -70,7 +73,6 @@
     return result.json()
   }
 
-  // 각 스텝의 응답을 저장
   function saveResponse(surveyId, stepIndex, response) {
     surveyResponses[stepIndex] = {
       surveyId,
@@ -79,7 +81,6 @@
     }
   }
 
-  // 설문조사 로드
   function loadSurvey(survey) {
     if (isSurveyOpen) {
       return
@@ -87,8 +88,6 @@
     isSurveyOpen = true
     currentStep = 0
     surveyResponses = []
-
-    console.log('Loading survey') // 설문조사 로드 확인
 
     const link = document.createElement('link')
     link.rel = 'stylesheet'
@@ -101,7 +100,7 @@
     document.body.appendChild(surveyContainer)
 
     showStep(survey, currentStep)
-    console.log('Survey container created and appended to body') // 컨테이너 생성 확인
+    console.log('Survey container created and appended to body')
   }
 
   function showStep(survey, stepIndex) {
@@ -128,35 +127,66 @@
         </form>
       </div>
     `
-    document.getElementById('closeSurvey').onclick = () => {
-      document.getElementById('survey-popup').remove()
-      isSurveyOpen = false
-      console.log('Survey closed') // 설문조사 닫기 확인
+
+    if (step.type === 'welcome') {
+      document.getElementById('nextStep').onclick = () => {
+        saveResponse(survey._id, stepIndex, '참여하기 눌림')
+        nextStep(survey, stepIndex)
+      }
     }
 
-    document.getElementById('surveyForm').onsubmit = async function (event) {
-      event.preventDefault()
-      const stepResponse = getResponse(step)
-      saveResponse(survey._id, stepIndex, stepResponse)
-
-      if (surveyResponseId) {
-        await updateResponse(surveyResponseId, {
-          responses: surveyResponses,
-        })
-      } else {
-        surveyResponseId = await createResponse(survey.customerId, survey._id, {
-          responses: surveyResponses,
-        })
+    document.getElementById('closeSurvey').onclick = () => {
+      if (currentStep > 0) {
+        const stepResponse = getResponse(step)
+        saveResponse(survey._id, stepIndex, stepResponse)
+        if (surveyResponseId) {
+          updateResponse(surveyResponseId, { responses: surveyResponses })
+        } else {
+          surveyResponseId = createResponse(
+            getCustomerIdFromUrl(),
+            survey._id,
+            { responses: surveyResponses },
+          )
+        }
       }
+      document.getElementById('survey-popup').remove()
+      isSurveyOpen = false
+      console.log('Survey closed')
+    }
 
-      if (stepIndex === survey.steps.length - 1) {
-        document.getElementById('survey-popup').remove()
-        isSurveyOpen = false
-        console.log('Survey submitted successfully') // 제출 성공 확인
-      } else {
-        currentStep++
-        showStep(survey, currentStep)
+    if (step.type !== 'welcome') {
+      document.getElementById('surveyForm').onsubmit = async function (event) {
+        event.preventDefault()
+        const stepResponse = getResponse(step)
+        saveResponse(survey._id, stepIndex, stepResponse)
+
+        if (surveyResponseId) {
+          await updateResponse(surveyResponseId, {
+            responses: surveyResponses,
+          })
+        } else {
+          surveyResponseId = await createResponse(
+            survey.customerId,
+            survey._id,
+            {
+              responses: surveyResponses,
+            },
+          )
+        }
+
+        nextStep(survey, stepIndex)
       }
+    }
+  }
+
+  function nextStep(survey, stepIndex) {
+    if (stepIndex === survey.steps.length - 1) {
+      document.getElementById('survey-popup').remove()
+      isSurveyOpen = false
+      console.log('Survey submitted successfully')
+    } else {
+      currentStep++
+      showStep(survey, currentStep)
     }
   }
 
@@ -213,7 +243,6 @@
     }
   }
 
-  // 트리거 설정
   function setupTriggers(surveys) {
     surveys.forEach((survey) => {
       const trigger = survey.trigger
@@ -223,10 +252,8 @@
       }
 
       const showSurvey = () => {
-        setTimeout(() => {
-          loadSurvey(survey)
-          localStorage.setItem(`survey-${survey._id}`, 'shown')
-        }, 3000) // 3초 지연
+        loadSurvey(survey)
+        localStorage.setItem(`survey-${survey._id}`, 'shown')
       }
 
       // 특정 버튼 클릭 시
@@ -279,20 +306,19 @@
         })
       }
     })
-    console.log('Triggers set up') // 트리거 설정 확인
+    console.log('Triggers set up')
   }
 
-  // 스크립트 초기화
   async function init() {
-    console.log('Initializing survey script') // 초기화 확인
+    console.log('Initializing survey script')
     const customerId = getCustomerIdFromUrl()
     if (!customerId) {
       throw new Error('Customer ID is not provided in the URL')
     }
     try {
       const surveyData = await fetchSurvey(customerId)
-      setupTriggers(surveyData.data) // 트리거 설정
-      console.log('Survey script initialized') // 초기화 완료 확인
+      setupTriggers(surveyData.data)
+      console.log('Survey script initialized')
     } catch (error) {
       console.error('Error fetching survey:', error)
     }
