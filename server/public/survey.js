@@ -5,6 +5,7 @@
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
   let isSurveyOpen = false
   let currentStep = 0
+  let surveyResponseId = null
   let surveyResponses = []
 
   // URL에서 customerId 가져오기
@@ -41,6 +42,31 @@
       body: JSON.stringify(data),
     })
 
+    return response.json()
+  }
+
+  // 설문조사 응답 저장 (최초 생성)
+  async function createResponse(customerId, surveyId, response) {
+    const response = await submitSurvey({
+      customerId,
+      surveyId,
+      responses: [response],
+    })
+    return response.data._id
+  }
+
+  // 설문조사 응답 업데이트
+  async function updateResponse(responseId, response) {
+    const response = await fetch(
+      `${API_URI}/api/appliedSurvey/response/${responseId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(response),
+      },
+    )
     return response.json()
   }
 
@@ -91,9 +117,14 @@
           <div>
             ${generateStepContent(step)}
           </div>
+          ${
+            step.type !== 'thankyou'
+              ? `
           <button type="submit" id="submitSurvey">
             ${stepIndex === survey.steps.length - 1 ? '제출하기' : '다음'}
-          </button>
+          </button>`
+              : ''
+          }
         </form>
       </div>
     `
@@ -108,22 +139,20 @@
       const response = getResponse(step)
       saveResponse(survey._id, stepIndex, response)
 
+      if (surveyResponseId) {
+        await updateResponse(surveyResponseId, {
+          responses: surveyResponses,
+        })
+      } else {
+        surveyResponseId = await createResponse(survey.customerId, survey._id, {
+          responses: surveyResponses,
+        })
+      }
+
       if (stepIndex === survey.steps.length - 1) {
-        try {
-          const result = await submitSurvey({
-            customerId: survey.customerId,
-            responses: surveyResponses,
-          })
-          if (result && result.status === 201) {
-            document.getElementById('survey-popup').remove()
-            isSurveyOpen = false
-            console.log('Survey submitted successfully') // 제출 성공 확인
-          } else {
-            throw new Error('Network response was not ok')
-          }
-        } catch (error) {
-          console.error('Error submitting survey:', error)
-        }
+        document.getElementById('survey-popup').remove()
+        isSurveyOpen = false
+        console.log('Survey submitted successfully') // 제출 성공 확인
       } else {
         currentStep++
         showStep(survey, currentStep)
@@ -158,7 +187,10 @@
       case 'text':
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
       case 'thankyou':
-        return `<button type="button" id="closeSurvey">닫기</button>`
+        return `<div class="thank-you-card">
+          <span class="emoji">😊</span>
+          <p>설문조사에 참여해주셔서 감사합니다!</p>
+        </div>`
       default:
         return ''
     }
@@ -166,14 +198,18 @@
 
   function getResponse(step) {
     switch (step.type) {
+      case 'welcome':
+        return '참여하기 눌림'
       case 'choice':
-        return document.querySelector('input[name="choice"]:checked')?.value
+        return document.querySelector('input[name="choice"]:checked').value
       case 'rating':
-        return document.querySelector('input[name="rating"]:checked')?.value
+        return document.querySelector('input[name="rating"]:checked').value
       case 'text':
         return document.getElementById('response').value
+      case 'thankyou':
+        return '설문 완료'
       default:
-        return null
+        return ''
     }
   }
 

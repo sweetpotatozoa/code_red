@@ -125,3 +125,17 @@ input[type='radio']:checked + label {
 input[type='radio'] + label:hover {
   background-color: #e0e0e0;
 }
+
+/* 땡큐카드 스타일 */
+.thank-you-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.thank-you-card .emoji {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
