@@ -203,15 +203,13 @@
   function getResponse(step) {
     switch (step.type) {
       case 'welcome':
-        return '설문 시작'
+        return 'clicked'
       case 'choice':
         return document.querySelector('input[name="choice"]:checked').value
       case 'rating':
         return document.querySelector('input[name="rating"]:checked').value
       case 'text':
         return document.getElementById('response').value
-      case 'thankyou':
-        return '설문 완료'
       default:
         return ''
     }
