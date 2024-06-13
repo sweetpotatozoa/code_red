@@ -157,6 +157,12 @@
 
       nextStep(survey, stepIndex)
     }
+
+    // 첫 번째 스텝이 웰컴카드일 경우, 바로 다음 스텝으로 넘어가기
+    if (stepIndex === 0 && step.type === 'welcome') {
+      saveResponse(survey._id, stepIndex, '설문 시작')
+      nextStep(survey, stepIndex)
+    }
   }
 
   // 다음 스텝으로 이동
@@ -175,7 +181,7 @@
   function generateStepContent(step) {
     switch (step.type) {
       case 'welcome':
-        return `<button type="button" id="nextStep">참여하기</button>`
+        return '' // 웰컴카드에서는 버튼 제거
       case 'choice':
         return step.options
           .map(
