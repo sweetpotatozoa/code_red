@@ -253,6 +253,16 @@
 
       triggerPriority.forEach((priority) => {
         if (trigger.type === priority) {
+          if (priority === 'url') {
+            if (window.location.pathname === trigger.url) {
+              showSurvey()
+            }
+          }
+
+          if (priority === 'newSession') {
+            showSurvey()
+          }
+
           if (priority === 'cssSelector') {
             const button = document.querySelector(trigger.selector)
             if (button) {
@@ -274,16 +284,6 @@
                 showSurvey()
               }
             })
-          }
-
-          if (priority === 'newSession') {
-            showSurvey()
-          }
-
-          if (priority === 'url') {
-            if (window.location.pathname === trigger.url) {
-              showSurvey()
-            }
           }
         }
       })
