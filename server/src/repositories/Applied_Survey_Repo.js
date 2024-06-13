@@ -17,11 +17,6 @@ class AppliedSurveyRepo {
     return result
   }
 
-  async addSurvey(survey) {
-    const result = await this.collection.insertOne(survey)
-    return { ...survey, _id: result.insertedId }
-  }
-
   async addResponse(response) {
     const result = await this.responsesCollection.insertOne(response)
     return { ...response, _id: result.insertedId }

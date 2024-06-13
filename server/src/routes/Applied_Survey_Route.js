@@ -10,13 +10,6 @@ router.get('/', async (req, res) => {
   res.status(200).json({ status: 200, data: surveys })
 })
 
-// 새로운 설문조사 추가
-router.post('/', async (req, res) => {
-  const surveyData = req.body
-  const newSurvey = await appliedSurveyRepo.addSurvey(surveyData)
-  res.status(201).json({ status: 201, data: newSurvey })
-})
-
 // 설문조사 응답 추가
 router.post('/response', async (req, res) => {
   const responseData = req.body
