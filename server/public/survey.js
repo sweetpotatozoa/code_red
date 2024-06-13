@@ -98,6 +98,20 @@
   function showStep(survey, stepIndex) {
     const step = survey.steps[stepIndex]
     const surveyContainer = document.getElementById('survey-popup')
+    const isLastStep = stepIndex === survey.steps.length - 1
+
+    let buttonText
+    switch (step.type) {
+      case 'welcome':
+        buttonText = '참여하기'
+        break
+      case 'thankyou':
+        buttonText = ''
+        break
+      default:
+        buttonText = isLastStep ? '제출하기' : '다음'
+    }
+
     surveyContainer.innerHTML = `
       <div class="survey-step">
         <div class="survey-header">
@@ -109,10 +123,8 @@
             ${generateStepContent(step)}
           </div>
           ${
-            step.type !== 'thankyou'
-              ? `<button type="submit" id="submitSurvey">${
-                  stepIndex === survey.steps.length - 1 ? '제출하기' : '다음'
-                }</button>`
+            buttonText
+              ? `<button type="submit" id="submitSurvey">${buttonText}</button>`
               : ''
           }
         </form>
@@ -157,14 +169,6 @@
 
       nextStep(survey, stepIndex)
     }
-
-    // 첫 번째 스텝이 웰컴카드일 경우, 버튼을 누르면 다음 스텝으로 이동
-    if (stepIndex === 0 && step.type === 'welcome') {
-      document.getElementById('nextStep').onclick = () => {
-        saveResponse(survey._id, stepIndex, '설문 시작')
-        nextStep(survey, stepIndex)
-      }
-    }
   }
 
   // 다음 스텝으로 이동
@@ -183,7 +187,7 @@
   function generateStepContent(step) {
     switch (step.type) {
       case 'welcome':
-        return '' // 웰컴카드에서는 버튼 제거
+        return '' // 웰컴카드에서는 버튼만 제거
       case 'choice':
         return step.options
           .map(
