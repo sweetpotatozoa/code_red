@@ -228,9 +228,7 @@
       case 'multiChoice':
         return Array.from(
           document.querySelectorAll('input[name="multiChoice"]:checked'),
-        )
-          .map((input) => input.value)
-          .join(', ')
+        ).map((input) => input.value)
       case 'rating':
         return document.querySelector('input[name="rating"]:checked').value
       case 'text':
