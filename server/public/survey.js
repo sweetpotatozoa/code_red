@@ -175,7 +175,7 @@
   function generateStepContent(step) {
     switch (step.type) {
       case 'welcome':
-        return `<button type="button" id="nextStep">${step.buttonText}</button>`
+        return `<button type="button" id="nextStep">참여하기</button>`
       case 'choice':
         return step.options
           .map(
