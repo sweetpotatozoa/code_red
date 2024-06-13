@@ -134,22 +134,7 @@
       </div>
     `
 
-    document.getElementById('closeSurvey').onclick = async () => {
-      if (currentStep > 0) {
-        const stepResponse = getResponse(step)
-        saveResponse(survey._id, currentStep, stepResponse)
-        if (surveyResponseId) {
-          await updateResponse(surveyResponseId, {
-            responses: surveyResponses,
-          })
-        } else {
-          surveyResponseId = await createResponse(
-            getCustomerIdFromUrl(),
-            survey._id,
-            { responses: surveyResponses },
-          )
-        }
-      }
+    document.getElementById('closeSurvey').onclick = () => {
       document.getElementById('survey-popup').remove()
       isSurveyOpen = false
       console.log('Survey closed')
@@ -218,15 +203,13 @@
   function getResponse(step) {
     switch (step.type) {
       case 'welcome':
-        return '설문 시작'
+        return 'clicked'
       case 'choice':
         return document.querySelector('input[name="choice"]:checked').value
       case 'rating':
         return document.querySelector('input[name="rating"]:checked').value
       case 'text':
         return document.getElementById('response').value
-      case 'thankyou':
-        return '설문 완료'
       default:
         return ''
     }
