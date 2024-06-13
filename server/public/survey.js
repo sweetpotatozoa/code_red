@@ -71,6 +71,9 @@
         body: JSON.stringify(response),
       },
     )
+    if (!result.ok) {
+      throw new Error('Network response was not ok')
+    }
     return result.json()
   }
 

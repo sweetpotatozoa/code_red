@@ -26,6 +26,14 @@ class AppliedSurveyRepo {
     const result = await this.responsesCollection.insertOne(response)
     return { ...response, _id: result.insertedId }
   }
+
+  async updateResponse(responseId, response) {
+    const result = await this.responsesCollection.updateOne(
+      { _id: new mongodb.ObjectID(responseId) },
+      { $set: response },
+    )
+    return result
+  }
 }
 
 module.exports = new AppliedSurveyRepo()

@@ -24,4 +24,15 @@ router.post('/response', async (req, res) => {
   res.status(201).json({ status: 201, data: newResponse })
 })
 
+// 설문조사 응답 업데이트
+router.put('/response/:id', async (req, res) => {
+  const responseId = req.params.id
+  const responseData = req.body
+  const updatedResponse = await appliedSurveyRepo.updateResponse(
+    responseId,
+    responseData,
+  )
+  res.status(200).json({ status: 200, data: updatedResponse })
+})
+
 module.exports = router
