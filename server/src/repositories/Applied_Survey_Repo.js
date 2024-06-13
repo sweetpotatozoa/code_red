@@ -29,7 +29,7 @@ class AppliedSurveyRepo {
 
   async updateResponse(responseId, response) {
     const result = await this.responsesCollection.updateOne(
-      { _id: new mongodb.ObjectID(responseId) },
+      { _id: new mongodb.ObjectId(responseId) },
       { $set: { responses: response.responses } },
     )
     return result
