@@ -131,7 +131,7 @@
 
     if (step.type === 'welcome') {
       document.getElementById('nextStep').onclick = () => {
-        saveResponse(survey._id, stepIndex, '참여하기 눌림')
+        saveResponse(survey._id, stepIndex, '설문 시작')
         nextStep(survey, stepIndex)
       }
     }
@@ -230,7 +230,7 @@
   function getResponse(step) {
     switch (step.type) {
       case 'welcome':
-        return '참여하기 눌림'
+        return '설문 시작'
       case 'choice':
         return document.querySelector('input[name="choice"]:checked').value
       case 'rating':
