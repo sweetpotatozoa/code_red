@@ -124,7 +124,9 @@
         const stepResponse = getResponse(step)
         saveResponse(survey._id, currentStep, stepResponse)
         if (surveyResponseId) {
-          await updateResponse(surveyResponseId, { responses: surveyResponses })
+          await updateResponse(surveyResponseId, {
+            responses: surveyResponses,
+          })
         } else {
           surveyResponseId = await createResponse(
             getCustomerIdFromUrl(),
@@ -138,29 +140,22 @@
       console.log('Survey closed')
     }
 
-    if (step.type !== 'welcome') {
-      document.getElementById('surveyForm').onsubmit = async function (event) {
-        event.preventDefault()
-        const stepResponse = getResponse(step)
-        saveResponse(survey._id, stepIndex, stepResponse)
+    document.getElementById('surveyForm').onsubmit = async function (event) {
+      event.preventDefault()
+      const stepResponse = getResponse(step)
+      saveResponse(survey._id, stepIndex, stepResponse)
 
-        if (surveyResponseId) {
-          await updateResponse(surveyResponseId, { responses: surveyResponses })
-        } else {
-          surveyResponseId = await createResponse(
-            survey.customerId,
-            survey._id,
-            { responses: surveyResponses },
-          )
-        }
+      if (surveyResponseId) {
+        await updateResponse(surveyResponseId, {
+          responses: surveyResponses,
+        })
+      } else {
+        surveyResponseId = await createResponse(survey.customerId, survey._id, {
+          responses: surveyResponses,
+        })
+      }
 
-        nextStep(survey, stepIndex)
-      }
-    } else {
-      document.getElementById('nextStep').onclick = () => {
-        saveResponse(survey._id, stepIndex, '설문 시작')
-        nextStep(survey, stepIndex)
-      }
+      nextStep(survey, stepIndex)
     }
   }
 
