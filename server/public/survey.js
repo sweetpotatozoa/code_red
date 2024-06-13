@@ -28,7 +28,9 @@
     if (!response.ok) {
       throw new Error('Network response was not ok')
     }
-    return response.json()
+    const data = await response.json()
+    console.log('Surveys loaded:', data)
+    return data
   }
 
   // 설문조사 응답 제출 (생성)
@@ -236,13 +238,14 @@
 
       const showSurvey = () => {
         if (!isSurveyOpen) {
-          // 설문조사가 열려 있지 않은 경우에만 로드
+          console.log(
+            `Trigger fired: ${trigger.type} at ${new Date().toISOString()}`,
+          )
           loadSurvey(survey)
           localStorage.setItem(`survey-${survey._id}`, 'shown')
         }
       }
 
-      // 트리거 우선순위 설정
       const triggerPriority = [
         'url',
         'newSession',
