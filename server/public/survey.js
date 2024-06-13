@@ -229,6 +229,21 @@
 
   // 트리거 설정
   function setupTriggers(surveys) {
+    const triggerPriority = [
+      'url',
+      'newSession',
+      'cssSelector',
+      'innerText',
+      'exitIntent',
+    ]
+
+    surveys.sort((a, b) => {
+      return (
+        triggerPriority.indexOf(a.trigger.type) -
+        triggerPriority.indexOf(b.trigger.type)
+      )
+    })
+
     surveys.forEach((survey) => {
       const trigger = survey.trigger
 
@@ -246,50 +261,38 @@
         }
       }
 
-      const triggerPriority = [
-        'url',
-        'newSession',
-        'cssSelector',
-        'innerText',
-        'exitIntent',
-      ]
+      if (trigger.type === 'url') {
+        if (window.location.pathname === trigger.url) {
+          showSurvey()
+        }
+      }
 
-      triggerPriority.forEach((priority) => {
-        if (trigger.type === priority) {
-          if (priority === 'url') {
-            if (window.location.pathname === trigger.url) {
-              showSurvey()
-            }
+      if (trigger.type === 'newSession') {
+        showSurvey()
+      }
+
+      if (trigger.type === 'cssSelector') {
+        const button = document.querySelector(trigger.selector)
+        if (button) {
+          button.addEventListener('click', showSurvey)
+        }
+      }
+
+      if (trigger.type === 'innerText') {
+        document.querySelectorAll('button, a, div').forEach((element) => {
+          if (element.innerText.includes(trigger.text)) {
+            element.addEventListener('click', showSurvey)
           }
+        })
+      }
 
-          if (priority === 'newSession') {
+      if (trigger.type === 'exitIntent') {
+        document.addEventListener('mouseleave', (event) => {
+          if (event.clientY <= 0) {
             showSurvey()
           }
-
-          if (priority === 'cssSelector') {
-            const button = document.querySelector(trigger.selector)
-            if (button) {
-              button.addEventListener('click', showSurvey)
-            }
-          }
-
-          if (priority === 'innerText') {
-            document.querySelectorAll('button, a, div').forEach((element) => {
-              if (element.innerText.includes(trigger.text)) {
-                element.addEventListener('click', showSurvey)
-              }
-            })
-          }
-
-          if (priority === 'exitIntent') {
-            document.addEventListener('mouseleave', (event) => {
-              if (event.clientY <= 0) {
-                showSurvey()
-              }
-            })
-          }
-        }
-      })
+        })
+      }
     })
     console.log('Triggers set up')
   }
