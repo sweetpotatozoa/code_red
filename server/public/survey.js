@@ -38,14 +38,14 @@
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ customerId, surveyId, ...response }),
+      body: JSON.stringify({ customerId, surveyId, responses: [response] }),
     })
     const data = await result.json()
     return data.data._id
   }
 
   // 설문조사 응답 업데이트
-  async function updateResponse(responseId, response) {
+  async function updateResponse(responseId, responses) {
     const result = await fetch(
       `${API_URI}/api/appliedSurvey/response/${responseId}`,
       {
@@ -53,7 +53,7 @@
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(response),
+        body: JSON.stringify({ responses }),
       },
     )
     if (!result.ok) {
@@ -67,6 +67,7 @@
     surveyResponses[stepIndex] = {
       stepIndex,
       response,
+      timestamp: new Date().toISOString(), // 타임스탬프 추가
     }
   }
 
@@ -145,12 +146,11 @@
       saveResponse(stepIndex, stepResponse)
 
       if (surveyResponseId) {
-        await updateResponse(surveyResponseId, {
-          responses: surveyResponses,
-        })
+        await updateResponse(surveyResponseId, surveyResponses)
       } else {
         surveyResponseId = await createResponse(survey.customerId, survey._id, {
-          responses: surveyResponses,
+          stepIndex,
+          response: stepResponse,
         })
       }
 
@@ -233,17 +233,6 @@
         if (button) {
           button.addEventListener('click', showSurvey)
         }
-      }
-
-      if (trigger.type === 'scroll') {
-        window.addEventListener('scroll', () => {
-          if (
-            window.innerHeight + window.scrollY >=
-            document.body.offsetHeight * (trigger.percentage / 100)
-          ) {
-            showSurvey()
-          }
-        })
       }
 
       if (trigger.type === 'exitIntent') {
