@@ -65,10 +65,11 @@
   }
 
   // 응답 저장
-  function saveResponse(stepIndex, response) {
+  function saveResponse(stepIndex, response, type) {
     surveyResponses[stepIndex] = {
       stepIndex,
       response,
+      type,
       timestamp: new Date().toISOString(), // 타임스탬프 추가
     }
   }
@@ -148,7 +149,7 @@
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
       const stepResponse = getResponse(step)
-      saveResponse(stepIndex, stepResponse)
+      saveResponse(stepIndex, stepResponse, step.type)
 
       if (surveyResponseId) {
         await updateResponse(surveyResponseId, surveyResponses)
@@ -156,6 +157,7 @@
         surveyResponseId = await createResponse(survey.customerId, survey._id, {
           stepIndex,
           response: stepResponse,
+          type: step.type,
         })
       }
 
