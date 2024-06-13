@@ -235,53 +235,58 @@
       }
 
       const showSurvey = () => {
-        loadSurvey(survey)
-        localStorage.setItem(`survey-${survey._id}`, 'shown')
-      }
-
-      if (trigger.type === 'cssSelector') {
-        const button = document.querySelector(trigger.selector)
-        if (button) {
-          button.addEventListener('click', showSurvey)
+        if (!isSurveyOpen) {
+          // 설문조사가 열려 있지 않은 경우에만 로드
+          loadSurvey(survey)
+          localStorage.setItem(`survey-${survey._id}`, 'shown')
         }
       }
 
-      if (trigger.type === 'scroll') {
-        window.addEventListener('scroll', () => {
-          if (
-            window.innerHeight + window.scrollY >=
-            document.body.offsetHeight * (trigger.percentage / 100)
-          ) {
+      // 트리거 우선순위 설정
+      const triggerPriority = [
+        'url',
+        'newSession',
+        'cssSelector',
+        'innerText',
+        'exitIntent',
+      ]
+
+      triggerPriority.forEach((priority) => {
+        if (trigger.type === priority) {
+          if (priority === 'cssSelector') {
+            const button = document.querySelector(trigger.selector)
+            if (button) {
+              button.addEventListener('click', showSurvey)
+            }
+          }
+
+          if (priority === 'innerText') {
+            document.querySelectorAll('button, a, div').forEach((element) => {
+              if (element.innerText.includes(trigger.text)) {
+                element.addEventListener('click', showSurvey)
+              }
+            })
+          }
+
+          if (priority === 'exitIntent') {
+            document.addEventListener('mouseleave', (event) => {
+              if (event.clientY <= 0) {
+                showSurvey()
+              }
+            })
+          }
+
+          if (priority === 'newSession') {
             showSurvey()
           }
-        })
-      }
 
-      if (trigger.type === 'exitIntent') {
-        document.addEventListener('mouseleave', (event) => {
-          if (event.clientY <= 0) {
-            showSurvey()
+          if (priority === 'url') {
+            if (window.location.pathname === trigger.url) {
+              showSurvey()
+            }
           }
-        })
-      }
-
-      if (trigger.type === 'newSession') {
-        showSurvey()
-      }
-
-      if (trigger.type === 'url') {
-        if (window.location.pathname === trigger.url) {
-          showSurvey()
         }
-      }
-
-      if (trigger.type === 'innerText') {
-        document.querySelectorAll('button, a, div').forEach((element) => {
-          if (element.innerText.includes(trigger.text)) {
-            element.addEventListener('click', showSurvey)
-          }
-        })
-      }
+      })
     })
     console.log('Triggers set up')
   }
