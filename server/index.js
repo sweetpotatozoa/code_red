@@ -14,6 +14,7 @@ const app = express()
 
 // CORS 설정
 app.use(cors())
+app.options('*', cors())
 
 // 기타 미들웨어 설정
 app.use(compression())
