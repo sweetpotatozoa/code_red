@@ -135,9 +135,9 @@
     `
 
     document.getElementById('closeSurvey').onclick = async () => {
-      if (currentStep > 0) {
+      if (step.type === 'thankyou') {
         const stepResponse = getResponse(step)
-        saveResponse(survey._id, currentStep, stepResponse)
+        saveResponse(survey._id, stepIndex, stepResponse)
         if (surveyResponseId) {
           await updateResponse(surveyResponseId, {
             responses: surveyResponses,
