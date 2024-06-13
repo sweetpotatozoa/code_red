@@ -193,6 +193,13 @@
               `<input type="radio" name="choice" value="${option}" id="choice-${index}"><label for="choice-${index}">${option}</label>`,
           )
           .join('')
+      case 'multiChoice':
+        return step.options
+          .map(
+            (option, index) =>
+              `<input type="checkbox" name="multiChoice" value="${option}" id="multiChoice-${index}"><label for="multiChoice-${index}">${option}</label>`,
+          )
+          .join('')
       case 'rating':
         return `<span class="star-rating">${[1, 2, 3, 4, 5]
           .map(
@@ -218,6 +225,12 @@
         return 'clicked'
       case 'choice':
         return document.querySelector('input[name="choice"]:checked').value
+      case 'multiChoice':
+        return Array.from(
+          document.querySelectorAll('input[name="multiChoice"]:checked'),
+        )
+          .map((input) => input.value)
+          .join(', ')
       case 'rating':
         return document.querySelector('input[name="rating"]:checked').value
       case 'text':
