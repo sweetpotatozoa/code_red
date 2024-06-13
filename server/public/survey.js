@@ -99,6 +99,9 @@
     const step = survey.steps[stepIndex]
     const surveyContainer = document.getElementById('survey-popup')
     const isLastStep = stepIndex === survey.steps.length - 1
+    const isSecondToLastStep =
+      stepIndex === survey.steps.length - 2 &&
+      survey.steps[survey.steps.length - 1].type === 'thankyou'
 
     let buttonText
     switch (step.type) {
@@ -109,7 +112,7 @@
         buttonText = ''
         break
       default:
-        buttonText = isLastStep ? '제출하기' : '다음'
+        buttonText = isLastStep || isSecondToLastStep ? '제출하기' : '다음'
     }
 
     surveyContainer.innerHTML = `
