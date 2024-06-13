@@ -158,10 +158,12 @@
       nextStep(survey, stepIndex)
     }
 
-    // 첫 번째 스텝이 웰컴카드일 경우, 바로 다음 스텝으로 넘어가기
+    // 첫 번째 스텝이 웰컴카드일 경우, 버튼을 누르면 다음 스텝으로 이동
     if (stepIndex === 0 && step.type === 'welcome') {
-      saveResponse(survey._id, stepIndex, '설문 시작')
-      nextStep(survey, stepIndex)
+      document.getElementById('nextStep').onclick = () => {
+        saveResponse(survey._id, stepIndex, '설문 시작')
+        nextStep(survey, stepIndex)
+      }
     }
   }
 
