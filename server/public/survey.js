@@ -28,7 +28,9 @@
     if (!response.ok) {
       throw new Error('Network response was not ok')
     }
-    return response.json()
+    const data = await response.json()
+    console.log('Surveys loaded:', data)
+    return data
   }
 
   // 설문조사 응답 제출 (생성)
@@ -63,10 +65,11 @@
   }
 
   // 응답 저장
-  function saveResponse(stepIndex, response) {
+  function saveResponse(stepIndex, response, type) {
     surveyResponses[stepIndex] = {
       stepIndex,
       response,
+      type,
       timestamp: new Date().toISOString(), // 타임스탬프 추가
     }
   }
@@ -146,7 +149,7 @@
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
       const stepResponse = getResponse(step)
-      saveResponse(stepIndex, stepResponse)
+      saveResponse(stepIndex, stepResponse, step.type)
 
       if (surveyResponseId) {
         await updateResponse(surveyResponseId, surveyResponses)
@@ -154,6 +157,7 @@
         surveyResponseId = await createResponse(survey.customerId, survey._id, {
           stepIndex,
           response: stepResponse,
+          type: step.type,
         })
       }
 
@@ -227,6 +231,21 @@
 
   // 트리거 설정
   function setupTriggers(surveys) {
+    const triggerPriority = [
+      'url',
+      'newSession',
+      'cssSelector',
+      'innerText',
+      'exitIntent',
+    ]
+
+    surveys.sort((a, b) => {
+      return (
+        triggerPriority.indexOf(a.trigger.type) -
+        triggerPriority.indexOf(b.trigger.type)
+      )
+    })
+
     surveys.forEach((survey) => {
       const trigger = survey.trigger
 
@@ -236,57 +255,46 @@
 
       const showSurvey = () => {
         if (!isSurveyOpen) {
-          // 설문조사가 열려 있지 않은 경우에만 로드
+          console.log(
+            `Trigger fired: ${trigger.type} at ${new Date().toISOString()}`,
+          )
           loadSurvey(survey)
           localStorage.setItem(`survey-${survey._id}`, 'shown')
         }
       }
 
-      // 트리거 우선순위 설정
-      const triggerPriority = [
-        'url',
-        'newSession',
-        'cssSelector',
-        'innerText',
-        'exitIntent',
-      ]
+      if (trigger.type === 'url') {
+        if (window.location.pathname === trigger.url) {
+          showSurvey()
+        }
+      }
 
-      triggerPriority.forEach((priority) => {
-        if (trigger.type === priority) {
-          if (priority === 'url') {
-            if (window.location.pathname === trigger.url) {
-              showSurvey()
-            }
+      if (trigger.type === 'newSession') {
+        showSurvey()
+      }
+
+      if (trigger.type === 'cssSelector') {
+        const button = document.querySelector(trigger.selector)
+        if (button) {
+          button.addEventListener('click', showSurvey)
+        }
+      }
+
+      if (trigger.type === 'innerText') {
+        document.querySelectorAll('button, a, div').forEach((element) => {
+          if (element.innerText.includes(trigger.text)) {
+            element.addEventListener('click', showSurvey)
           }
+        })
+      }
 
-          if (priority === 'newSession') {
+      if (trigger.type === 'exitIntent') {
+        document.addEventListener('mouseleave', (event) => {
+          if (event.clientY <= 0) {
             showSurvey()
           }
-
-          if (priority === 'cssSelector') {
-            const button = document.querySelector(trigger.selector)
-            if (button) {
-              button.addEventListener('click', showSurvey)
-            }
-          }
-
-          if (priority === 'innerText') {
-            document.querySelectorAll('button, a, div').forEach((element) => {
-              if (element.innerText.includes(trigger.text)) {
-                element.addEventListener('click', showSurvey)
-              }
-            })
-          }
-
-          if (priority === 'exitIntent') {
-            document.addEventListener('mouseleave', (event) => {
-              if (event.clientY <= 0) {
-                showSurvey()
-              }
-            })
-          }
-        }
-      })
+        })
+      }
     })
     console.log('Triggers set up')
   }
