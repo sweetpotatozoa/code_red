@@ -134,22 +134,7 @@
       </div>
     `
 
-    document.getElementById('closeSurvey').onclick = async () => {
-      if (step.type === 'thankyou') {
-        const stepResponse = getResponse(step)
-        saveResponse(survey._id, stepIndex, stepResponse)
-        if (surveyResponseId) {
-          await updateResponse(surveyResponseId, {
-            responses: surveyResponses,
-          })
-        } else {
-          surveyResponseId = await createResponse(
-            getCustomerIdFromUrl(),
-            survey._id,
-            { responses: surveyResponses },
-          )
-        }
-      }
+    document.getElementById('closeSurvey').onclick = () => {
       document.getElementById('survey-popup').remove()
       isSurveyOpen = false
       console.log('Survey closed')
