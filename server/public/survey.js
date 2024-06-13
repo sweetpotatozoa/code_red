@@ -63,9 +63,8 @@
   }
 
   // 응답 저장
-  function saveResponse(surveyId, stepIndex, response) {
+  function saveResponse(stepIndex, response) {
     surveyResponses[stepIndex] = {
-      surveyId,
       stepIndex,
       response,
     }
@@ -143,7 +142,7 @@
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
       const stepResponse = getResponse(step)
-      saveResponse(survey._id, stepIndex, stepResponse)
+      saveResponse(stepIndex, stepResponse)
 
       if (surveyResponseId) {
         await updateResponse(surveyResponseId, {
