@@ -246,6 +246,17 @@
         }
       }
 
+      if (trigger.type === 'scroll') {
+        window.addEventListener('scroll', () => {
+          if (
+            window.innerHeight + window.scrollY >=
+            document.body.offsetHeight * (trigger.percentage / 100)
+          ) {
+            showSurvey()
+          }
+        })
+      }
+
       if (trigger.type === 'exitIntent') {
         document.addEventListener('mouseleave', (event) => {
           if (event.clientY <= 0) {
