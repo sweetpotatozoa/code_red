@@ -108,6 +108,9 @@
       case 'welcome':
         buttonText = '참여하기'
         break
+      case 'info':
+        buttonText = step.buttonText
+        break
       case 'thankyou':
         buttonText = ''
         break
@@ -154,6 +157,10 @@
         })
       }
 
+      if (step.type === 'info') {
+        window.open(step.buttonUrl, '_blank')
+      }
+
       nextStep(survey, stepIndex)
     }
   }
@@ -191,6 +198,8 @@
           .join('')}</span>`
       case 'text':
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
+      case 'info':
+        return `<p>${step.question}</p>` // 인포카드의 질문 표시
       case 'thankyou':
         return `<div class="thank-you-card"><span class="emoji">😊</span><p>${step.question}</p></div>`
       default:
@@ -209,6 +218,8 @@
         return document.querySelector('input[name="rating"]:checked').value
       case 'text':
         return document.getElementById('response').value
+      case 'info':
+        return 'clicked'
       default:
         return ''
     }
