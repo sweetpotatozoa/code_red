@@ -1,4 +1,5 @@
 const mongodb = require('../utils/mongodb')
+const { ObjectId } = require('mongodb') // 수정된 부분
 
 class AppliedSurveyRepo {
   constructor() {
@@ -24,7 +25,7 @@ class AppliedSurveyRepo {
 
   async updateResponse(responseId, response) {
     const result = await this.responsesCollection.updateOne(
-      { _id: new mongodb.ObjectID(responseId) },
+      { _id: new ObjectId(responseId) }, // 수정된 부분
       { $set: response },
     )
     return result
