@@ -227,29 +227,43 @@
       console.log('Survey closed')
     }
 
-    if (step.type !== 'welcome') {
-      document.getElementById('surveyForm').onsubmit = async function (event) {
-        event.preventDefault()
-        const stepResponse = getResponse(step)
-        saveResponse(stepIndex, stepResponse, step.type)
+    document.getElementById('surveyForm').onsubmit = async function (event) {
+      event.preventDefault()
+      const stepResponse = getResponse(step)
+      saveResponse(stepIndex, stepResponse, step.type)
 
-        if (surveyResponseId) {
-          await updateResponse(surveyResponseId, surveyResponses)
-        } else {
-          surveyResponseId = await createResponse(
-            survey.customerId,
-            survey._id,
-            surveyResponses[stepIndex],
-          )
-        }
-
-        showStep(survey, stepIndex + 1)
+      if (surveyResponseId) {
+        await updateResponse(surveyResponseId, surveyResponses)
+      } else {
+        surveyResponseId = await createResponse(survey.customerId, survey._id, {
+          stepIndex,
+          response: stepResponse,
+          type: step.type,
+        })
       }
+
+      if (step.type === 'info') {
+        window.open(step.buttonUrl, '_blank')
+      }
+
+      nextStep(survey, stepIndex)
+    }
+  }
+
+  // 다음 스텝으로 이동
+  function nextStep(survey, stepIndex) {
+    const activeSteps = survey.steps.filter((step) =>
+      step.type === 'welcome' || step.type === 'thankyou'
+        ? step.isActived
+        : true,
+    )
+    if (stepIndex === activeSteps.length - 1) {
+      document.getElementById('survey-popup').remove()
+      isSurveyOpen = false
+      console.log('Survey submitted successfully')
     } else {
-      document.getElementById('nextStep').onclick = () => {
-        saveResponse(stepIndex, 'clicked', step.type)
-        showStep(survey, stepIndex + 1)
-      }
+      currentStep++
+      showStep(survey, currentStep)
     }
   }
 
