@@ -41,8 +41,10 @@
 
         // 각 스텝의 유효성 검사
         for (let step of survey.steps) {
-          if (!step.type || !step.question) {
-            console.error(`Invalid step data in survey ${survey._id}`)
+          if (step.title === undefined || step.description === undefined) {
+            console.error(
+              `Missing title or description in survey ${survey._id}`,
+            )
             return false
           }
 
@@ -201,7 +203,12 @@
           <button type="button" id="closeSurvey" class="close-button">X</button>
         </div>
         <form id="surveyForm">
-          <label for="question">${step.question}</label>
+          ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
+          ${
+            step.description
+              ? `<p class="survey-description">${step.description}</p>`
+              : ''
+          }
           <div>
             ${generateStepContent(step)}
           </div>
@@ -220,43 +227,29 @@
       console.log('Survey closed')
     }
 
-    document.getElementById('surveyForm').onsubmit = async function (event) {
-      event.preventDefault()
-      const stepResponse = getResponse(step)
-      saveResponse(stepIndex, stepResponse, step.type)
+    if (step.type !== 'welcome') {
+      document.getElementById('surveyForm').onsubmit = async function (event) {
+        event.preventDefault()
+        const stepResponse = getResponse(step)
+        saveResponse(stepIndex, stepResponse, step.type)
 
-      if (surveyResponseId) {
-        await updateResponse(surveyResponseId, surveyResponses)
-      } else {
-        surveyResponseId = await createResponse(survey.customerId, survey._id, {
-          stepIndex,
-          response: stepResponse,
-          type: step.type,
-        })
+        if (surveyResponseId) {
+          await updateResponse(surveyResponseId, surveyResponses)
+        } else {
+          surveyResponseId = await createResponse(
+            survey.customerId,
+            survey._id,
+            surveyResponses[stepIndex],
+          )
+        }
+
+        showStep(survey, stepIndex + 1)
       }
-
-      if (step.type === 'info') {
-        window.open(step.buttonUrl, '_blank')
-      }
-
-      nextStep(survey, stepIndex)
-    }
-  }
-
-  // 다음 스텝으로 이동
-  function nextStep(survey, stepIndex) {
-    const activeSteps = survey.steps.filter((step) =>
-      step.type === 'welcome' || step.type === 'thankyou'
-        ? step.isActived
-        : true,
-    )
-    if (stepIndex === activeSteps.length - 1) {
-      document.getElementById('survey-popup').remove()
-      isSurveyOpen = false
-      console.log('Survey submitted successfully')
     } else {
-      currentStep++
-      showStep(survey, currentStep)
+      document.getElementById('nextStep').onclick = () => {
+        saveResponse(stepIndex, 'clicked', step.type)
+        showStep(survey, stepIndex + 1)
+      }
     }
   }
 
