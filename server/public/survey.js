@@ -187,7 +187,7 @@
         buttonText = '참여하기'
         break
       case 'info':
-        buttonText = step.buttonText
+        // buttonText = step.buttonText
         break
       case 'thankyou':
         buttonText = ''
