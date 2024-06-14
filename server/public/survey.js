@@ -32,18 +32,24 @@
       const data = await response.json()
       console.log('Surveys loaded:', data)
 
-      // 유효성 검사
-      if (!Array.isArray(data.data)) {
-        throw new Error('Invalid survey data format')
-      }
-
-      data.data.forEach((survey) => {
+      // 유효성 검사 및 필터링
+      const validSurveys = data.data.filter((survey) => {
         if (!survey.trigger || !survey.steps || !Array.isArray(survey.steps)) {
-          throw new Error(`Invalid survey structure: ${survey._id}`)
+          console.error(`Invalid survey structure: ${survey._id}`)
+          return false
         }
+
+        // 각 스텝의 유효성 검사
+        for (let step of survey.steps) {
+          if (!step.type || !step.question) {
+            console.error(`Invalid step data in survey ${survey._id}`)
+            return false
+          }
+        }
+        return true
       })
 
-      return data
+      return { status: data.status, data: validSurveys }
     } catch (error) {
       console.error('Error fetching survey:', error)
       return null
@@ -116,17 +122,7 @@
 
   // 설문조사 스텝 표시
   function showStep(survey, stepIndex) {
-    if (stepIndex >= survey.steps.length) {
-      console.error('Invalid step index')
-      return
-    }
-
     const step = survey.steps[stepIndex]
-    if (!step || !step.type || !step.question) {
-      console.error('Invalid step data', step)
-      return
-    }
-
     const surveyContainer = document.getElementById('survey-popup')
     const isLastStep = stepIndex === survey.steps.length - 1
     const isSecondToLastStep =
@@ -286,11 +282,6 @@
 
     surveys.forEach((survey) => {
       const trigger = survey.trigger
-
-      if (!trigger || !trigger.type) {
-        console.error(`Invalid trigger for survey ${survey._id}`)
-        return
-      }
 
       if (localStorage.getItem(`survey-${survey._id}`)) {
         return
