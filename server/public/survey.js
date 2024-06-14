@@ -41,7 +41,7 @@
 
         // 각 스텝의 유효성 검사
         for (let step of survey.steps) {
-          if (!step.type || !step.question) {
+          if (!step.type || !step.question || step.isActived === undefined) {
             console.error(`Invalid step data in survey ${survey._id}`)
             return false
           }
@@ -156,10 +156,13 @@
   function showStep(survey, stepIndex) {
     const step = survey.steps[stepIndex]
     const surveyContainer = document.getElementById('survey-popup')
-    const isLastStep = stepIndex === survey.steps.length - 1
+
+    // 활성화된 스텝 필터링
+    const activeSteps = survey.steps.filter((step) => step.isActived)
+    const isLastStep = stepIndex === activeSteps.length - 1
     const isSecondToLastStep =
-      stepIndex === survey.steps.length - 2 &&
-      survey.steps[survey.steps.length - 1].type === 'thankyou'
+      stepIndex === activeSteps.length - 2 &&
+      activeSteps[activeSteps.length - 1].type === 'thankyou'
 
     let buttonText
     switch (step.type) {
@@ -226,7 +229,8 @@
 
   // 다음 스텝으로 이동
   function nextStep(survey, stepIndex) {
-    if (stepIndex === survey.steps.length - 1) {
+    const activeSteps = survey.steps.filter((step) => step.isActived)
+    if (stepIndex === activeSteps.length - 1) {
       document.getElementById('survey-popup').remove()
       isSurveyOpen = false
       console.log('Survey submitted successfully')
@@ -284,35 +288,22 @@
       case 'multiChoice':
         return Array.from(
           document.querySelectorAll('input[name="multiChoice"]:checked'),
-        ).map((input) => input.value)
+        ).map((checkbox) => checkbox.value)
       case 'rating':
         return document.querySelector('input[name="rating"]:checked').value
       case 'text':
         return document.getElementById('response').value
       case 'info':
         return 'clicked'
+      case 'thankyou':
+        return '설문 완료'
       default:
         return ''
     }
   }
 
-  // 트리거 설정
+  // 트리거 설정 및 처리
   function setupTriggers(surveys) {
-    const triggerPriority = [
-      'url',
-      'newSession',
-      'cssSelector',
-      'innerText',
-      'exitIntent',
-    ]
-
-    surveys.sort((a, b) => {
-      return (
-        triggerPriority.indexOf(a.trigger.type) -
-        triggerPriority.indexOf(b.trigger.type)
-      )
-    })
-
     surveys.forEach((survey) => {
       const trigger = survey.trigger
 
@@ -321,52 +312,59 @@
       }
 
       const showSurvey = () => {
-        if (!isSurveyOpen) {
-          console.log(
-            `Trigger fired: ${trigger.type} at ${new Date().toISOString()}`,
-          )
-          loadSurvey(survey)
-          localStorage.setItem(`survey-${survey._id}`, 'shown')
-        }
+        loadSurvey(survey)
+        localStorage.setItem(`survey-${survey._id}`, 'shown')
       }
 
-      if (trigger.type === 'url') {
-        if (window.location.pathname === trigger.url) {
-          showSurvey()
-        }
-      }
+      // 트리거 우선순위 설정
+      const triggerPriority = [
+        'url',
+        'newSession',
+        'cssSelector',
+        'innerText',
+        'exitIntent',
+      ]
 
-      if (trigger.type === 'newSession') {
-        showSurvey()
-      }
-
-      if (trigger.type === 'cssSelector') {
-        const button = document.querySelector(trigger.selector)
-        if (button) {
-          button.addEventListener('click', showSurvey)
-        }
-      }
-
-      if (trigger.type === 'innerText') {
-        document.querySelectorAll('button, a, div').forEach((element) => {
-          if (element.innerText.includes(trigger.text)) {
-            element.addEventListener('click', showSurvey)
+      triggerPriority.forEach((priority) => {
+        if (trigger.type === priority) {
+          if (priority === 'cssSelector') {
+            const button = document.querySelector(trigger.selector)
+            if (button) {
+              button.addEventListener('click', showSurvey)
+            }
           }
-        })
-      }
 
-      if (trigger.type === 'exitIntent') {
-        document.addEventListener('mouseleave', (event) => {
-          if (event.clientY <= 0) {
+          if (priority === 'innerText') {
+            document.querySelectorAll('button, a, div').forEach((element) => {
+              if (element.innerText.includes(trigger.text)) {
+                element.addEventListener('click', showSurvey)
+              }
+            })
+          }
+
+          if (priority === 'exitIntent') {
+            document.addEventListener('mouseleave', (event) => {
+              if (event.clientY <= 0) {
+                showSurvey()
+              }
+            })
+          }
+
+          if (priority === 'newSession') {
             showSurvey()
           }
-        })
-      }
+
+          if (priority === 'url') {
+            if (window.location.pathname === trigger.url) {
+              showSurvey()
+            }
+          }
+        }
+      })
     })
     console.log('Triggers set up')
   }
 
-  // 초기화
   async function init() {
     console.log('Initializing survey script')
     const customerId = getCustomerIdFromUrl()
