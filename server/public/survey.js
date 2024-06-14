@@ -20,15 +20,72 @@
     return null
   }
 
-  // 설문조사 데이터 가져오기
+  // 설문조사 데이터 가져오기 및 유효성 검사
   async function fetchSurvey(customerId) {
-    const response = await fetch(
-      `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
-    )
-    if (!response.ok) {
-      throw new Error('Network response was not ok')
+    try {
+      const response = await fetch(
+        `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
+      )
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      const data = await response.json()
+      console.log('Surveys loaded:', data)
+
+      // 유효성 검사 및 필터링
+      const validSurveys = data.data.filter((survey) => {
+        if (!survey.trigger || !survey.steps || !Array.isArray(survey.steps)) {
+          console.error(`Invalid survey structure: ${survey._id}`)
+          return false
+        }
+
+        // 각 스텝의 유효성 검사
+        for (let step of survey.steps) {
+          if (!step.type || !step.question) {
+            console.error(`Invalid step data in survey ${survey._id}`)
+            return false
+          }
+
+          // 스텝 타입별 필드 검사
+          switch (step.type) {
+            case 'choice':
+            case 'multiChoice':
+              if (!step.options || !Array.isArray(step.options)) {
+                console.error(
+                  `Invalid options for ${step.type} step in survey ${survey._id}`,
+                )
+                return false
+              }
+              break
+            case 'info':
+              if (!step.buttonText || !step.buttonUrl) {
+                console.error(
+                  `Missing buttonText or buttonUrl for info step in survey ${survey._id}`,
+                )
+                return false
+              }
+              break
+            case 'rating':
+            case 'text':
+            case 'welcome':
+            case 'thankyou':
+              // No additional fields required
+              break
+            default:
+              console.error(
+                `Unknown step type: ${step.type} in survey ${survey._id}`,
+              )
+              return false
+          }
+        }
+        return true
+      })
+
+      return { status: data.status, data: validSurveys }
+    } catch (error) {
+      console.error('Error fetching survey:', error)
+      return null
     }
-    return response.json()
   }
 
   // 설문조사 응답 제출 (생성)
@@ -38,14 +95,14 @@
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ customerId, surveyId, ...response }),
+      body: JSON.stringify({ customerId, surveyId, responses: [response] }),
     })
     const data = await result.json()
     return data.data._id
   }
 
   // 설문조사 응답 업데이트
-  async function updateResponse(responseId, response) {
+  async function updateResponse(responseId, responses) {
     const result = await fetch(
       `${API_URI}/api/appliedSurvey/response/${responseId}`,
       {
@@ -53,7 +110,7 @@
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(response),
+        body: JSON.stringify({ responses }),
       },
     )
     if (!result.ok) {
@@ -63,11 +120,12 @@
   }
 
   // 응답 저장
-  function saveResponse(surveyId, stepIndex, response) {
+  function saveResponse(stepIndex, response, type) {
     surveyResponses[stepIndex] = {
-      surveyId,
       stepIndex,
       response,
+      type,
+      timestamp: new Date().toISOString(), // 타임스탬프 추가
     }
   }
 
@@ -108,6 +166,9 @@
       case 'welcome':
         buttonText = '참여하기'
         break
+      case 'info':
+        buttonText = step.buttonText
+        break
       case 'thankyou':
         buttonText = ''
         break
@@ -143,16 +204,20 @@
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
       const stepResponse = getResponse(step)
-      saveResponse(survey._id, stepIndex, stepResponse)
+      saveResponse(stepIndex, stepResponse, step.type)
 
       if (surveyResponseId) {
-        await updateResponse(surveyResponseId, {
-          responses: surveyResponses,
-        })
+        await updateResponse(surveyResponseId, surveyResponses)
       } else {
         surveyResponseId = await createResponse(survey.customerId, survey._id, {
-          responses: surveyResponses,
+          stepIndex,
+          response: stepResponse,
+          type: step.type,
         })
+      }
+
+      if (step.type === 'info') {
+        window.open(step.buttonUrl, '_blank')
       }
 
       nextStep(survey, stepIndex)
@@ -183,6 +248,13 @@
               `<input type="radio" name="choice" value="${option}" id="choice-${index}"><label for="choice-${index}">${option}</label>`,
           )
           .join('')
+      case 'multiChoice':
+        return step.options
+          .map(
+            (option, index) =>
+              `<input type="checkbox" name="multiChoice" value="${option}" id="multiChoice-${index}"><label for="multiChoice-${index}">${option}</label>`,
+          )
+          .join('')
       case 'rating':
         return `<span class="star-rating">${[1, 2, 3, 4, 5]
           .map(
@@ -192,6 +264,8 @@
           .join('')}</span>`
       case 'text':
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
+      case 'info':
+        return `<p>${step.question}</p>` // 인포카드의 질문 표시
       case 'thankyou':
         return `<div class="thank-you-card"><span class="emoji">😊</span><p>${step.question}</p></div>`
       default:
@@ -206,10 +280,16 @@
         return 'clicked'
       case 'choice':
         return document.querySelector('input[name="choice"]:checked').value
+      case 'multiChoice':
+        return Array.from(
+          document.querySelectorAll('input[name="multiChoice"]:checked'),
+        ).map((input) => input.value)
       case 'rating':
         return document.querySelector('input[name="rating"]:checked').value
       case 'text':
         return document.getElementById('response').value
+      case 'info':
+        return 'clicked'
       default:
         return ''
     }
@@ -217,6 +297,21 @@
 
   // 트리거 설정
   function setupTriggers(surveys) {
+    const triggerPriority = [
+      'url',
+      'newSession',
+      'cssSelector',
+      'innerText',
+      'exitIntent',
+    ]
+
+    surveys.sort((a, b) => {
+      return (
+        triggerPriority.indexOf(a.trigger.type) -
+        triggerPriority.indexOf(b.trigger.type)
+      )
+    })
+
     surveys.forEach((survey) => {
       const trigger = survey.trigger
 
@@ -225,8 +320,23 @@
       }
 
       const showSurvey = () => {
-        loadSurvey(survey)
-        localStorage.setItem(`survey-${survey._id}`, 'shown')
+        if (!isSurveyOpen) {
+          console.log(
+            `Trigger fired: ${trigger.type} at ${new Date().toISOString()}`,
+          )
+          loadSurvey(survey)
+          localStorage.setItem(`survey-${survey._id}`, 'shown')
+        }
+      }
+
+      if (trigger.type === 'url') {
+        if (window.location.pathname === trigger.url) {
+          showSurvey()
+        }
+      }
+
+      if (trigger.type === 'newSession') {
+        showSurvey()
       }
 
       if (trigger.type === 'cssSelector') {
@@ -236,13 +346,10 @@
         }
       }
 
-      if (trigger.type === 'scroll') {
-        window.addEventListener('scroll', () => {
-          if (
-            window.innerHeight + window.scrollY >=
-            document.body.offsetHeight * (trigger.percentage / 100)
-          ) {
-            showSurvey()
+      if (trigger.type === 'innerText') {
+        document.querySelectorAll('button, a, div').forEach((element) => {
+          if (element.innerText.includes(trigger.text)) {
+            element.addEventListener('click', showSurvey)
           }
         })
       }
@@ -251,24 +358,6 @@
         document.addEventListener('mouseleave', (event) => {
           if (event.clientY <= 0) {
             showSurvey()
-          }
-        })
-      }
-
-      if (trigger.type === 'newSession') {
-        showSurvey()
-      }
-
-      if (trigger.type === 'url') {
-        if (window.location.pathname === trigger.url) {
-          showSurvey()
-        }
-      }
-
-      if (trigger.type === 'innerText') {
-        document.querySelectorAll('button, a, div').forEach((element) => {
-          if (element.innerText.includes(trigger.text)) {
-            element.addEventListener('click', showSurvey)
           }
         })
       }
@@ -285,10 +374,12 @@
     }
     try {
       const surveyData = await fetchSurvey(customerId)
-      setupTriggers(surveyData.data)
-      console.log('Survey script initialized')
+      if (surveyData) {
+        setupTriggers(surveyData.data)
+        console.log('Survey script initialized')
+      }
     } catch (error) {
-      console.error('Error fetching survey:', error)
+      console.error('Error initializing survey script:', error)
     }
   }
 
