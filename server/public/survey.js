@@ -48,7 +48,7 @@
 
           // 스텝 타입별 필드 검사
           switch (step.type) {
-            case 'choice':
+            case 'singleChoice':
             case 'multiChoice':
               if (!step.options || !Array.isArray(step.options)) {
                 console.error(
@@ -241,11 +241,11 @@
     switch (step.type) {
       case 'welcome':
         return '' // 웰컴카드에서는 버튼만 제거
-      case 'choice':
+      case 'singleChoice':
         return step.options
           .map(
             (option, index) =>
-              `<input type="radio" name="choice" value="${option}" id="choice-${index}"><label for="choice-${index}">${option}</label>`,
+              `<input type="radio" name="singleChoice" value="${option}" id="singleChoice-${index}"><label for="singleChoice-${index}">${option}</label>`,
           )
           .join('')
       case 'multiChoice':
@@ -278,8 +278,9 @@
     switch (step.type) {
       case 'welcome':
         return 'clicked'
-      case 'choice':
-        return document.querySelector('input[name="choice"]:checked').value
+      case 'singleChoice':
+        return document.querySelector('input[name="singleChoice"]:checked')
+          .value
       case 'multiChoice':
         return Array.from(
           document.querySelectorAll('input[name="multiChoice"]:checked'),
