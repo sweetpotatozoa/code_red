@@ -76,7 +76,6 @@
               break
             case 'rating':
             case 'text':
-              // No additional fields required
               break
             default:
               console.error(
@@ -95,7 +94,7 @@
     }
   }
 
-  // 설문조사 응답 제출 (생성)
+  // 설문조사 응답 생성
   async function createResponse(customerId, surveyId, response) {
     const result = await fetch(`${API_URI}/api/appliedSurvey/response`, {
       method: 'POST',
@@ -132,7 +131,7 @@
       stepIndex,
       response,
       type,
-      timestamp: new Date().toISOString(), // 타임스탬프 추가
+      timestamp: new Date().toISOString(),
     }
   }
 
@@ -265,7 +264,7 @@
   function generateStepContent(step) {
     switch (step.type) {
       case 'welcome':
-        return '' // 웰컴카드에서는 콘텐츠가 필요 없음
+        return ''
       case 'singleChoice':
         return step.options
           .map(
@@ -292,7 +291,7 @@
       case 'info':
         return ''
       case 'thankyou':
-        return `<div class="thank-you-card"><span class="emoji">😊</span></div>` // Thank you 카드의 텍스트 제거
+        return `<div class="thank-you-card"><span class="emoji">😊</span></div>`
       default:
         return ''
     }
