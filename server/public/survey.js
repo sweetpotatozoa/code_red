@@ -45,6 +45,38 @@
             console.error(`Invalid step data in survey ${survey._id}`)
             return false
           }
+
+          // 스텝 타입별 필드 검사
+          switch (step.type) {
+            case 'choice':
+            case 'multiChoice':
+              if (!step.options || !Array.isArray(step.options)) {
+                console.error(
+                  `Invalid options for ${step.type} step in survey ${survey._id}`,
+                )
+                return false
+              }
+              break
+            case 'info':
+              if (!step.buttonText || !step.buttonUrl) {
+                console.error(
+                  `Missing buttonText or buttonUrl for info step in survey ${survey._id}`,
+                )
+                return false
+              }
+              break
+            case 'rating':
+            case 'text':
+            case 'welcome':
+            case 'thankyou':
+              // No additional fields required
+              break
+            default:
+              console.error(
+                `Unknown step type: ${step.type} in survey ${survey._id}`,
+              )
+              return false
+          }
         }
         return true
       })
