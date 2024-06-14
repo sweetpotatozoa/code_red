@@ -215,25 +215,25 @@
       </div>
     `
 
-    // info 타입의 버튼을 동적으로 생성하여 추가
-    if (step.type === 'info') {
-      const infoButton = document.createElement('button')
-      infoButton.type = 'button'
-      infoButton.id = 'infoButton'
-      infoButton.textContent = step.buttonText
-      infoButton.onclick = () => {
-        window.open(step.buttonUrl, '_blank')
-      }
-      surveyContainer.querySelector('form').appendChild(infoButton)
-    }
+    // // info 타입의 버튼을 동적으로 생성하여 추가
+    // if (step.type === 'info') {
+    //   const infoButton = document.createElement('button')
+    //   infoButton.type = 'button'
+    //   infoButton.id = 'infoButton'
+    //   infoButton.textContent = step.buttonText
+    //   infoButton.onclick = () => {
+    //     window.open(step.buttonUrl, '_blank')
+    //   }
+    //   surveyContainer.querySelector('form').appendChild(infoButton)
+    // }
 
-    // thankyou 타입의 카드를 동적으로 생성하여 추가
-    if (step.type === 'thankyou') {
-      const thankyouCard = document.createElement('div')
-      thankyouCard.className = 'thank-you-card'
-      thankyouCard.innerHTML = `<span class="emoji">😊</span><p>${step.question}</p>`
-      surveyContainer.querySelector('form').appendChild(thankyouCard)
-    }
+    // // thankyou 타입의 카드를 동적으로 생성하여 추가
+    // if (step.type === 'thankyou') {
+    //   const thankyouCard = document.createElement('div')
+    //   thankyouCard.className = 'thank-you-card'
+    //   thankyouCard.innerHTML = `<span class="emoji">😊</span><p>${step.question}</p>`
+    //   surveyContainer.querySelector('form').appendChild(thankyouCard)
+    // }
 
     document.getElementById('closeSurvey').onclick = () => {
       document.getElementById('survey-popup').remove()
