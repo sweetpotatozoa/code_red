@@ -41,13 +41,22 @@
 
         // 각 스텝의 유효성 검사
         for (let step of survey.steps) {
-          if (!step.type || !step.question || step.isActived === undefined) {
+          if (!step.type || !step.question) {
             console.error(`Invalid step data in survey ${survey._id}`)
             return false
           }
 
           // 스텝 타입별 필드 검사
           switch (step.type) {
+            case 'welcome':
+            case 'thankyou':
+              if (step.isActived === undefined) {
+                console.error(
+                  `Missing isActived for ${step.type} step in survey ${survey._id}`,
+                )
+                return false
+              }
+              break
             case 'singleChoice':
             case 'multiChoice':
               if (!step.options || !Array.isArray(step.options)) {
@@ -67,8 +76,6 @@
               break
             case 'rating':
             case 'text':
-            case 'welcome':
-            case 'thankyou':
               // No additional fields required
               break
             default:
@@ -158,7 +165,11 @@
     const surveyContainer = document.getElementById('survey-popup')
 
     // 활성화된 스텝 필터링
-    const activeSteps = survey.steps.filter((step) => step.isActived)
+    const activeSteps = survey.steps.filter((step) =>
+      step.type === 'welcome' || step.type === 'thankyou'
+        ? step.isActived
+        : true,
+    )
     const isLastStep = stepIndex === activeSteps.length - 1
     const isSecondToLastStep =
       stepIndex === activeSteps.length - 2 &&
@@ -229,7 +240,11 @@
 
   // 다음 스텝으로 이동
   function nextStep(survey, stepIndex) {
-    const activeSteps = survey.steps.filter((step) => step.isActived)
+    const activeSteps = survey.steps.filter((step) =>
+      step.type === 'welcome' || step.type === 'thankyou'
+        ? step.isActived
+        : true,
+    )
     if (stepIndex === activeSteps.length - 1) {
       document.getElementById('survey-popup').remove()
       isSurveyOpen = false
@@ -244,12 +259,12 @@
   function generateStepContent(step) {
     switch (step.type) {
       case 'welcome':
-        return '' // 웰컴카드에서는 버튼만 제거
+        return '' // 웰컴카드에서는 콘텐츠가 필요 없음
       case 'singleChoice':
         return step.options
           .map(
             (option, index) =>
-              `<input type="radio" name="singleChoice" value="${option}" id="singleChoice-${index}"><label for="singleChoice-${index}">${option}</label>`,
+              `<input type="radio" name="choice" value="${option}" id="choice-${index}"><label for="choice-${index}">${option}</label>`,
           )
           .join('')
       case 'multiChoice':
@@ -269,7 +284,7 @@
       case 'text':
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
       case 'info':
-        return `<p>${step.question}</p>` // 인포카드의 질문 표시
+        return `<button type="button" id="infoButton">${step.buttonText}</button>`
       case 'thankyou':
         return `<div class="thank-you-card"><span class="emoji">😊</span><p>${step.question}</p></div>`
       default:
@@ -277,14 +292,13 @@
     }
   }
 
-  // 스텝 응답 추출
+  // 응답 추출
   function getResponse(step) {
     switch (step.type) {
       case 'welcome':
         return 'clicked'
       case 'singleChoice':
-        return document.querySelector('input[name="singleChoice"]:checked')
-          .value
+        return document.querySelector('input[name="choice"]:checked').value
       case 'multiChoice':
         return Array.from(
           document.querySelectorAll('input[name="multiChoice"]:checked'),
@@ -295,8 +309,6 @@
         return document.getElementById('response').value
       case 'info':
         return 'clicked'
-      case 'thankyou':
-        return '설문 완료'
       default:
         return ''
     }
