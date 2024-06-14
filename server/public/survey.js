@@ -161,15 +161,21 @@
 
   // 설문조사 스텝 표시
   function showStep(survey, stepIndex) {
-    const step = survey.steps[stepIndex]
-    const surveyContainer = document.getElementById('survey-popup')
-
-    // 활성화된 스텝 필터링
     const activeSteps = survey.steps.filter((step) =>
       step.type === 'welcome' || step.type === 'thankyou'
         ? step.isActived
         : true,
     )
+    const step = activeSteps[stepIndex]
+    const surveyContainer = document.getElementById('survey-popup')
+
+    if (!step) {
+      document.getElementById('survey-popup').remove()
+      isSurveyOpen = false
+      console.log('Survey finished')
+      return
+    }
+
     const isLastStep = stepIndex === activeSteps.length - 1
     const isSecondToLastStep =
       stepIndex === activeSteps.length - 2 &&
