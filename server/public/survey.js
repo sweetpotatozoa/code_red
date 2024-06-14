@@ -20,17 +20,34 @@
     return null
   }
 
-  // 설문조사 데이터 가져오기
+  // 설문조사 데이터 가져오기 및 유효성 검사
   async function fetchSurvey(customerId) {
-    const response = await fetch(
-      `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
-    )
-    if (!response.ok) {
-      throw new Error('Network response was not ok')
+    try {
+      const response = await fetch(
+        `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
+      )
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      const data = await response.json()
+      console.log('Surveys loaded:', data)
+
+      // 유효성 검사
+      if (!Array.isArray(data.data)) {
+        throw new Error('Invalid survey data format')
+      }
+
+      data.data.forEach((survey) => {
+        if (!survey.trigger || !survey.steps || !Array.isArray(survey.steps)) {
+          throw new Error(`Invalid survey structure: ${survey._id}`)
+        }
+      })
+
+      return data
+    } catch (error) {
+      console.error('Error fetching survey:', error)
+      return null
     }
-    const data = await response.json()
-    console.log('Surveys loaded:', data)
-    return data
   }
 
   // 설문조사 응답 제출 (생성)
@@ -99,7 +116,17 @@
 
   // 설문조사 스텝 표시
   function showStep(survey, stepIndex) {
+    if (stepIndex >= survey.steps.length) {
+      console.error('Invalid step index')
+      return
+    }
+
     const step = survey.steps[stepIndex]
+    if (!step || !step.type || !step.question) {
+      console.error('Invalid step data', step)
+      return
+    }
+
     const surveyContainer = document.getElementById('survey-popup')
     const isLastStep = stepIndex === survey.steps.length - 1
     const isSecondToLastStep =
@@ -260,6 +287,11 @@
     surveys.forEach((survey) => {
       const trigger = survey.trigger
 
+      if (!trigger || !trigger.type) {
+        console.error(`Invalid trigger for survey ${survey._id}`)
+        return
+      }
+
       if (localStorage.getItem(`survey-${survey._id}`)) {
         return
       }
@@ -319,10 +351,12 @@
     }
     try {
       const surveyData = await fetchSurvey(customerId)
-      setupTriggers(surveyData.data)
-      console.log('Survey script initialized')
+      if (surveyData) {
+        setupTriggers(surveyData.data)
+        console.log('Survey script initialized')
+      }
     } catch (error) {
-      console.error('Error fetching survey:', error)
+      console.error('Error initializing survey script:', error)
     }
   }
 
