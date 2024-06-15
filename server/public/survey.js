@@ -349,6 +349,42 @@
 
   // 4. Event Listener and Trigger Setup - 이벤트 리스너를 설정하고, 각 트리거가 발생할 때 설문조사를 표시하도록 처리하는 함수들입니다. 이벤트 리스너를 제거하는 클린업 함수도 포함되어 있습니다.
 
+  // URL 변경 감지 함수
+  function setupUrlChangeListener(callback) {
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+
+    // history.pushState를 감지
+    history.pushState = function() {
+      originalPushState.apply(this, arguments);
+      callback();
+    };
+
+    // history.replaceState를 감지
+    history.replaceState = function() {
+      originalReplaceState.apply(this, arguments);
+      callback();
+    };
+
+    // popstate 이벤트를 감지
+    window.addEventListener('popstate', callback);
+  }
+
+  // URL 트리거를 감지하고 설문조사를 표시하는 함수
+  function handleUrlChange() {
+    const currentUrl = new URL(window.location.href);
+    surveys.forEach(survey => {
+      survey.triggers.forEach(trigger => {
+        if (trigger.type === 'url') {
+          const triggerUrl = new URL(trigger.url, window.location.origin);
+          if (currentUrl.pathname === triggerUrl.pathname || (currentUrl.pathname === '/' && triggerUrl.pathname === '')) {
+            showSurvey();
+          }
+        }
+      });
+    });
+  }
+
   // 트리거 설정 및 처리
   function setupTriggers(surveys) {
     const surveyMap = new Map()
@@ -440,11 +476,8 @@
         }
 
         if (trigger.type === 'url') {
-          const currentUrl = new URL(window.location.href)
-          const triggerUrl = new URL(trigger.url, window.location.origin)
-          if (currentUrl.pathname === triggerUrl.pathname || (currentUrl.pathname === '/' && triggerUrl.pathname === '')) {
-            showSurvey()
-          }
+          setupUrlChangeListener(handleUrlChange);  // URL 변경 감지 설정
+          handleUrlChange();  // 초기 URL 체크
         }
 
         if (trigger.type === 'scroll') {
