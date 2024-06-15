@@ -531,7 +531,7 @@
         // 페이지 언로드 시 클린업 수행
         window.addEventListener('beforeunload', () => cleanupTriggers(window.activeSurveyId))
 
-        // 설문조사 완료 시 클린업 수행
+        // 설문조사 완료 시 클린업 수행 + 닫기 버튼을 눌러서 완료할 시에도 동작
         function handleSurveyCompletion() {
           cleanupTriggers(window.activeSurveyId)
           window.removeEventListener('surveyCompleted', handleSurveyCompletion)
