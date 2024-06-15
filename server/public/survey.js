@@ -273,7 +273,14 @@
     `
 
     document.getElementById('closeSurvey').onclick = () => {
-      document.getElementById('survey-popup').remove()
+      closeSurvey()
+    }
+
+    function closeSurvey() {
+      const surveyPopup = document.getElementById('survey-popup')
+      if (surveyPopup) {
+        surveyPopup.remove()
+      }
       window.activeSurveyId = null
       console.log('Survey closed')
     }
@@ -377,6 +384,11 @@
     }
   }
 
+  // 페이지 새로고침 또는 닫기 시 설문조사 상태 초기화
+  window.addEventListener('beforeunload', () => {
+    window.activeSurveyId = null
+  })
+
   // 트리거 설정 및 처리
   function setupTriggers(surveys) {
     const surveyMap = new Map()
@@ -412,15 +424,15 @@
       const trigger = JSON.parse(key)
 
       const showSurvey = () => {
-        if (
-          window.activeSurveyId === null &&
-          !localStorage.getItem(`survey-${survey._id}`)
-        ) {
+        if (window.activeSurveyId === null) {
           setTimeout(
-            () => loadSurvey(survey),
+            () => {
+              if (window.activeSurveyId === null) {
+                loadSurvey(survey)
+              }
+            },
             trigger.type === 'newSession' || trigger.type === 'url' ? 1000 : 0,
           )
-          localStorage.setItem(`survey-${survey._id}`, 'shown')
         }
       }
 
@@ -440,11 +452,12 @@
       }
 
       if (trigger.type === 'exitIntent') {
-        document.addEventListener('mouseleave', (event) => {
+        const handleExitIntent = (event) => {
           if (event.clientY <= 0) {
             showSurvey()
           }
-        })
+        }
+        document.addEventListener('mouseleave', handleExitIntent)
       }
 
       if (trigger.type === 'newSession') {
