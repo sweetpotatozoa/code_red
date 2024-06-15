@@ -381,10 +381,6 @@
     const surveyMap = new Map()
 
     surveys.forEach((survey) => {
-      if (localStorage.getItem(`survey-${survey._id}`)) {
-        return
-      }
-
       survey.triggers.forEach((trigger) => {
         const key = JSON.stringify(trigger)
         if (
@@ -400,8 +396,10 @@
       const trigger = JSON.parse(key)
 
       const showSurvey = () => {
-        loadSurvey(survey)
-        localStorage.setItem(`survey-${survey._id}`, 'shown')
+        if (!localStorage.getItem(`survey-${survey._id}`)) {
+          loadSurvey(survey)
+          localStorage.setItem(`survey-${survey._id}`, 'shown')
+        }
       }
 
       if (trigger.type === 'cssSelector') {
@@ -422,9 +420,7 @@
       if (trigger.type === 'exitIntent') {
         document.addEventListener('mouseleave', (event) => {
           if (event.clientY <= 0) {
-            if (!localStorage.getItem(`survey-${survey._id}`)) {
-              showSurvey()
-            }
+            showSurvey()
           }
         })
       }
@@ -448,11 +444,9 @@
         const handleScroll = () => {
           const scrollPercentage =
             (window.scrollY + window.innerHeight) / document.body.scrollHeight
-          if (scrollPercentage >= 0.01) {
+          if (scrollPercentage >= 0.2) {
             window.removeEventListener('scroll', handleScroll)
-            if (!localStorage.getItem(`survey-${survey._id}`)) {
-              showSurvey()
-            }
+            showSurvey()
           }
         }
         window.addEventListener('scroll', handleScroll)
