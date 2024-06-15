@@ -6,6 +6,7 @@
   let currentStep = 0
   let surveyResponseId = null
   let surveyResponses = []
+  let activeSurveys = new Set()
 
   // 고객사 ID 추출
   function getCustomerIdFromUrl() {
@@ -183,77 +184,77 @@
     showStep(survey, currentStep)
     console.log('Survey container created and appended to body')
 
-    saveSurveyData(survey._id, { lastShownTime: new Date().toISOString(), completed: false });
+    saveSurveyData(survey._id, { lastShownTime: new Date().toISOString(), completed: false })
   }
 
   // 설문조사 표시 조건 확인
   function canShowSurvey(survey) {
-    const surveyData = getSurveyData(survey._id);
-    if (!surveyData) return true;
+    const surveyData = getSurveyData(survey._id)
+    if (!surveyData) return true
 
-    const { lastShownTime, completed } = surveyData;
-    const now = new Date();
-    const lastShown = new Date(lastShownTime);
-    const secondsSinceLastShown = (now - lastShown) / 1000;
+    const { lastShownTime, completed } = surveyData
+    const now = new Date()
+    const lastShown = new Date(lastShownTime)
+    const secondsSinceLastShown = (now - lastShown) / 1000
 
     switch (survey.displayOption) {
       case 'once':
-        return false;
+        return false
       case 'untilCompleted':
-        if (completed) return false;
-        return secondsSinceLastShown >= survey.cooldown;
+        if (completed) return false
+        return secondsSinceLastShown >= survey.cooldown
       case 'always':
-        return secondsSinceLastShown >= survey.cooldown;
+        return secondsSinceLastShown >= survey.cooldown
       default:
-        return false;
+        return false
     }
   }
 
   // 설문조사 스텝 표시
   function showStep(survey, stepIndex) {
-    const activeSteps = survey.steps.filter((step) => (step.type === 'welcome' || step.type === 'thankyou') ? step.isActived : true);
-    const step = activeSteps[stepIndex];
-    const surveyContainer = document.getElementById('survey-popup');
+    const activeSteps = survey.steps.filter((step) => (step.type === 'welcome' || step.type === 'thankyou') ? step.isActived : true)
+    const step = activeSteps[stepIndex]
+    const surveyContainer = document.getElementById('survey-popup')
 
     if (!step) {
-      document.getElementById('survey-popup').remove();
-      window.activeSurveyId = null;
-      console.log('Survey finished');
-      return;
+      document.getElementById('survey-popup').remove()
+      window.activeSurveyId = null
+      console.log('Survey finished')
+      return
     }
 
-    const isLastStep = stepIndex === activeSteps.length - 1;
-    const isSecondToLastStep = stepIndex === activeSteps.length - 2 && activeSteps[activeSteps.length - 1].type === 'thankyou';
+    const isLastStep = stepIndex === activeSteps.length - 1
+    const isSecondToLastStep = stepIndex === activeSteps.length - 2 && activeSteps[activeSteps.length - 1].type === 'thankyou'
 
-    const buttonText = getButtonText(step, isLastStep, isSecondToLastStep);
+    const buttonText = getButtonText(step, isLastStep, isSecondToLastStep)
 
-    surveyContainer.innerHTML = generateStepHTML(step, buttonText);
+    surveyContainer.innerHTML = generateStepHTML(step, buttonText)
 
     document.getElementById('closeSurvey').onclick = () => {
-      closeSurvey(survey._id, false);
-    };
+      closeSurvey(survey._id, false)
+    }
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
-      event.preventDefault();
-      const stepResponse = getResponse(step);
-      saveResponse(stepIndex, stepResponse, step.type);
+      event.preventDefault()
+      const stepResponse = getResponse(step)
+      saveResponse(stepIndex, stepResponse, step.type)
 
       if (surveyResponseId) {
-        await updateResponse(surveyResponseId, surveyResponses);
+        await updateResponse(surveyResponseId, surveyResponses)
       } else {
         surveyResponseId = await createResponse(survey.customerId, survey._id, {
           stepIndex,
           response: stepResponse,
           type: step.type,
-        });
+        })
       }
 
       if (step.type === 'info') {
-        window.open(step.buttonUrl, '_blank');
+        window.open(step.buttonUrl, '_blank')
       }
 
-      nextStep(survey, stepIndex);
-    };
+      nextStep(survey, stepIndex)
+    }
   }
 
   function generateStepHTML(step, buttonText) {
@@ -271,39 +272,40 @@
           ${buttonText ? `<button type="submit" id="submitSurvey">${buttonText}</button>` : ''}
         </form>
       </div>
-    `;
+    `
   }
 
   function getButtonText(step, isLastStep, isSecondToLastStep) {
     switch (step.type) {
       case 'welcome':
-        return '참여하기';
+        return '참여하기'
       case 'info':
-        return step.buttonText;
+        return step.buttonText
       case 'thankyou':
-        return '';
+        return ''
       default:
-        return isLastStep || isSecondToLastStep ? '제출하기' : '다음';
+        return isLastStep || isSecondToLastStep ? '제출하기' : '다음'
     }
   }
 
   function closeSurvey(surveyId, completed) {
-    const surveyPopup = document.getElementById('survey-popup');
+    const surveyPopup = document.getElementById('survey-popup')
     if (surveyPopup) {
-      surveyPopup.remove();
+      surveyPopup.remove()
     }
-    window.activeSurveyId = null;
-    console.log('Survey closed');
-    saveSurveyData(surveyId, { lastShownTime: new Date().toISOString(), completed });
+    window.activeSurveyId = null
+    console.log('Survey closed')
+    saveSurveyData(surveyId, { lastShownTime: new Date().toISOString(), completed })
+    window.dispatchEvent(new Event('surveyCompleted')) // 설문조사 완료 이벤트 발생
   }
 
   function getSurveyData(surveyId) {
-    const data = localStorage.getItem(`survey-${surveyId}`);
-    return data ? JSON.parse(data) : null;
+    const data = localStorage.getItem(`survey-${surveyId}`)
+    return data ? JSON.parse(data) : null
   }
 
   function saveSurveyData(surveyId, data) {
-    localStorage.setItem(`survey-${surveyId}`, JSON.stringify(data));
+    localStorage.setItem(`survey-${surveyId}`, JSON.stringify(data))
   }
 
   // 다음 스텝으로 이동
@@ -411,13 +413,12 @@
       }
     }
 
-    const cleanupFunctions = []
+    const cleanupFunctions = new Map()
 
     try {
       sortedTriggers.forEach(([key, surveyList]) => {
         const trigger = JSON.parse(key)
 
-        // 빠르게 연속된 이벤트 발생 시 마지막 이벤트만 처리
         const showSurvey = debounce(() => {
           for (let survey of surveyList) {
             if (window.activeSurveyId === null && canShowSurvey(survey)) {
@@ -431,7 +432,7 @@
           const button = document.querySelector(trigger.selector)
           if (button) {
             button.addEventListener('click', showSurvey)
-            cleanupFunctions.push(() => button.removeEventListener('click', showSurvey))
+            cleanupFunctions.set(trigger.selector, () => button.removeEventListener('click', showSurvey))
           }
         }
 
@@ -439,7 +440,7 @@
           document.querySelectorAll('button, a, div').forEach((element) => {
             if (element.innerText.includes(trigger.text)) {
               element.addEventListener('click', showSurvey)
-              cleanupFunctions.push(() => element.removeEventListener('click', showSurvey))
+              cleanupFunctions.set(element, () => element.removeEventListener('click', showSurvey))
             }
           })
         }
@@ -451,7 +452,7 @@
             }
           }
           document.addEventListener('mouseleave', handleExitIntent)
-          cleanupFunctions.push(() => document.removeEventListener('mouseleave', handleExitIntent))
+          cleanupFunctions.set('mouseleave', () => document.removeEventListener('mouseleave', handleExitIntent))
         }
 
         if (trigger.type === 'newSession') {
@@ -476,10 +477,7 @@
           const debouncedHandleScroll = debounce(handleScroll, 200)
           window.addEventListener('scroll', debouncedHandleScroll)
 
-          const cleanup = () => {
-            window.removeEventListener('scroll', debouncedHandleScroll)
-          }
-          cleanupFunctions.push(cleanup)
+          cleanupFunctions.set('scroll', () => window.removeEventListener('scroll', debouncedHandleScroll))
         }
       })
     } catch (error) {
@@ -487,8 +485,9 @@
     }
 
     // 정리 함수 반환
-    return () => {
-      cleanupFunctions.forEach(cleanup => cleanup())
+    return (surveyId) => {
+      cleanupFunctions.forEach((cleanup) => cleanup())
+      cleanupFunctions.clear()
     }
   }
 
@@ -504,11 +503,15 @@
       if (surveyData) {
         const cleanupTriggers = setupTriggers(surveyData.data)
 
-        // SPA 라우트 변경 시 클린업 함수 호출 (예: React Router 사용 시)
-        // const history = createBrowserHistory()
-        // history.listen(() => {
-        //   cleanupTriggers()
-        // })
+        // 페이지 언로드 시 클린업 수행
+        window.addEventListener('beforeunload', () => cleanupTriggers(window.activeSurveyId))
+
+        // 설문조사 완료 시 클린업 수행
+        function handleSurveyCompletion() {
+          cleanupTriggers(window.activeSurveyId)
+          window.removeEventListener('surveyCompleted', handleSurveyCompletion)
+        }
+        window.addEventListener('surveyCompleted', handleSurveyCompletion)
 
         console.log('Survey script initialized')
       }
@@ -519,3 +522,4 @@
 
   init()
 })()
+
