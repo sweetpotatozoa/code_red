@@ -34,7 +34,7 @@
     localStorage.setItem(`survey-${surveyId}`, JSON.stringify(data))
   }
 
-  // 응답 저장
+  // 설문조사 응답을 저장
   function saveResponse(stepIndex, response, type) {
     surveyResponses[stepIndex] = {
       stepIndex,
@@ -500,7 +500,7 @@
     }
   }
 
-  // 설문조사 로드
+  // 설문조사 로드 - 설문조사를 시작하고 첫 번째 스텝을 표시합니다.
   function loadSurvey(survey) {
     if (window.activeSurveyId !== null) {
       console.log('Another survey is already active')
