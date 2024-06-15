@@ -7,6 +7,7 @@
   let surveyResponseId = null
   let surveyResponses = []
   let activeSurveys = new Set()
+  let surveys = []
 
   // 1. Helper Functions - 각종 보조 기능을 수행하는 함수들로, URL에서 고객 ID를 추출하거나 로컬 스토리지에 데이터를 저장하고 불러오는 기능을 합니다.
 
@@ -378,7 +379,7 @@
         if (trigger.type === 'url') {
           const triggerUrl = new URL(trigger.url, window.location.origin);
           if (currentUrl.pathname === triggerUrl.pathname || (currentUrl.pathname === '/' && triggerUrl.pathname === '')) {
-            showSurvey();
+            loadSurvey(survey);  // 수정: showSurvey -> loadSurvey
           }
         }
       });
@@ -386,7 +387,8 @@
   }
 
   // 트리거 설정 및 처리
-  function setupTriggers(surveys) {
+  function setupTriggers(surveysData) {
+    surveys = surveysData;  // 전역 변수에 할당
     const surveyMap = new Map()
     const triggerPriority = {
       newSession: 1,
