@@ -210,8 +210,22 @@
     showStep(survey, currentStep)
     console.log('Survey container created and appended to body')
 
-    // 설문조사가 로드되면 로컬 스토리지에 기록
-    localStorage.setItem(`survey-${survey._id}-shown`, 'true')
+    // 설문조사가 로드되면 로컬 스토리지에 현재 시간 기록
+    localStorage.setItem(`survey-${survey._id}`, new Date().toISOString())
+  }
+
+  function canShowSurvey(survey) {
+    const lastShownTime = localStorage.getItem(`survey-${survey._id}`)
+    if (!lastShownTime) return true
+
+    const now = new Date()
+    const lastShown = new Date(lastShownTime)
+    const secondsSinceLastShown = (now - lastShown) / 1000
+
+    // 설문조사 객체에 cooldown 속성이 없으면 기본값 10초 사용
+    const cooldownSeconds = survey.cooldown || 10
+
+    return secondsSinceLastShown >= cooldownSeconds
   }
 
   // 설문조사 스텝 표시
@@ -427,10 +441,7 @@
       const trigger = JSON.parse(key)
 
       const showSurvey = () => {
-        if (
-          window.activeSurveyId === null &&
-          !localStorage.getItem(`survey-${survey._id}-shown`)
-        ) {
+        if (window.activeSurveyId === null && canShowSurvey(survey)) {
           setTimeout(
             () => {
               if (window.activeSurveyId === null) {
