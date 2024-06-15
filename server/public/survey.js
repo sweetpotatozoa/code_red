@@ -446,7 +446,7 @@
         const handleScroll = () => {
           const scrollPercentage =
             (window.scrollY + window.innerHeight) / document.body.scrollHeight
-          if (scrollPercentage >= 0.2) {
+          if (scrollPercentage >= 0.5) {
             window.removeEventListener('scroll', handleScroll)
             showSurvey()
           }
