@@ -375,7 +375,7 @@
 
   // 트리거 설정 및 처리
   function setupTriggers(surveys) {
-    const triggerQueue = new Map()
+    const surveyMap = new Map()
     const triggerPriority = {
       newSession: 1,
       url: 2,
@@ -388,28 +388,33 @@
     surveys.forEach((survey) => {
       survey.triggers.forEach((trigger) => {
         const key = JSON.stringify({ ...trigger, priority: triggerPriority[trigger.type] })
-        if (!triggerQueue.has(key)) {
-          triggerQueue.set(key, [])
+        if (!surveyMap.has(key) || new Date(survey.updateAt) > new Date(surveyMap.get(key).updateAt)) {
+          surveyMap.set(key, survey)
         }
-        triggerQueue.get(key).push(survey)
       })
     })
 
-    const sortedTriggers = Array.from(triggerQueue.keys()).sort((a, b) => JSON.parse(a).priority - JSON.parse(b).priority)
+    const sortedTriggers = Array.from(surveyMap.entries()).sort((a, b) => {
+      const triggerA = JSON.parse(a[0])
+      const triggerB = JSON.parse(b[0])
+      if (triggerA.priority === triggerB.priority) {
+        return new Date(surveyMap.get(a[0]).updateAt) - new Date(surveyMap.get(b[0]).updateAt)
+      }
+      return triggerA.priority - triggerB.priority
+    })
 
-    sortedTriggers.forEach((key) => {
+    sortedTriggers.forEach(([key, survey]) => {
       const trigger = JSON.parse(key)
-      const priority = trigger.priority
 
       const showSurvey = () => {
-        const surveyList = triggerQueue.get(key)
+        const surveyList = surveyMap.get(key)
         for (let survey of surveyList) {
           if (window.activeSurveyId === null && canShowSurvey(survey)) {
             setTimeout(() => {
               if (window.activeSurveyId === null) {
                 loadSurvey(survey)
               }
-            }, 0)
+            }, /*trigger.type === 'newSession' || trigger.type === 'url' ? 1000 :*/ 0)
             break
           }
         }
