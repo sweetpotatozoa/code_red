@@ -49,8 +49,16 @@
       console.log('Surveys loaded:', data)
 
       const validSurveys = data.data.filter((survey) => {
-        if (!survey.updateAt || !survey.triggers || !survey.steps || !Array.isArray(survey.steps) || !survey.displayOption || (survey.displayOption !== 'once' && !survey.cooldown)) {
+        if (!survey.updateAt || !survey.triggers || !survey.steps || !Array.isArray(survey.steps) || !survey.displayOption) {
           console.error(`Invalid survey structure: ${survey._id}`)
+          return false
+        }
+
+        if (
+          survey.displayOption !== 'once' &&
+          (survey.cooldown === undefined || isNaN(survey.cooldown))
+        ) {
+          console.error(`Missing or invalid cooldown for survey ${survey._id}`)
           return false
         }
 
