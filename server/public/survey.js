@@ -20,60 +20,61 @@
     return null
   }
 
+  // 초기화 함수
+  async function init() {
+    console.log('Initializing survey script')
+    const customerId = getCustomerIdFromUrl()
+    if (!customerId) {
+      throw new Error('Customer ID is not provided in the URL')
+    }
+    try {
+      const surveyData = await fetchSurvey(customerId)
+      if (surveyData) {
+        setupTriggers(surveyData.data)
+        console.log('Survey script initialized')
+      }
+    } catch (error) {
+      console.error('Error initializing survey script:', error)
+    }
+  }
+
   // 설문조사 데이터 가져오기 및 유효성 검사
   async function fetchSurvey(customerId) {
     try {
-      const response = await fetch(
-        `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
-      )
+      const response = await fetch(`${API_URI}/api/appliedSurvey?customerId=${customerId}`)
       if (!response.ok) {
         throw new Error('Network response was not ok')
       }
       const data = await response.json()
       console.log('Surveys loaded:', data)
 
-      // 유효성 검사 및 필터링
       const validSurveys = data.data.filter((survey) => {
-        if (
-          !survey.updateAt ||
-          !survey.triggers ||
-          !survey.steps ||
-          !Array.isArray(survey.steps)
-        ) {
+        if (!survey.updateAt || !survey.triggers || !survey.steps || !Array.isArray(survey.steps)) {
           console.error(`Invalid survey structure: ${survey._id}`)
           return false
         }
 
-        // 각 트리거의 유효성 검사
         for (let trigger of survey.triggers) {
           if (!trigger.type) {
             console.error(`Missing trigger type in survey ${survey._id}`)
             return false
           }
-
-          // 트리거 타입별 필드 검사
           switch (trigger.type) {
             case 'url':
               if (trigger.url === undefined) {
-                console.error(
-                  `Missing url for url trigger in survey ${survey._id}`,
-                )
+                console.error(`Missing url for url trigger in survey ${survey._id}`)
                 return false
               }
               break
             case 'cssSelector':
               if (!trigger.selector) {
-                console.error(
-                  `Missing selector for cssSelector trigger in survey ${survey._id}`,
-                )
+                console.error(`Missing selector for cssSelector trigger in survey ${survey._id}`)
                 return false
               }
               break
             case 'innerText':
               if (!trigger.text) {
-                console.error(
-                  `Missing text for innerText trigger in survey ${survey._id}`,
-                )
+                console.error(`Missing text for innerText trigger in survey ${survey._id}`)
                 return false
               }
               break
@@ -82,47 +83,34 @@
             case 'newSession':
               break
             default:
-              console.error(
-                `Unknown trigger type: ${trigger.type} in survey ${survey._id}`,
-              )
+              console.error(`Unknown trigger type: ${trigger.type} in survey ${survey._id}`)
               return false
           }
         }
 
-        // 각 스텝의 유효성 검사
         for (let step of survey.steps) {
           if (step.title === undefined || step.description === undefined) {
-            console.error(
-              `Missing title or description in survey ${survey._id}`,
-            )
+            console.error(`Missing title or description in survey ${survey._id}`)
             return false
           }
-
-          // 스텝 타입별 필드 검사
           switch (step.type) {
             case 'welcome':
             case 'thankyou':
               if (step.isActived === undefined) {
-                console.error(
-                  `Missing isActived for ${step.type} step in survey ${survey._id}`,
-                )
+                console.error(`Missing isActived for ${step.type} step in survey ${survey._id}`)
                 return false
               }
               break
             case 'singleChoice':
             case 'multiChoice':
               if (!step.options || !Array.isArray(step.options)) {
-                console.error(
-                  `Invalid options for ${step.type} step in survey ${survey._id}`,
-                )
+                console.error(`Invalid options for ${step.type} step in survey ${survey._id}`)
                 return false
               }
               break
             case 'info':
               if (!step.buttonText || !step.buttonUrl) {
-                console.error(
-                  `Missing buttonText or buttonUrl for info step in survey ${survey._id}`,
-                )
+                console.error(`Missing buttonText or buttonUrl for info step in survey ${survey._id}`)
                 return false
               }
               break
@@ -130,9 +118,7 @@
             case 'text':
               break
             default:
-              console.error(
-                `Unknown step type: ${step.type} in survey ${survey._id}`,
-              )
+              console.error(`Unknown step type: ${step.type} in survey ${survey._id}`)
               return false
           }
         }
@@ -161,16 +147,13 @@
 
   // 설문조사 응답 업데이트
   async function updateResponse(responseId, responses) {
-    const result = await fetch(
-      `${API_URI}/api/appliedSurvey/response/${responseId}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ responses }),
+    const result = await fetch(`${API_URI}/api/appliedSurvey/response/${responseId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    )
+      body: JSON.stringify({ responses }),
+    })
     if (!result.ok) {
       throw new Error('Network response was not ok')
     }
@@ -210,10 +193,10 @@
     showStep(survey, currentStep)
     console.log('Survey container created and appended to body')
 
-    // 설문조사가 로드되면 로컬 스토리지에 현재 시간 기록
     localStorage.setItem(`survey-${survey._id}`, new Date().toISOString())
   }
 
+  // 설문조사 표시 조건 확인
   function canShowSurvey(survey) {
     const lastShownTime = localStorage.getItem(`survey-${survey._id}`)
     if (!lastShownTime) return true
@@ -222,7 +205,6 @@
     const lastShown = new Date(lastShownTime)
     const secondsSinceLastShown = (now - lastShown) / 1000
 
-    // 설문조사 객체에 cooldown 속성이 없으면 기본값 10초 사용
     const cooldownSeconds = survey.cooldown || 10
 
     return secondsSinceLastShown >= cooldownSeconds
@@ -240,7 +222,7 @@
 
     if (!step) {
       document.getElementById('survey-popup').remove()
-      isSurveyOpen = false
+      window.activeSurveyId = null
       console.log('Survey finished')
       return
     }
@@ -334,7 +316,7 @@
     )
     if (stepIndex === activeSteps.length - 1) {
       document.getElementById('survey-popup').remove()
-      isSurveyOpen = false
+      window.activeSurveyId = null
       console.log('Survey submitted successfully')
     } else {
       currentStep++
@@ -505,23 +487,6 @@
       }
     })
     console.log('Triggers set up')
-  }
-
-  async function init() {
-    console.log('Initializing survey script')
-    const customerId = getCustomerIdFromUrl()
-    if (!customerId) {
-      throw new Error('Customer ID is not provided in the URL')
-    }
-    try {
-      const surveyData = await fetchSurvey(customerId)
-      if (surveyData) {
-        setupTriggers(surveyData.data)
-        console.log('Survey script initialized')
-      }
-    } catch (error) {
-      console.error('Error initializing survey script:', error)
-    }
   }
 
   init()
