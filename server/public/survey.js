@@ -352,6 +352,19 @@
 
   // 4. Event Listener and Trigger Setup - 이벤트 리스너를 설정하고, 각 트리거가 발생할 때 설문조사를 표시하도록 처리하는 함수들입니다. 이벤트 리스너를 제거하는 클린업 함수도 포함되어 있습니다.
 
+  // Debounce 함수
+  function debounce(func, wait) {
+    let timeout
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout)
+        func(...args)
+      }
+      clearTimeout(timeout)
+      timeout = setTimeout(later, wait)
+    }
+  }
+
   // Debounce와 조건 체크를 포함한 showSurvey 함수
   const showSurvey = debounce((survey) => {
     if (window.activeSurveyId === null && canShowSurvey(survey)) {
@@ -427,18 +440,6 @@
       }
       return triggerA.priority - triggerB.priority
     })
-
-    function debounce(func, wait) {
-      let timeout
-      return function executedFunction(...args) {
-        const later = () => {
-          clearTimeout(timeout)
-          func(...args)
-        }
-        clearTimeout(timeout)
-        timeout = setTimeout(later, wait)
-      }
-    }
 
     const cleanupFunctions = new Map()
 
