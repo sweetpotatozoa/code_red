@@ -54,7 +54,7 @@
           // 트리거 타입별 필드 검사
           switch (trigger.type) {
             case 'url':
-              if (!trigger.url) {
+              if (trigger.url === undefined) {
                 console.error(
                   `Missing url for url trigger in survey ${survey._id}`,
                 )
@@ -403,56 +403,43 @@
         localStorage.setItem(`survey-${survey._id}`, 'shown')
       }
 
-      // 트리거 우선순위 설정
-      const triggerPriority = [
-        'url',
-        'newSession',
-        'cssSelector',
-        'innerText',
-        'exitIntent',
-      ]
+      if (trigger.type === 'cssSelector') {
+        const button = document.querySelector(trigger.selector)
+        if (button) {
+          button.addEventListener('click', showSurvey)
+        }
+      }
 
-      triggerPriority.forEach((priority) => {
-        if (trigger.type === priority) {
-          if (priority === 'cssSelector') {
-            const button = document.querySelector(trigger.selector)
-            if (button) {
-              button.addEventListener('click', showSurvey)
-            }
+      if (trigger.type === 'innerText') {
+        document.querySelectorAll('button, a, div').forEach((element) => {
+          if (element.innerText.includes(trigger.text)) {
+            element.addEventListener('click', showSurvey)
           }
+        })
+      }
 
-          if (priority === 'innerText') {
-            document.querySelectorAll('button, a, div').forEach((element) => {
-              if (element.innerText.includes(trigger.text)) {
-                element.addEventListener('click', showSurvey)
-              }
-            })
-          }
-
-          if (priority === 'exitIntent') {
-            document.addEventListener('mouseleave', (event) => {
-              if (event.clientY <= 0) {
-                showSurvey()
-              }
-            })
-          }
-
-          if (priority === 'newSession') {
+      if (trigger.type === 'exitIntent') {
+        document.addEventListener('mouseleave', (event) => {
+          if (event.clientY <= 0) {
             showSurvey()
           }
+        })
+      }
 
-          if (priority === 'url') {
-            const currentUrl = new URL(window.location.href)
-            const triggerUrl = new URL(trigger.url, window.location.origin)
-            if (
-              currentUrl.pathname === triggerUrl.pathname ||
-              (currentUrl.pathname === '/' && triggerUrl.pathname === '')
-            ) {
-              showSurvey()
-            }
-          }
+      if (trigger.type === 'newSession') {
+        showSurvey()
+      }
+
+      if (trigger.type === 'url') {
+        const currentUrl = new URL(window.location.href)
+        const triggerUrl = new URL(trigger.url, window.location.origin)
+        if (
+          currentUrl.pathname === triggerUrl.pathname ||
+          (currentUrl.pathname === '/' && triggerUrl.pathname === '')
+        ) {
+          showSurvey()
         }
-      })
+      }
     })
     console.log('Triggers set up')
   }
