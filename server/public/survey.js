@@ -49,7 +49,7 @@
       console.log('Surveys loaded:', data)
 
       const validSurveys = data.data.filter((survey) => {
-        if (!survey.updateAt || !survey.triggers || !survey.steps || !Array.isArray(survey.steps)) {
+        if (!survey.updateAt || !survey.triggers || !survey.steps || !Array.isArray(survey.steps) || !survey.displayOption || (survey.displayOption !== 'once' && !survey.cooldown)) {
           console.error(`Invalid survey structure: ${survey._id}`)
           return false
         }
@@ -193,30 +193,35 @@
     showStep(survey, currentStep)
     console.log('Survey container created and appended to body')
 
-    localStorage.setItem(`survey-${survey._id}`, new Date().toISOString())
+    localStorage.setItem(`survey-${survey._id}`, JSON.stringify({ lastShownTime: new Date().toISOString(), completed: false }))
   }
 
   // 설문조사 표시 조건 확인
   function canShowSurvey(survey) {
-    const lastShownTime = localStorage.getItem(`survey-${survey._id}`)
-    if (!lastShownTime) return true
+    const surveyData = localStorage.getItem(`survey-${survey._id}`)
+    if (!surveyData) return true
 
+    const { lastShownTime, completed } = JSON.parse(surveyData)
     const now = new Date()
     const lastShown = new Date(lastShownTime)
     const secondsSinceLastShown = (now - lastShown) / 1000
 
-    const cooldownSeconds = survey.cooldown || 10
-
-    return secondsSinceLastShown >= cooldownSeconds
+    switch (survey.displayOption) {
+      case 'once':
+        return false
+      case 'untilCompleted':
+        if (completed) return false
+        return secondsSinceLastShown >= survey.cooldown
+      case 'always':
+        return secondsSinceLastShown >= survey.cooldown
+      default:
+        return false
+    }
   }
 
   // 설문조사 스텝 표시
   function showStep(survey, stepIndex) {
-    const activeSteps = survey.steps.filter((step) =>
-      step.type === 'welcome' || step.type === 'thankyou'
-        ? step.isActived
-        : true,
-    )
+    const activeSteps = survey.steps.filter((step) => (step.type === 'welcome' || step.type === 'thankyou') ? step.isActived : true)
     const step = activeSteps[stepIndex]
     const surveyContainer = document.getElementById('survey-popup')
 
@@ -228,9 +233,7 @@
     }
 
     const isLastStep = stepIndex === activeSteps.length - 1
-    const isSecondToLastStep =
-      stepIndex === activeSteps.length - 2 &&
-      activeSteps[activeSteps.length - 1].type === 'thankyou'
+    const isSecondToLastStep = stepIndex === activeSteps.length - 2 && activeSteps[activeSteps.length - 1].type === 'thankyou'
 
     let buttonText
     switch (step.type) {
@@ -254,34 +257,17 @@
         </div>
         <form id="surveyForm">
           ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
-          ${
-            step.description
-              ? `<p class="survey-description">${step.description}</p>`
-              : ''
-          }
+          ${step.description ? `<p class="survey-description">${step.description}</p>` : ''}
           <div>
             ${generateStepContent(step)}
           </div>
-          ${
-            buttonText
-              ? `<button type="submit" id="submitSurvey">${buttonText}</button>`
-              : ''
-          }
+          ${buttonText ? `<button type="submit" id="submitSurvey">${buttonText}</button>` : ''}
         </form>
       </div>
     `
 
     document.getElementById('closeSurvey').onclick = () => {
-      closeSurvey()
-    }
-
-    function closeSurvey() {
-      const surveyPopup = document.getElementById('survey-popup')
-      if (surveyPopup) {
-        surveyPopup.remove()
-      }
-      window.activeSurveyId = null
-      console.log('Survey closed')
+      closeSurvey(survey._id, false)
     }
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
@@ -307,16 +293,22 @@
     }
   }
 
+  // 설문조사 닫기
+  function closeSurvey(surveyId, completed) {
+    const surveyPopup = document.getElementById('survey-popup')
+    if (surveyPopup) {
+      surveyPopup.remove()
+    }
+    window.activeSurveyId = null
+    console.log('Survey closed')
+    localStorage.setItem(`survey-${surveyId}`, JSON.stringify({ lastShownTime: new Date().toISOString(), completed }))
+  }
+
   // 다음 스텝으로 이동
   function nextStep(survey, stepIndex) {
-    const activeSteps = survey.steps.filter((step) =>
-      step.type === 'welcome' || step.type === 'thankyou'
-        ? step.isActived
-        : true,
-    )
+    const activeSteps = survey.steps.filter((step) => (step.type === 'welcome' || step.type === 'thankyou') ? step.isActived : true)
     if (stepIndex === activeSteps.length - 1) {
-      document.getElementById('survey-popup').remove()
-      window.activeSurveyId = null
+      closeSurvey(survey._id, true)
       console.log('Survey submitted successfully')
     } else {
       currentStep++
@@ -330,26 +322,11 @@
       case 'welcome':
         return ''
       case 'singleChoice':
-        return step.options
-          .map(
-            (option, index) =>
-              `<input type="radio" name="choice" value="${option}" id="choice-${index}"><label for="choice-${index}">${option}</label>`,
-          )
-          .join('')
+        return step.options.map((option, index) => `<input type="radio" name="choice" value="${option}" id="choice-${index}"><label for="choice-${index}">${option}</label>`).join('')
       case 'multiChoice':
-        return step.options
-          .map(
-            (option, index) =>
-              `<input type="checkbox" name="multiChoice" value="${option}" id="multiChoice-${index}"><label for="multiChoice-${index}">${option}</label>`,
-          )
-          .join('')
+        return step.options.map((option, index) => `<input type="checkbox" name="multiChoice" value="${option}" id="multiChoice-${index}"><label for="multiChoice-${index}">${option}</label>`).join('')
       case 'rating':
-        return `<span class="star-rating">${[1, 2, 3, 4, 5]
-          .map(
-            (i) =>
-              `<input type="radio" name="rating" value="${i}" id="rating-${i}"><label for="rating-${i}">★</label>`,
-          )
-          .join('')}</span>`
+        return `<span class="star-rating">${[1, 2, 3, 4, 5].map((i) => `<input type="radio" name="rating" value="${i}" id="rating-${i}"><label for="rating-${i}">★</label>`).join('')}</span>`
       case 'text':
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
       case 'info':
@@ -369,9 +346,7 @@
       case 'singleChoice':
         return document.querySelector('input[name="choice"]:checked').value
       case 'multiChoice':
-        return Array.from(
-          document.querySelectorAll('input[name="multiChoice"]:checked'),
-        ).map((checkbox) => checkbox.value)
+        return Array.from(document.querySelectorAll('input[name="multiChoice"]:checked')).map((checkbox) => checkbox.value)
       case 'rating':
         return document.querySelector('input[name="rating"]:checked').value
       case 'text':
@@ -385,7 +360,9 @@
 
   // 페이지 새로고침 또는 닫기 시 설문조사 상태 초기화
   window.addEventListener('beforeunload', () => {
-    window.activeSurveyId = null
+    if (window.activeSurveyId !== null) {
+      closeSurvey(window.activeSurveyId, false)
+    }
   })
 
   // 트리거 설정 및 처리
@@ -402,36 +379,25 @@
 
     surveys.forEach((survey) => {
       survey.triggers.forEach((trigger) => {
-        const key = JSON.stringify({
-          ...trigger,
-          priority: triggerPriority[trigger.type],
-        })
-        if (
-          !surveyMap.has(key) ||
-          new Date(survey.updateAt) > new Date(surveyMap.get(key).updateAt)
-        ) {
+        const key = JSON.stringify({ ...trigger, priority: triggerPriority[trigger.type] })
+        if (!surveyMap.has(key) || new Date(survey.updateAt) > new Date(surveyMap.get(key).updateAt)) {
           surveyMap.set(key, survey)
         }
       })
     })
 
-    const sortedTriggers = Array.from(surveyMap.entries()).sort(
-      (a, b) => JSON.parse(a[0]).priority - JSON.parse(b[0]).priority,
-    )
+    const sortedTriggers = Array.from(surveyMap.entries()).sort((a, b) => JSON.parse(a[0]).priority - JSON.parse(b[0]).priority)
 
     sortedTriggers.forEach(([key, survey]) => {
       const trigger = JSON.parse(key)
 
       const showSurvey = () => {
         if (window.activeSurveyId === null && canShowSurvey(survey)) {
-          setTimeout(
-            () => {
-              if (window.activeSurveyId === null) {
-                loadSurvey(survey)
-              }
-            },
-            trigger.type === 'newSession' || trigger.type === 'url' ? 1000 : 0,
-          )
+          setTimeout(() => {
+            if (window.activeSurveyId === null) {
+              loadSurvey(survey)
+            }
+          }, trigger.type === 'newSession' || trigger.type === 'url' ? 1000 : 0)
         }
       }
 
@@ -466,18 +432,14 @@
       if (trigger.type === 'url') {
         const currentUrl = new URL(window.location.href)
         const triggerUrl = new URL(trigger.url, window.location.origin)
-        if (
-          currentUrl.pathname === triggerUrl.pathname ||
-          (currentUrl.pathname === '/' && triggerUrl.pathname === '')
-        ) {
+        if (currentUrl.pathname === triggerUrl.pathname || (currentUrl.pathname === '/' && triggerUrl.pathname === '')) {
           showSurvey()
         }
       }
 
       if (trigger.type === 'scroll') {
         const handleScroll = () => {
-          const scrollPercentage =
-            (window.scrollY + window.innerHeight) / document.body.scrollHeight
+          const scrollPercentage = (window.scrollY + window.innerHeight) / document.body.scrollHeight
           if (scrollPercentage >= 0.01) {
             window.removeEventListener('scroll', handleScroll)
             showSurvey()
