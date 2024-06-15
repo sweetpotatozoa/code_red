@@ -2,7 +2,7 @@
   console.log('Survey script loaded')
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
-  let isSurveyOpen = false
+  window.activeSurveyId = null
   let currentStep = 0
   let surveyResponseId = null
   let surveyResponses = []
@@ -189,10 +189,11 @@
 
   // 설문조사 로드
   function loadSurvey(survey) {
-    if (isSurveyOpen) {
+    if (window.activeSurveyId !== null) {
+      console.log('Another survey is already active')
       return
     }
-    isSurveyOpen = true
+    window.activeSurveyId = survey._id
     currentStep = 0
     surveyResponses = []
 
@@ -273,7 +274,7 @@
 
     document.getElementById('closeSurvey').onclick = () => {
       document.getElementById('survey-popup').remove()
-      isSurveyOpen = false
+      window.activeSurveyId = null
       console.log('Survey closed')
     }
 
@@ -379,10 +380,21 @@
   // 트리거 설정 및 처리
   function setupTriggers(surveys) {
     const surveyMap = new Map()
+    const triggerPriority = {
+      newSession: 1,
+      url: 2,
+      exitIntent: 3,
+      scroll: 4,
+      cssSelector: 5,
+      innerText: 6,
+    }
 
     surveys.forEach((survey) => {
       survey.triggers.forEach((trigger) => {
-        const key = JSON.stringify(trigger)
+        const key = JSON.stringify({
+          ...trigger,
+          priority: triggerPriority[trigger.type],
+        })
         if (
           !surveyMap.has(key) ||
           new Date(survey.updateAt) > new Date(surveyMap.get(key).updateAt)
@@ -392,12 +404,22 @@
       })
     })
 
-    surveyMap.forEach((survey, key) => {
+    const sortedTriggers = Array.from(surveyMap.entries()).sort(
+      (a, b) => JSON.parse(a[0]).priority - JSON.parse(b[0]).priority,
+    )
+
+    sortedTriggers.forEach(([key, survey]) => {
       const trigger = JSON.parse(key)
 
       const showSurvey = () => {
-        if (!localStorage.getItem(`survey-${survey._id}`)) {
-          loadSurvey(survey)
+        if (
+          window.activeSurveyId === null &&
+          !localStorage.getItem(`survey-${survey._id}`)
+        ) {
+          setTimeout(
+            () => loadSurvey(survey),
+            trigger.type === 'newSession' || trigger.type === 'url' ? 1000 : 0,
+          )
           localStorage.setItem(`survey-${survey._id}`, 'shown')
         }
       }
@@ -444,7 +466,7 @@
         const handleScroll = () => {
           const scrollPercentage =
             (window.scrollY + window.innerHeight) / document.body.scrollHeight
-          if (scrollPercentage >= 0.2) {
+          if (scrollPercentage >= 0.01) {
             window.removeEventListener('scroll', handleScroll)
             showSurvey()
           }
