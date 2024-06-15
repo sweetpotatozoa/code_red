@@ -388,7 +388,7 @@
     surveys.forEach((survey) => {
       survey.triggers.forEach((trigger) => {
         const key = JSON.stringify({ ...trigger, priority: triggerPriority[trigger.type] })
-        if (!surveyMap.has(key) || new Date(survey.updateAt) > new Date(surveyMap.get(key).updateAt)) {
+        if (!surveyMap.has(key) || new Date(survey.updateAt) > new Date(surveyMap.get(key)[0].updateAt)) {
           surveyMap.set(key, [survey])
         } else {
           surveyMap.get(key).push(survey)
@@ -400,7 +400,7 @@
       const triggerA = JSON.parse(a[0])
       const triggerB = JSON.parse(b[0])
       if (triggerA.priority === triggerB.priority) {
-        return new Date(surveyMap.get(a[0])[0].updateAt) - new Date(surveyMap.get(b[0])[0].updateAt)
+        return new Date(surveyMap.get(b[0])[0].updateAt) - new Date(surveyMap.get(a[0])[0].updateAt)
       }
       return triggerA.priority - triggerB.priority
     })
