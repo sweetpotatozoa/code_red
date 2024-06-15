@@ -77,6 +77,7 @@
                 return false
               }
               break
+            case 'scroll':
             case 'exitIntent':
             case 'newSession':
               break
@@ -439,6 +440,18 @@
         ) {
           showSurvey()
         }
+      }
+
+      if (trigger.type === 'scroll') {
+        const handleScroll = () => {
+          const scrollPercentage =
+            (window.scrollY + window.innerHeight) / document.body.scrollHeight
+          if (scrollPercentage >= 0.2) {
+            window.removeEventListener('scroll', handleScroll)
+            showSurvey()
+          }
+        }
+        window.addEventListener('scroll', handleScroll)
       }
     })
     console.log('Triggers set up')
