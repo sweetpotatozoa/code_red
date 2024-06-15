@@ -414,7 +414,7 @@
               if (window.activeSurveyId === null) {
                 loadSurvey(survey)
               }
-            }, /*trigger.type === 'newSession' || trigger.type === 'url' ? 1000 :*/ 0)
+            },  0)
             break
           }
         }
