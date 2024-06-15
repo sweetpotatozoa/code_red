@@ -417,10 +417,6 @@
       sortedTriggers.forEach(([key, surveyList]) => {
         const trigger = JSON.parse(key)
 
-        if (!isValidTrigger(trigger)) {
-          throw new Error(`Invalid trigger: ${JSON.stringify(trigger)}`)
-        }
-
         // 빠르게 연속된 이벤트 발생 시 마지막 이벤트만 처리
         const showSurvey = debounce(() => {
           for (let survey of surveyList) {
