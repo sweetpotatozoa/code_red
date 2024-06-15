@@ -379,7 +379,7 @@
         if (trigger.type === 'url') {
           const triggerUrl = new URL(trigger.url, window.location.origin);
           if (currentUrl.pathname === triggerUrl.pathname || (currentUrl.pathname === '/' && triggerUrl.pathname === '')) {
-            loadSurvey(survey);  // 수정: showSurvey -> loadSurvey
+            showSurvey(survey);
           }
         }
       });
