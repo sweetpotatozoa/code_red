@@ -183,19 +183,19 @@
     showStep(survey, currentStep)
     console.log('Survey container created and appended to body')
 
-    localStorage.setItem(`survey-${survey._id}`, JSON.stringify({ lastShownTime: new Date().toISOString(), completed: false }))
+    saveSurveyData(survey._id, { lastShownTime: new Date().toISOString(), completed: false });
   }
 
   // 설문조사 표시 조건 확인
   function canShowSurvey(survey) {
     const surveyData = getSurveyData(survey._id);
     if (!surveyData) return true;
-  
+
     const { lastShownTime, completed } = surveyData;
     const now = new Date();
     const lastShown = new Date(lastShownTime);
     const secondsSinceLastShown = (now - lastShown) / 1000;
-  
+
     switch (survey.displayOption) {
       case 'once':
         return false;
@@ -214,30 +214,30 @@
     const activeSteps = survey.steps.filter((step) => (step.type === 'welcome' || step.type === 'thankyou') ? step.isActived : true);
     const step = activeSteps[stepIndex];
     const surveyContainer = document.getElementById('survey-popup');
-  
+
     if (!step) {
       document.getElementById('survey-popup').remove();
       window.activeSurveyId = null;
       console.log('Survey finished');
       return;
     }
-  
+
     const isLastStep = stepIndex === activeSteps.length - 1;
     const isSecondToLastStep = stepIndex === activeSteps.length - 2 && activeSteps[activeSteps.length - 1].type === 'thankyou';
-  
+
     const buttonText = getButtonText(step, isLastStep, isSecondToLastStep);
-  
+
     surveyContainer.innerHTML = generateStepHTML(step, buttonText);
-  
+
     document.getElementById('closeSurvey').onclick = () => {
       closeSurvey(survey._id, false);
     };
-  
+
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault();
       const stepResponse = getResponse(step);
       saveResponse(stepIndex, stepResponse, step.type);
-  
+
       if (surveyResponseId) {
         await updateResponse(surveyResponseId, surveyResponses);
       } else {
@@ -247,15 +247,15 @@
           type: step.type,
         });
       }
-  
+
       if (step.type === 'info') {
         window.open(step.buttonUrl, '_blank');
       }
-  
+
       nextStep(survey, stepIndex);
     };
   }
-  
+
   function generateStepHTML(step, buttonText) {
     return `
       <div class="survey-step">
@@ -273,7 +273,7 @@
       </div>
     `;
   }
-  
+
   function getButtonText(step, isLastStep, isSecondToLastStep) {
     switch (step.type) {
       case 'welcome':
@@ -296,12 +296,12 @@
     console.log('Survey closed');
     saveSurveyData(surveyId, { lastShownTime: new Date().toISOString(), completed });
   }
-  
+
   function getSurveyData(surveyId) {
     const data = localStorage.getItem(`survey-${surveyId}`);
     return data ? JSON.parse(data) : null;
   }
-  
+
   function saveSurveyData(surveyId, data) {
     localStorage.setItem(`survey-${surveyId}`, JSON.stringify(data));
   }
@@ -367,159 +367,159 @@
     }
   })
 
- // 트리거 설정 및 처리
-function setupTriggers(surveys) {
-  const surveyMap = new Map()
-  const triggerPriority = {
-    newSession: 1,
-    url: 2,
-    exitIntent: 3,
-    scroll: 4,
-    cssSelector: 5,
-    innerText: 6,
-  }
-
-  surveys.forEach((survey) => {
-    survey.triggers.forEach((trigger) => {
-      const key = JSON.stringify({ ...trigger, priority: triggerPriority[trigger.type] })
-      if (!surveyMap.has(key) || new Date(survey.updateAt) > new Date(surveyMap.get(key)[0].updateAt)) {
-        surveyMap.set(key, [survey])
-      } else {
-        surveyMap.get(key).push(survey)
-      }
-    })
-  })
-
-  const sortedTriggers = Array.from(surveyMap.entries()).sort((a, b) => {
-    const triggerA = JSON.parse(a[0])
-    const triggerB = JSON.parse(b[0])
-    if (triggerA.priority === triggerB.priority) {
-      return new Date(surveyMap.get(b[0])[0].updateAt) - new Date(surveyMap.get(a[0])[0].updateAt)
+  // 트리거 설정 및 처리
+  function setupTriggers(surveys) {
+    const surveyMap = new Map()
+    const triggerPriority = {
+      newSession: 1,
+      url: 2,
+      exitIntent: 3,
+      scroll: 4,
+      cssSelector: 5,
+      innerText: 6,
     }
-    return triggerA.priority - triggerB.priority
-  })
 
-  function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
+    surveys.forEach((survey) => {
+      survey.triggers.forEach((trigger) => {
+        const key = JSON.stringify({ ...trigger, priority: triggerPriority[trigger.type] })
+        if (!surveyMap.has(key) || new Date(survey.updateAt) > new Date(surveyMap.get(key)[0].updateAt)) {
+          surveyMap.set(key, [survey])
+        } else {
+          surveyMap.get(key).push(survey)
+        }
+      })
+    })
 
-  const cleanupFunctions = []
-
-  try {
-    sortedTriggers.forEach(([key, surveyList]) => {
-      const trigger = JSON.parse(key)
-
-      if (!isValidTrigger(trigger)) {
-        throw new Error(`Invalid trigger: ${JSON.stringify(trigger)}`)
+    const sortedTriggers = Array.from(surveyMap.entries()).sort((a, b) => {
+      const triggerA = JSON.parse(a[0])
+      const triggerB = JSON.parse(b[0])
+      if (triggerA.priority === triggerB.priority) {
+        return new Date(surveyMap.get(b[0])[0].updateAt) - new Date(surveyMap.get(a[0])[0].updateAt)
       }
+      return triggerA.priority - triggerB.priority
+    })
 
-      // 빠르게 연속된 이벤트 발생 시 마지막 이벤트만 처리
-      const showSurvey = debounce(() => {
-        for (let survey of surveyList) {
-          if (window.activeSurveyId === null && canShowSurvey(survey)) {
-            loadSurvey(survey)
-            break
+    function debounce(func, wait) {
+      let timeout
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout)
+          func(...args)
+        }
+        clearTimeout(timeout)
+        timeout = setTimeout(later, wait)
+      }
+    }
+
+    const cleanupFunctions = []
+
+    try {
+      sortedTriggers.forEach(([key, surveyList]) => {
+        const trigger = JSON.parse(key)
+
+        if (!isValidTrigger(trigger)) {
+          throw new Error(`Invalid trigger: ${JSON.stringify(trigger)}`)
+        }
+
+        // 빠르게 연속된 이벤트 발생 시 마지막 이벤트만 처리
+        const showSurvey = debounce(() => {
+          for (let survey of surveyList) {
+            if (window.activeSurveyId === null && canShowSurvey(survey)) {
+              loadSurvey(survey)
+              break
+            }
+          }
+        }, 200)
+
+        if (trigger.type === 'cssSelector') {
+          const button = document.querySelector(trigger.selector)
+          if (button) {
+            button.addEventListener('click', showSurvey)
+            cleanupFunctions.push(() => button.removeEventListener('click', showSurvey))
           }
         }
-      }, 200)
 
-      if (trigger.type === 'cssSelector') {
-        const button = document.querySelector(trigger.selector)
-        if (button) {
-          button.addEventListener('click', showSurvey)
-          cleanupFunctions.push(() => button.removeEventListener('click', showSurvey))
+        if (trigger.type === 'innerText') {
+          document.querySelectorAll('button, a, div').forEach((element) => {
+            if (element.innerText.includes(trigger.text)) {
+              element.addEventListener('click', showSurvey)
+              cleanupFunctions.push(() => element.removeEventListener('click', showSurvey))
+            }
+          })
         }
-      }
 
-      if (trigger.type === 'innerText') {
-        document.querySelectorAll('button, a, div').forEach((element) => {
-          if (element.innerText.includes(trigger.text)) {
-            element.addEventListener('click', showSurvey)
-            cleanupFunctions.push(() => element.removeEventListener('click', showSurvey))
+        if (trigger.type === 'exitIntent') {
+          const handleExitIntent = (event) => {
+            if (event.clientY <= 0) {
+              showSurvey()
+            }
           }
-        })
-      }
-
-      if (trigger.type === 'exitIntent') {
-        const handleExitIntent = (event) => {
-          if (event.clientY <= 0) {
-            showSurvey()
-          }
+          document.addEventListener('mouseleave', handleExitIntent)
+          cleanupFunctions.push(() => document.removeEventListener('mouseleave', handleExitIntent))
         }
-        document.addEventListener('mouseleave', handleExitIntent)
-        cleanupFunctions.push(() => document.removeEventListener('mouseleave', handleExitIntent))
-      }
 
-      if (trigger.type === 'newSession') {
-        showSurvey()
-      }
-
-      if (trigger.type === 'url') {
-        const currentUrl = new URL(window.location.href)
-        const triggerUrl = new URL(trigger.url, window.location.origin)
-        if (currentUrl.pathname === triggerUrl.pathname || (currentUrl.pathname === '/' && triggerUrl.pathname === '')) {
+        if (trigger.type === 'newSession') {
           showSurvey()
         }
-      }
 
-      if (trigger.type === 'scroll') {
-        const handleScroll = () => {
-          const scrollPercentage = (window.scrollY + window.innerHeight) / document.body.scrollHeight
-          if (scrollPercentage >= 0.01) {
+        if (trigger.type === 'url') {
+          const currentUrl = new URL(window.location.href)
+          const triggerUrl = new URL(trigger.url, window.location.origin)
+          if (currentUrl.pathname === triggerUrl.pathname || (currentUrl.pathname === '/' && triggerUrl.pathname === '')) {
             showSurvey()
           }
         }
-        const debouncedHandleScroll = debounce(handleScroll, 200)
-        window.addEventListener('scroll', debouncedHandleScroll)
 
-        const cleanup = () => {
-          window.removeEventListener('scroll', debouncedHandleScroll)
+        if (trigger.type === 'scroll') {
+          const handleScroll = () => {
+            const scrollPercentage = (window.scrollY + window.innerHeight) / document.body.scrollHeight
+            if (scrollPercentage >= 0.01) {
+              showSurvey()
+            }
+          }
+          const debouncedHandleScroll = debounce(handleScroll, 200)
+          window.addEventListener('scroll', debouncedHandleScroll)
+
+          const cleanup = () => {
+            window.removeEventListener('scroll', debouncedHandleScroll)
+          }
+          cleanupFunctions.push(cleanup)
         }
-        cleanupFunctions.push(cleanup)
-      }
-    })
-  } catch (error) {
-    console.error('Error in setupTriggers:', error)
-  }
-
-  // 정리 함수 반환
-  return () => {
-    cleanupFunctions.forEach(cleanup => cleanup())
-  }
-}
-
-// 초기화 함수
-async function init() {
-  console.log('Initializing survey script')
-  const customerId = getCustomerIdFromUrl()
-  if (!customerId) {
-    throw new Error('Customer ID is not provided in the URL')
-  }
-  try {
-    const surveyData = await fetchSurvey(customerId)
-    if (surveyData) {
-      const cleanupTriggers = setupTriggers(surveyData.data)
-      
-      // SPA 라우트 변경 시 클린업 함수 호출 (예: React Router 사용 시)
-      // const history = createBrowserHistory()
-      // history.listen(() => {
-      //   cleanupTriggers()
-      // })
-
-      console.log('Survey script initialized')
+      })
+    } catch (error) {
+      console.error('Error in setupTriggers:', error)
     }
-  } catch (error) {
-    console.error('Error initializing survey script:', error)
-  }
-}
 
-init()
+    // 정리 함수 반환
+    return () => {
+      cleanupFunctions.forEach(cleanup => cleanup())
+    }
+  }
+
+  // 초기화 함수
+  async function init() {
+    console.log('Initializing survey script')
+    const customerId = getCustomerIdFromUrl()
+    if (!customerId) {
+      throw new Error('Customer ID is not provided in the URL')
+    }
+    try {
+      const surveyData = await fetchSurvey(customerId)
+      if (surveyData) {
+        const cleanupTriggers = setupTriggers(surveyData.data)
+
+        // SPA 라우트 변경 시 클린업 함수 호출 (예: React Router 사용 시)
+        // const history = createBrowserHistory()
+        // history.listen(() => {
+        //   cleanupTriggers()
+        // })
+
+        console.log('Survey script initialized')
+      }
+    } catch (error) {
+      console.error('Error initializing survey script:', error)
+    }
+  }
+
+  init()
 })()
