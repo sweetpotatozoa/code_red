@@ -422,7 +422,9 @@
       if (trigger.type === 'exitIntent') {
         document.addEventListener('mouseleave', (event) => {
           if (event.clientY <= 0) {
-            showSurvey()
+            if (!localStorage.getItem(`survey-${survey._id}`)) {
+              showSurvey()
+            }
           }
         })
       }
@@ -446,9 +448,11 @@
         const handleScroll = () => {
           const scrollPercentage =
             (window.scrollY + window.innerHeight) / document.body.scrollHeight
-          if (scrollPercentage >= 0.5) {
+          if (scrollPercentage >= 0.01) {
             window.removeEventListener('scroll', handleScroll)
-            showSurvey()
+            if (!localStorage.getItem(`survey-${survey._id}`)) {
+              showSurvey()
+            }
           }
         }
         window.addEventListener('scroll', handleScroll)
