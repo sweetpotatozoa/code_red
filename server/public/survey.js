@@ -396,16 +396,28 @@
 
     const sortedTriggers = Array.from(surveyMap.entries()).sort((a, b) => JSON.parse(a[0]).priority - JSON.parse(b[0]).priority)
 
+    const triggerQueue = new Map()
+
     sortedTriggers.forEach(([key, survey]) => {
       const trigger = JSON.parse(key)
+      const priority = JSON.parse(key).priority
+
+      if (!triggerQueue.has(priority)) {
+        triggerQueue.set(priority, [])
+      }
+      triggerQueue.get(priority).push(survey)
 
       const showSurvey = () => {
-        if (window.activeSurveyId === null && canShowSurvey(survey)) {
-          setTimeout(() => {
-            if (window.activeSurveyId === null) {
-              loadSurvey(survey)
-            }
-          }, trigger.type === 'newSession' || trigger.type === 'url' ? 1000 : 0)
+        const surveyList = triggerQueue.get(priority)
+        for (let survey of surveyList) {
+          if (window.activeSurveyId === null && canShowSurvey(survey)) {
+            setTimeout(() => {
+              if (window.activeSurveyId === null) {
+                loadSurvey(survey)
+              }
+            }, 0)
+            break
+          }
         }
       }
 
