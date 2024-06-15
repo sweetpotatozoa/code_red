@@ -34,7 +34,7 @@
 
       // 유효성 검사 및 필터링
       const validSurveys = data.data.filter((survey) => {
-        if (!survey.trigger || !survey.steps || !Array.isArray(survey.steps)) {
+        if (!survey.triggers || !survey.steps || !Array.isArray(survey.steps)) {
           console.error(`Invalid survey structure: ${survey._id}`)
           return false
         }
@@ -328,12 +328,26 @@
 
   // 트리거 설정 및 처리
   function setupTriggers(surveys) {
-    surveys.forEach((survey) => {
-      const trigger = survey.trigger
+    const surveyMap = new Map()
 
+    surveys.forEach((survey) => {
       if (localStorage.getItem(`survey-${survey._id}`)) {
         return
       }
+
+      survey.triggers.forEach((trigger) => {
+        const key = JSON.stringify(trigger)
+        if (
+          !surveyMap.has(key) ||
+          new Date(survey.updateAt) > new Date(surveyMap.get(key).updateAt)
+        ) {
+          surveyMap.set(key, survey)
+        }
+      })
+    })
+
+    surveyMap.forEach((survey, key) => {
+      const trigger = JSON.parse(key)
 
       const showSurvey = () => {
         loadSurvey(survey)
