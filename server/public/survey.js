@@ -209,6 +209,9 @@
 
     showStep(survey, currentStep)
     console.log('Survey container created and appended to body')
+
+    // 설문조사가 로드되면 로컬 스토리지에 기록
+    localStorage.setItem(`survey-${survey._id}-shown`, 'true')
   }
 
   // 설문조사 스텝 표시
@@ -424,7 +427,10 @@
       const trigger = JSON.parse(key)
 
       const showSurvey = () => {
-        if (window.activeSurveyId === null) {
+        if (
+          window.activeSurveyId === null &&
+          !localStorage.getItem(`survey-${survey._id}-shown`)
+        ) {
           setTimeout(
             () => {
               if (window.activeSurveyId === null) {
