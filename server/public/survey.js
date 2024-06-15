@@ -379,7 +379,12 @@
           }
 
           if (priority === 'url') {
-            if (window.location.pathname === trigger.url) {
+            const currentUrl = new URL(window.location.href)
+            const triggerUrl = new URL(trigger.url, window.location.origin)
+            if (
+              currentUrl.pathname === triggerUrl.pathname ||
+              (currentUrl.pathname === '/' && triggerUrl.pathname === '')
+            ) {
               showSurvey()
             }
           }
