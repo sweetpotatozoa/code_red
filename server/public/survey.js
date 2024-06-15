@@ -34,9 +34,58 @@
 
       // 유효성 검사 및 필터링
       const validSurveys = data.data.filter((survey) => {
-        if (!survey.triggers || !survey.steps || !Array.isArray(survey.steps)) {
+        if (
+          !survey.updateAt ||
+          !survey.triggers ||
+          !survey.steps ||
+          !Array.isArray(survey.steps)
+        ) {
           console.error(`Invalid survey structure: ${survey._id}`)
           return false
+        }
+
+        // 각 트리거의 유효성 검사
+        for (let trigger of survey.triggers) {
+          if (!trigger.type) {
+            console.error(`Missing trigger type in survey ${survey._id}`)
+            return false
+          }
+
+          // 트리거 타입별 필드 검사
+          switch (trigger.type) {
+            case 'url':
+              if (!trigger.url) {
+                console.error(
+                  `Missing url for url trigger in survey ${survey._id}`,
+                )
+                return false
+              }
+              break
+            case 'cssSelector':
+              if (!trigger.selector) {
+                console.error(
+                  `Missing selector for cssSelector trigger in survey ${survey._id}`,
+                )
+                return false
+              }
+              break
+            case 'innerText':
+              if (!trigger.text) {
+                console.error(
+                  `Missing text for innerText trigger in survey ${survey._id}`,
+                )
+                return false
+              }
+              break
+            case 'exitIntent':
+            case 'newSession':
+              break
+            default:
+              console.error(
+                `Unknown trigger type: ${trigger.type} in survey ${survey._id}`,
+              )
+              return false
+          }
         }
 
         // 각 스텝의 유효성 검사
