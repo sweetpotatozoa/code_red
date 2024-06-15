@@ -1,4 +1,4 @@
-;(async function () {
+(async function () {
   console.log('Survey script loaded')
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
@@ -8,7 +8,9 @@
   let surveyResponses = []
   let activeSurveys = new Set()
 
-  // 고객사 ID 추출
+  // 1. Helper Functions - 각종 보조 기능을 수행하는 함수들로, URL에서 고객 ID를 추출하거나 로컬 스토리지에 데이터를 저장하고 불러오는 기능을 합니다.
+
+  // URL에서 customerId 추출
   function getCustomerIdFromUrl() {
     const scriptElements = document.getElementsByTagName('script')
     for (let script of scriptElements) {
@@ -21,7 +23,77 @@
     return null
   }
 
-  // 설문조사 데이터 유효성 검사 함수
+  // 로컬 스토리지에서 설문조사 데이터를 가져오기
+  function getSurveyData(surveyId) {
+    const data = localStorage.getItem(`survey-${surveyId}`)
+    return data ? JSON.parse(data) : null
+  }
+
+  // 로컬 스토리지에 설문조사 데이터 저장
+  function saveSurveyData(surveyId, data) {
+    localStorage.setItem(`survey-${surveyId}`, JSON.stringify(data))
+  }
+
+  // 응답 저장
+  function saveResponse(stepIndex, response, type) {
+    surveyResponses[stepIndex] = {
+      stepIndex,
+      response,
+      type,
+      timestamp: new Date().toISOString(),
+    }
+  }
+
+  // HTTP 요청을 통해 설문조사 데이터 가져오기
+  async function fetchSurvey(customerId) {
+    try {
+      const response = await fetch(`${API_URI}/api/appliedSurvey?customerId=${customerId}`)
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      const data = await response.json()
+      console.log('Surveys loaded:', data)
+
+      const validSurveys = data.data.filter(validateSurvey)
+
+      return { status: data.status, data: validSurveys }
+    } catch (error) {
+      console.error('Error fetching survey:', error)
+      return null
+    }
+  }
+
+  // 설문조사 응답 생성
+  async function createResponse(customerId, surveyId, response) {
+    const result = await fetch(`${API_URI}/api/appliedSurvey/response`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ customerId, surveyId, responses: [response] }),
+    })
+    const data = await result.json()
+    return data.data._id
+  }
+
+  // 설문조사 응답 업데이트
+  async function updateResponse(responseId, responses) {
+    const result = await fetch(`${API_URI}/api/appliedSurvey/response/${responseId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ responses }),
+    })
+    if (!result.ok) {
+      throw new Error('Network response was not ok')
+    }
+    return result.json()
+  }
+
+  // 2. Survey Validation Functions - 설문조사의 데이터 유효성을 검증하는 함수들로, 각 트리거와 스텝이 올바르게 구성되어 있는지 확인합니다.
+
+  // 설문조사 데이터 유효성 검사
   function validateSurvey(survey) {
     if (!survey.updateAt || !survey.triggers || !survey.steps || !Array.isArray(survey.steps) || !survey.displayOption) {
       console.error(`Invalid survey structure: ${survey._id}`)
@@ -104,88 +176,7 @@
     return true
   }
 
-  // 설문조사 데이터 가져오기 및 유효성 검사
-  async function fetchSurvey(customerId) {
-    try {
-      const response = await fetch(`${API_URI}/api/appliedSurvey?customerId=${customerId}`)
-      if (!response.ok) {
-        throw new Error('Network response was not ok')
-      }
-      const data = await response.json()
-      console.log('Surveys loaded:', data)
-
-      const validSurveys = data.data.filter(validateSurvey)
-
-      return { status: data.status, data: validSurveys }
-    } catch (error) {
-      console.error('Error fetching survey:', error)
-      return null
-    }
-  }
-
-  // 설문조사 응답 생성
-  async function createResponse(customerId, surveyId, response) {
-    const result = await fetch(`${API_URI}/api/appliedSurvey/response`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ customerId, surveyId, responses: [response] }),
-    })
-    const data = await result.json()
-    return data.data._id
-  }
-
-  // 설문조사 응답 업데이트
-  async function updateResponse(responseId, responses) {
-    const result = await fetch(`${API_URI}/api/appliedSurvey/response/${responseId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ responses }),
-    })
-    if (!result.ok) {
-      throw new Error('Network response was not ok')
-    }
-    return result.json()
-  }
-
-  // 응답 저장
-  function saveResponse(stepIndex, response, type) {
-    surveyResponses[stepIndex] = {
-      stepIndex,
-      response,
-      type,
-      timestamp: new Date().toISOString(),
-    }
-  }
-
-  // 설문조사 로드
-  function loadSurvey(survey) {
-    if (window.activeSurveyId !== null) {
-      console.log('Another survey is already active')
-      return
-    }
-    window.activeSurveyId = survey._id
-    currentStep = 0
-    surveyResponses = []
-
-    const link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.type = 'text/css'
-    link.href = `${API_URI}/survey.css`
-    document.head.appendChild(link)
-
-    const surveyContainer = document.createElement('div')
-    surveyContainer.id = 'survey-popup'
-    document.body.appendChild(surveyContainer)
-
-    showStep(survey, currentStep)
-    console.log('Survey container created and appended to body')
-
-    saveSurveyData(survey._id, { lastShownTime: new Date().toISOString(), completed: false })
-  }
+  // 3. Survey Display Functions - 설문조사를 표시하고, 단계별로 응답을 수집하고 저장하는 함수들로 구성되어 있습니다.
 
   // 설문조사 표시 조건 확인
   function canShowSurvey(survey) {
@@ -257,6 +248,7 @@
     }
   }
 
+  // 설문조사 단계별 내용 생성
   function generateStepHTML(step, buttonText) {
     return `
       <div class="survey-step">
@@ -275,6 +267,7 @@
     `
   }
 
+  // 설문조사 단계별 버튼 텍스트 설정
   function getButtonText(step, isLastStep, isSecondToLastStep) {
     switch (step.type) {
       case 'welcome':
@@ -288,6 +281,7 @@
     }
   }
 
+  // 설문조사 닫기
   function closeSurvey(surveyId, completed) {
     const surveyPopup = document.getElementById('survey-popup')
     if (surveyPopup) {
@@ -297,15 +291,6 @@
     console.log('Survey closed')
     saveSurveyData(surveyId, { lastShownTime: new Date().toISOString(), completed })
     window.dispatchEvent(new Event('surveyCompleted')) // 설문조사 완료 이벤트 발생
-  }
-
-  function getSurveyData(surveyId) {
-    const data = localStorage.getItem(`survey-${surveyId}`)
-    return data ? JSON.parse(data) : null
-  }
-
-  function saveSurveyData(surveyId, data) {
-    localStorage.setItem(`survey-${surveyId}`, JSON.stringify(data))
   }
 
   // 다음 스텝으로 이동
@@ -320,7 +305,7 @@
     }
   }
 
-  // 스텝 콘텐츠 생성
+  // 설문조사 스텝 콘텐츠 생성
   function generateStepContent(step) {
     switch (step.type) {
       case 'welcome':
@@ -362,12 +347,7 @@
     }
   }
 
-  // 페이지 새로고침 또는 닫기 시 설문조사 상태 초기화
-  window.addEventListener('beforeunload', () => {
-    if (window.activeSurveyId !== null) {
-      closeSurvey(window.activeSurveyId, false)
-    }
-  })
+  // 4. Event Listener and Trigger Setup - 이벤트 리스너를 설정하고, 각 트리거가 발생할 때 설문조사를 표시하도록 처리하는 함수들입니다. 이벤트 리스너를 제거하는 클린업 함수도 포함되어 있습니다.
 
   // 트리거 설정 및 처리
   function setupTriggers(surveys) {
@@ -491,7 +471,7 @@
     }
   }
 
-  // 초기화 함수
+  // 초기화 함수 - 초기화 함수로, 고객 ID를 추출하고 설문조사 데이터를 가져온 후 트리거를 설정합니다.
   async function init() {
     console.log('Initializing survey script')
     const customerId = getCustomerIdFromUrl()
@@ -520,6 +500,32 @@
     }
   }
 
+  // 설문조사 로드
+  function loadSurvey(survey) {
+    if (window.activeSurveyId !== null) {
+      console.log('Another survey is already active')
+      return
+    }
+    window.activeSurveyId = survey._id
+    currentStep = 0
+    surveyResponses = []
+
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.type = 'text/css'
+    link.href = `${API_URI}/survey.css`
+    document.head.appendChild(link)
+
+    const surveyContainer = document.createElement('div')
+    surveyContainer.id = 'survey-popup'
+    document.body.appendChild(surveyContainer)
+
+    showStep(survey, currentStep)
+    console.log('Survey container created and appended to body')
+
+    saveSurveyData(survey._id, { lastShownTime: new Date().toISOString(), completed: false })
+  }
+
+  // 스크립트 초기화 호출
   init()
 })()
-
