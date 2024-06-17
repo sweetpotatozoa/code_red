@@ -296,7 +296,12 @@
         }
 
         if (step.type === 'info') {
-          window.open(step.buttonUrl, '_blank')
+          window.open(
+            step.buttonUrl.startsWith('http')
+              ? step.buttonUrl
+              : `https://${step.buttonUrl}`,
+            '_blank',
+          )
         }
 
         // 마지막 스텝인지 확인 (감사 카드 제외)
