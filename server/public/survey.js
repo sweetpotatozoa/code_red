@@ -540,8 +540,6 @@
     }
 
     // 각 설문조사의 트리거를 surveyMap에 추가
-    // 트리거 유형과 우선순위를 키로 사용하여 설문조사를 그룹화
-    // 동일한 트리거를 가진 설문조사 중 가장 최신 업데이트된 설문조사만 남김
     surveys.forEach((survey) => {
       survey.triggers.forEach((trigger) => {
         const key = JSON.stringify({
@@ -565,7 +563,6 @@
     })
 
     // surveyMap의 엔트리를 트리거 우선순위에 따라 정렬
-    // 우선순위가 같은 경우, 최신 업데이트된 설문조사가 앞에 오도록 정렬
     const sortedTriggers = Array.from(surveyMap.entries()).sort((a, b) => {
       const triggerA = JSON.parse(a[0])
       const triggerB = JSON.parse(b[0])
@@ -601,23 +598,32 @@
             cleanupFunctions.set(trigger.selector, () =>
               button.removeEventListener('click', showSurvey),
             )
+          } else {
+            console.log(`CSS Selector not found: ${trigger.selector}`)
           }
         }
 
         if (trigger.type === 'innerText') {
-          document.querySelectorAll('button, a, div').forEach((element) => {
+          const elements = document.querySelectorAll('button, a, div')
+          let found = false
+          elements.forEach((element) => {
             if (element.innerText.includes(trigger.text)) {
               element.addEventListener('click', showSurvey)
               console.log(`Inner Text trigger set for ${trigger.text}`)
+              found = true
               cleanupFunctions.set(element, () =>
                 element.removeEventListener('click', showSurvey),
               )
             }
           })
+          if (!found) {
+            console.log(`Inner Text not found: ${trigger.text}`)
+          }
         }
 
         if (trigger.type === 'exitIntent') {
           const handleExitIntent = (event) => {
+            console.log('Exit Intent detected')
             if (event.clientY <= 0) {
               showSurvey()
             }
@@ -644,7 +650,9 @@
           const handleScroll = () => {
             const scrollPercentage =
               (window.scrollY + window.innerHeight) / document.body.scrollHeight
+            console.log(`Scroll Percentage: ${scrollPercentage}`)
             if (scrollPercentage >= 0.01) {
+              console.log('Scroll trigger activated')
               showSurvey()
             }
           }
