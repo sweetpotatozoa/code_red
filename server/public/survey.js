@@ -2,12 +2,16 @@
   console.log('Survey script loaded')
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
-  let isSurveyOpen = false
+  window.activeSurveyId = null
   let currentStep = 0
   let surveyResponseId = null
   let surveyResponses = []
+  let activeSurveys = new Set()
+  let surveys = []
 
-  // 고객사 ID 추출
+  // 1. Helper Functions - 각종 보조 기능을 수행하는 함수들로, URL에서 고객 ID를 추출하거나 로컬 스토리지에 데이터를 저장하고 불러오는 기능을 합니다.
+
+  // URL에서 customerId 추출
   function getCustomerIdFromUrl() {
     const scriptElements = document.getElementsByTagName('script')
     for (let script of scriptElements) {
@@ -20,7 +24,28 @@
     return null
   }
 
-  // 설문조사 데이터 가져오기 및 유효성 검사
+  // 로컬 스토리지에서 설문조사 데이터를 가져오기
+  function getSurveyData(surveyId) {
+    const data = localStorage.getItem(`survey-${surveyId}`)
+    return data ? JSON.parse(data) : null
+  }
+
+  // 로컬 스토리지에 설문조사 데이터 저장
+  function saveSurveyData(surveyId, data) {
+    localStorage.setItem(`survey-${surveyId}`, JSON.stringify(data))
+  }
+
+  // 설문조사 응답을 저장
+  function saveResponse(stepIndex, response, type) {
+    surveyResponses[stepIndex] = {
+      stepIndex,
+      response,
+      type,
+      timestamp: new Date().toISOString(),
+    }
+  }
+
+  // HTTP 요청을 통해 설문조사 데이터 가져오기
   async function fetchSurvey(customerId) {
     try {
       const response = await fetch(
@@ -32,60 +57,7 @@
       const data = await response.json()
       console.log('Surveys loaded:', data)
 
-      // 유효성 검사 및 필터링
-      const validSurveys = data.data.filter((survey) => {
-        if (!survey.trigger || !survey.steps || !Array.isArray(survey.steps)) {
-          console.error(`Invalid survey structure: ${survey._id}`)
-          return false
-        }
-
-        // 각 스텝의 유효성 검사
-        for (let step of survey.steps) {
-          if (!step.type || !step.question) {
-            console.error(`Invalid step data in survey ${survey._id}`)
-            return false
-          }
-
-          // 스텝 타입별 필드 검사
-          switch (step.type) {
-            case 'welcome':
-            case 'thankyou':
-              if (step.isActived === undefined) {
-                console.error(
-                  `Missing isActived for ${step.type} step in survey ${survey._id}`,
-                )
-                return false
-              }
-              break
-            case 'singleChoice':
-            case 'multiChoice':
-              if (!step.options || !Array.isArray(step.options)) {
-                console.error(
-                  `Invalid options for ${step.type} step in survey ${survey._id}`,
-                )
-                return false
-              }
-              break
-            case 'info':
-              if (!step.buttonText || !step.buttonUrl) {
-                console.error(
-                  `Missing buttonText or buttonUrl for info step in survey ${survey._id}`,
-                )
-                return false
-              }
-              break
-            case 'rating':
-            case 'text':
-              break
-            default:
-              console.error(
-                `Unknown step type: ${step.type} in survey ${survey._id}`,
-              )
-              return false
-          }
-        }
-        return true
-      })
+      const validSurveys = data.data.filter(validateSurvey)
 
       return { status: data.status, data: validSurveys }
     } catch (error) {
@@ -96,66 +68,179 @@
 
   // 설문조사 응답 생성
   async function createResponse(customerId, surveyId, response) {
-    const result = await fetch(`${API_URI}/api/appliedSurvey/response`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ customerId, surveyId, responses: [response] }),
-    })
-    const data = await result.json()
-    return data.data._id
+    try {
+      const result = await fetch(`${API_URI}/api/appliedSurvey/response`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ customerId, surveyId, responses: [response] }),
+      })
+      if (!result.ok) {
+        throw new Error(`HTTP error! status: ${result.status}`)
+      }
+      const data = await result.json()
+      return data.data._id
+    } catch (error) {
+      console.error('Error in createResponse:', error)
+      throw error
+    }
   }
 
   // 설문조사 응답 업데이트
   async function updateResponse(responseId, responses) {
-    const result = await fetch(
-      `${API_URI}/api/appliedSurvey/response/${responseId}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+    try {
+      const result = await fetch(
+        `${API_URI}/api/appliedSurvey/response/${responseId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ responses }),
         },
-        body: JSON.stringify({ responses }),
-      },
-    )
-    if (!result.ok) {
-      throw new Error('Network response was not ok')
-    }
-    return result.json()
-  }
-
-  // 응답 저장
-  function saveResponse(stepIndex, response, type) {
-    surveyResponses[stepIndex] = {
-      stepIndex,
-      response,
-      type,
-      timestamp: new Date().toISOString(),
+      )
+      if (!result.ok) {
+        throw new Error(`HTTP error! status: ${result.status}`)
+      }
+      return result.json()
+    } catch (error) {
+      console.error('Error in updateResponse:', error)
+      throw error
     }
   }
 
-  // 설문조사 로드
-  function loadSurvey(survey) {
-    if (isSurveyOpen) {
-      return
+  // 2. Survey Validation Functions - 설문조사의 데이터 유효성을 검증하는 함수들로, 각 트리거와 스텝이 올바르게 구성되어 있는지 확인합니다.
+
+  // 설문조사 데이터 유효성 검사
+  function validateSurvey(survey) {
+    if (
+      !survey.updateAt ||
+      !survey.triggers ||
+      !survey.steps ||
+      !Array.isArray(survey.steps) ||
+      !survey.displayOption
+    ) {
+      console.error(`Invalid survey structure: ${survey._id}`)
+      return false
     }
-    isSurveyOpen = true
-    currentStep = 0
-    surveyResponses = []
 
-    const link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.type = 'text/css'
-    link.href = `${API_URI}/survey.css`
-    document.head.appendChild(link)
+    if (
+      survey.displayOption !== 'once' &&
+      (survey.cooldown === undefined || isNaN(survey.cooldown))
+    ) {
+      console.error(`Missing or invalid cooldown for survey ${survey._id}`)
+      return false
+    }
 
-    const surveyContainer = document.createElement('div')
-    surveyContainer.id = 'survey-popup'
-    document.body.appendChild(surveyContainer)
+    for (let trigger of survey.triggers) {
+      if (!trigger.type) {
+        console.error(`Missing trigger type in survey ${survey._id}`)
+        return false
+      }
+      switch (trigger.type) {
+        case 'url':
+          if (trigger.url === undefined) {
+            console.error(`Missing url for url trigger in survey ${survey._id}`)
+            return false
+          }
+          break
+        case 'cssSelector':
+          if (!trigger.selector) {
+            console.error(
+              `Missing selector for cssSelector trigger in survey ${survey._id}`,
+            )
+            return false
+          }
+          break
+        case 'innerText':
+          if (!trigger.text) {
+            console.error(
+              `Missing text for innerText trigger in survey ${survey._id}`,
+            )
+            return false
+          }
+          break
+        case 'scroll':
+        case 'exitIntent':
+        case 'newSession':
+          break
+        default:
+          console.error(
+            `Unknown trigger type: ${trigger.type} in survey ${survey._id}`,
+          )
+          return false
+      }
+    }
 
-    showStep(survey, currentStep)
-    console.log('Survey container created and appended to body')
+    for (let step of survey.steps) {
+      if (step.title === undefined || step.description === undefined) {
+        console.error(`Missing title or description in survey ${survey._id}`)
+        return false
+      }
+      switch (step.type) {
+        case 'welcome':
+        case 'thankyou':
+          if (step.isActived === undefined) {
+            console.error(
+              `Missing isActived for ${step.type} step in survey ${survey._id}`,
+            )
+            return false
+          }
+          break
+        case 'singleChoice':
+        case 'multiChoice':
+          if (!step.options || !Array.isArray(step.options)) {
+            console.error(
+              `Invalid options for ${step.type} step in survey ${survey._id}`,
+            )
+            return false
+          }
+          break
+        case 'info':
+          if (!step.buttonText || !step.buttonUrl) {
+            console.error(
+              `Missing buttonText or buttonUrl for info step in survey ${survey._id}`,
+            )
+            return false
+          }
+          break
+        case 'rating':
+        case 'text':
+          break
+        default:
+          console.error(
+            `Unknown step type: ${step.type} in survey ${survey._id}`,
+          )
+          return false
+      }
+    }
+    return true
+  }
+
+  // 3. Survey Display Functions - 설문조사를 표시하고, 단계별로 응답을 수집하고 저장하는 함수들로 구성되어 있습니다.
+
+  // 설문조사 표시 조건 확인
+  function canShowSurvey(survey) {
+    const surveyData = getSurveyData(survey._id)
+    if (!surveyData) return true
+
+    const { lastShownTime, completed } = surveyData
+    const now = new Date()
+    const lastShown = new Date(lastShownTime)
+    const secondsSinceLastShown = (now - lastShown) / 1000
+
+    switch (survey.displayOption) {
+      case 'once':
+        return false
+      case 'untilCompleted':
+        if (completed) return false
+        return secondsSinceLastShown >= survey.cooldown
+      case 'always':
+        return secondsSinceLastShown >= survey.cooldown
+      default:
+        return false
+    }
   }
 
   // 설문조사 스텝 표시
@@ -170,7 +255,7 @@
 
     if (!step) {
       document.getElementById('survey-popup').remove()
-      isSurveyOpen = false
+      window.activeSurveyId = null
       console.log('Survey finished')
       return
     }
@@ -180,28 +265,71 @@
       stepIndex === activeSteps.length - 2 &&
       activeSteps[activeSteps.length - 1].type === 'thankyou'
 
-    let buttonText
-    switch (step.type) {
-      case 'welcome':
-        buttonText = '참여하기'
-        break
-      case 'info':
-        buttonText = step.buttonText
-        break
-      case 'thankyou':
-        buttonText = ''
-        break
-      default:
-        buttonText = isLastStep || isSecondToLastStep ? '제출하기' : '다음'
+    const buttonText = getButtonText(step, isLastStep, isSecondToLastStep)
+
+    surveyContainer.innerHTML = generateStepHTML(step, buttonText)
+
+    // 여기에서 'closeSurvey' 이벤트 리스너를 설정
+    document.getElementById('closeSurvey').onclick = () => {
+      const isThankYouStep = step.type === 'thankyou'
+      closeSurvey(survey._id, isThankYouStep)
     }
 
-    surveyContainer.innerHTML = `
+    document.getElementById('surveyForm').onsubmit = async function (event) {
+      event.preventDefault()
+      const stepResponse = getResponse(step)
+      saveResponse(stepIndex, stepResponse, step.type)
+
+      try {
+        if (surveyResponseId) {
+          await updateResponse(surveyResponseId, surveyResponses)
+        } else {
+          surveyResponseId = await createResponse(
+            survey.customerId,
+            survey._id,
+            {
+              stepIndex,
+              response: stepResponse,
+              type: step.type,
+            },
+          )
+        }
+
+        if (step.type === 'info') {
+          window.open(
+            step.buttonUrl.startsWith('http')
+              ? step.buttonUrl
+              : `https://${step.buttonUrl}`,
+            '_blank',
+          )
+        }
+
+        // 마지막 스텝인지 확인 (감사 카드 제외)
+        if (isLastStep && step.type !== 'thankyou') {
+          closeSurvey(survey._id, true)
+        } else {
+          nextStep(survey, stepIndex)
+        }
+      } catch (error) {
+        console.error('Error while submitting survey:', error)
+      }
+    }
+  }
+
+  // 설문조사 단계별 내용 생성
+  function generateStepHTML(step, buttonText) {
+    return `
       <div class="survey-step">
         <div class="survey-header">
           <button type="button" id="closeSurvey" class="close-button">X</button>
         </div>
         <form id="surveyForm">
-          <label for="question">${step.question}</label>
+          ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
+          ${
+            step.description
+              ? `<p class="survey-description">${step.description}</p>`
+              : ''
+          }
           <div>
             ${generateStepContent(step)}
           </div>
@@ -213,34 +341,35 @@
         </form>
       </div>
     `
+  }
 
-    document.getElementById('closeSurvey').onclick = () => {
-      document.getElementById('survey-popup').remove()
-      isSurveyOpen = false
-      console.log('Survey closed')
+  // 설문조사 단계별 버튼 텍스트 설정
+  function getButtonText(step, isLastStep, isSecondToLastStep) {
+    switch (step.type) {
+      case 'welcome':
+        return '참여하기'
+      case 'info':
+        return step.buttonText
+      case 'thankyou':
+        return ''
+      default:
+        return isLastStep || isSecondToLastStep ? '제출하기' : '다음'
     }
+  }
 
-    document.getElementById('surveyForm').onsubmit = async function (event) {
-      event.preventDefault()
-      const stepResponse = getResponse(step)
-      saveResponse(stepIndex, stepResponse, step.type)
-
-      if (surveyResponseId) {
-        await updateResponse(surveyResponseId, surveyResponses)
-      } else {
-        surveyResponseId = await createResponse(survey.customerId, survey._id, {
-          stepIndex,
-          response: stepResponse,
-          type: step.type,
-        })
-      }
-
-      if (step.type === 'info') {
-        window.open(step.buttonUrl, '_blank')
-      }
-
-      nextStep(survey, stepIndex)
+  // 설문조사 닫기
+  function closeSurvey(surveyId, completed = false) {
+    const surveyPopup = document.getElementById('survey-popup')
+    if (surveyPopup) {
+      surveyPopup.remove()
     }
+    window.activeSurveyId = null
+    console.log('Survey closed')
+    saveSurveyData(surveyId, {
+      lastShownTime: new Date().toISOString(),
+      completed,
+    })
+    window.dispatchEvent(new Event('surveyCompleted')) // 설문조사 완료 이벤트 발생
   }
 
   // 다음 스텝으로 이동
@@ -250,22 +379,33 @@
         ? step.isActived
         : true,
     )
+
+    // 현재 스텝이 마지막 스텝일 때
     if (stepIndex === activeSteps.length - 1) {
-      document.getElementById('survey-popup').remove()
-      isSurveyOpen = false
-      console.log('Survey submitted successfully')
+      // 마지막 스텝이 "thankyou" 스텝이고 활성화되어 있는 경우
+      if (
+        activeSteps[stepIndex].type === 'thankyou' &&
+        activeSteps[stepIndex].isActived
+      ) {
+        closeSurvey(survey._id, true) // 완료된 것으로 설정
+        console.log('Survey submitted successfully')
+      } else {
+        closeSurvey(survey._id, true)
+        console.log('Survey closed')
+      }
     } else {
       currentStep++
       showStep(survey, currentStep)
     }
   }
 
-  // 스텝 콘텐츠 생성
+  // 설문조사 스텝 콘텐츠 생성
   function generateStepContent(step) {
     switch (step.type) {
       case 'welcome':
         return ''
       case 'singleChoice':
+        // 단일 선택 질문의 선택지를 라디오 버튼으로 렌더링
         return step.options
           .map(
             (option, index) =>
@@ -273,6 +413,7 @@
           )
           .join('')
       case 'multiChoice':
+        // 다중 선택 질문의 선택지를 체크박스로 렌더링
         return step.options
           .map(
             (option, index) =>
@@ -280,6 +421,7 @@
           )
           .join('')
       case 'rating':
+        // 평점 질문을 별점으로 렌더링
         return `<span class="star-rating">${[1, 2, 3, 4, 5]
           .map(
             (i) =>
@@ -287,10 +429,12 @@
           )
           .join('')}</span>`
       case 'text':
+        // 텍스트 입력 질문을 textarea로 렌더링
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
       case 'info':
         return ''
       case 'thankyou':
+        // 감사 인사 카드를 이모지와 함께 렌더링
         return `<div class="thank-you-card"><span class="emoji">😊</span></div>`
       default:
         return ''
@@ -319,69 +463,218 @@
     }
   }
 
-  // 트리거 설정 및 처리
-  function setupTriggers(surveys) {
+  // 4. Event Listener and Trigger Setup - 이벤트 리스너를 설정하고, 각 트리거가 발생할 때 설문조사를 표시하도록 처리하는 함수들입니다. 이벤트 리스너를 제거하는 클린업 함수도 포함되어 있습니다.
+
+  // Debounce 함수
+  function debounce(func, wait) {
+    let timeout
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout)
+        func(...args)
+      }
+      clearTimeout(timeout)
+      timeout = setTimeout(later, wait)
+    }
+  }
+
+  // Debounce와 조건 체크를 포함한 showSurvey 함수
+  const showSurvey = debounce((survey) => {
+    if (window.activeSurveyId === null && canShowSurvey(survey)) {
+      loadSurvey(survey)
+    }
+  }, 200)
+
+  // URL 변경 감지 함수
+  function setupUrlChangeListener(callback) {
+    const originalPushState = history.pushState
+    const originalReplaceState = history.replaceState
+
+    // history.pushState를 감지
+    history.pushState = function () {
+      originalPushState.apply(this, arguments)
+      callback()
+    }
+
+    // history.replaceState를 감지
+    history.replaceState = function () {
+      originalReplaceState.apply(this, arguments)
+      callback()
+    }
+
+    // popstate 이벤트를 감지
+    window.addEventListener('popstate', callback)
+  }
+
+  // URL 트리거를 감지하고 설문조사를 표시하는 함수
+  function handleUrlChange() {
+    const currentUrl = new URL(window.location.href)
     surveys.forEach((survey) => {
-      const trigger = survey.trigger
-
-      if (localStorage.getItem(`survey-${survey._id}`)) {
-        return
-      }
-
-      const showSurvey = () => {
-        loadSurvey(survey)
-        localStorage.setItem(`survey-${survey._id}`, 'shown')
-      }
-
-      // 트리거 우선순위 설정
-      const triggerPriority = [
-        'url',
-        'newSession',
-        'cssSelector',
-        'innerText',
-        'exitIntent',
-      ]
-
-      triggerPriority.forEach((priority) => {
-        if (trigger.type === priority) {
-          if (priority === 'cssSelector') {
-            const button = document.querySelector(trigger.selector)
-            if (button) {
-              button.addEventListener('click', showSurvey)
-            }
-          }
-
-          if (priority === 'innerText') {
-            document.querySelectorAll('button, a, div').forEach((element) => {
-              if (element.innerText.includes(trigger.text)) {
-                element.addEventListener('click', showSurvey)
-              }
-            })
-          }
-
-          if (priority === 'exitIntent') {
-            document.addEventListener('mouseleave', (event) => {
-              if (event.clientY <= 0) {
-                showSurvey()
-              }
-            })
-          }
-
-          if (priority === 'newSession') {
-            showSurvey()
-          }
-
-          if (priority === 'url') {
-            if (window.location.pathname === trigger.url) {
-              showSurvey()
-            }
+      survey.triggers.forEach((trigger) => {
+        if (trigger.type === 'url') {
+          const triggerUrl = new URL(trigger.url, window.location.origin)
+          if (
+            currentUrl.pathname === triggerUrl.pathname ||
+            (currentUrl.pathname === '/' && triggerUrl.pathname === '')
+          ) {
+            showSurvey(survey)
           }
         }
       })
     })
-    console.log('Triggers set up')
   }
 
+  // 트리거 설정 및 처리
+  function setupTriggers(surveysData) {
+    surveys = surveysData
+    const surveyMap = new Map()
+
+    // 트리거 유형별 우선순위 설정
+    const triggerPriority = {
+      newSession: 1,
+      url: 2,
+      exitIntent: 3,
+      scroll: 4,
+      cssSelector: 5,
+      innerText: 6,
+    }
+
+    // 각 설문조사의 트리거를 surveyMap에 추가
+    surveys.forEach((survey) => {
+      survey.triggers.forEach((trigger) => {
+        const key = JSON.stringify({
+          ...trigger,
+          priority: triggerPriority[trigger.type],
+        })
+        if (!surveyMap.has(key)) {
+          surveyMap.set(key, [survey])
+        } else {
+          const surveys = surveyMap.get(key)
+          const insertIndex = surveys.findIndex(
+            (s) => new Date(survey.updateAt) > new Date(s.updateAt),
+          )
+          if (insertIndex === -1) {
+            surveys.push(survey)
+          } else {
+            surveys.splice(insertIndex, 0, survey)
+          }
+        }
+      })
+    })
+
+    // surveyMap의 엔트리를 트리거 우선순위에 따라 정렬
+    const sortedTriggers = Array.from(surveyMap.entries()).sort((a, b) => {
+      const triggerA = JSON.parse(a[0])
+      const triggerB = JSON.parse(b[0])
+      if (triggerA.priority === triggerB.priority) {
+        return (
+          new Date(surveyMap.get(b[0])[0].updateAt) -
+          new Date(surveyMap.get(a[0])[0].updateAt)
+        )
+      }
+      return triggerA.priority - triggerB.priority
+    })
+
+    const cleanupFunctions = new Map()
+
+    try {
+      sortedTriggers.forEach(([key, surveyList]) => {
+        const trigger = JSON.parse(key)
+
+        const showSurvey = debounce(() => {
+          for (let survey of surveyList) {
+            if (window.activeSurveyId === null && canShowSurvey(survey)) {
+              loadSurvey(survey)
+              break
+            }
+          }
+        }, 200)
+
+        if (trigger.type === 'cssSelector') {
+          const button = document.querySelector(trigger.selector)
+          if (button) {
+            button.addEventListener('click', showSurvey)
+            console.log(`CSS Selector trigger set for ${trigger.selector}`)
+            cleanupFunctions.set(trigger.selector, () =>
+              button.removeEventListener('click', showSurvey),
+            )
+          } else {
+            console.log(`CSS Selector not found: ${trigger.selector}`)
+          }
+        }
+
+        if (trigger.type === 'innerText') {
+          const elements = document.querySelectorAll('button, a, div')
+          let found = false
+          elements.forEach((element) => {
+            if (element.innerText.includes(trigger.text)) {
+              element.addEventListener('click', showSurvey)
+              console.log(`Inner Text trigger set for ${trigger.text}`)
+              found = true
+              cleanupFunctions.set(element, () =>
+                element.removeEventListener('click', showSurvey),
+              )
+            }
+          })
+          if (!found) {
+            console.log(`Inner Text not found: ${trigger.text}`)
+          }
+        }
+
+        if (trigger.type === 'exitIntent') {
+          const handleExitIntent = (event) => {
+            console.log('Exit Intent detected')
+            if (event.clientY <= 0) {
+              showSurvey()
+            }
+          }
+          document.addEventListener('mouseleave', handleExitIntent)
+          console.log(`Exit Intent trigger set`)
+          cleanupFunctions.set('mouseleave', () =>
+            document.removeEventListener('mouseleave', handleExitIntent),
+          )
+        }
+
+        if (trigger.type === 'newSession') {
+          showSurvey()
+          console.log(`New Session trigger set`)
+        }
+
+        if (trigger.type === 'url') {
+          setupUrlChangeListener(handleUrlChange)
+          handleUrlChange()
+          console.log(`URL trigger set for ${trigger.url}`)
+        }
+
+        if (trigger.type === 'scroll') {
+          const handleScroll = () => {
+            const scrollPercentage =
+              (window.scrollY + window.innerHeight) / document.body.scrollHeight
+            console.log(`Scroll Percentage: ${scrollPercentage}`)
+            if (scrollPercentage >= 0.01) {
+              console.log('Scroll trigger activated')
+              showSurvey()
+            }
+          }
+          const debouncedHandleScroll = debounce(handleScroll, 200)
+          window.addEventListener('scroll', debouncedHandleScroll)
+          console.log(`Scroll trigger set`)
+          cleanupFunctions.set('scroll', () =>
+            window.removeEventListener('scroll', debouncedHandleScroll),
+          )
+        }
+      })
+    } catch (error) {
+      console.error('Error in setupTriggers:', error)
+    }
+
+    return (surveyId) => {
+      cleanupFunctions.forEach((cleanup) => cleanup())
+      cleanupFunctions.clear()
+    }
+  }
+
+  // 초기화 함수 - 초기화 함수로, 고객 ID를 추출하고 설문조사 데이터를 가져온 후 트리거를 설정합니다.
   async function init() {
     console.log('Initializing survey script')
     const customerId = getCustomerIdFromUrl()
@@ -391,7 +684,20 @@
     try {
       const surveyData = await fetchSurvey(customerId)
       if (surveyData) {
-        setupTriggers(surveyData.data)
+        const cleanupTriggers = setupTriggers(surveyData.data)
+
+        // 페이지 언로드 시 클린업 수행
+        window.addEventListener('beforeunload', () =>
+          cleanupTriggers(window.activeSurveyId),
+        )
+
+        // 설문조사 완료 시 클린업 수행 + 닫기 버튼을 눌러서 완료할 시에도 동작
+        function handleSurveyCompletion() {
+          cleanupTriggers(window.activeSurveyId)
+          window.removeEventListener('surveyCompleted', handleSurveyCompletion)
+        }
+        window.addEventListener('surveyCompleted', handleSurveyCompletion)
+
         console.log('Survey script initialized')
       }
     } catch (error) {
@@ -399,5 +705,38 @@
     }
   }
 
+  // 설문조사 로드 - 설문조사를 시작하고 첫 번째 스텝을 표시합니다.
+  function loadSurvey(survey) {
+    if (window.activeSurveyId !== null) {
+      console.log('Another survey is already active')
+      return
+    }
+    window.activeSurveyId = survey._id
+    currentStep = 0
+    surveyResponses = []
+
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.type = 'text/css'
+    link.href = `${API_URI}/survey.css`
+    document.head.appendChild(link)
+
+    // CSS 파일이 로드된 후 설문조사를 표시
+    link.onload = () => {
+      const surveyContainer = document.createElement('div')
+      surveyContainer.id = 'survey-popup'
+      document.body.appendChild(surveyContainer)
+
+      showStep(survey, currentStep)
+      console.log('Survey container created and appended to body')
+
+      saveSurveyData(survey._id, {
+        lastShownTime: new Date().toISOString(),
+        completed: false,
+      })
+    }
+  }
+
+  // 스크립트 초기화 호출
   init()
 })()
