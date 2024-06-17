@@ -525,13 +525,18 @@
           ...trigger,
           priority: triggerPriority[trigger.type],
         })
-        if (
-          !surveyMap.has(key) ||
-          new Date(survey.updateAt) > new Date(surveyMap.get(key)[0].updateAt)
-        ) {
+        if (!surveyMap.has(key)) {
           surveyMap.set(key, [survey])
         } else {
-          surveyMap.get(key).push(survey)
+          const surveys = surveyMap.get(key)
+          const insertIndex = surveys.findIndex(
+            (s) => new Date(survey.updateAt) > new Date(s.updateAt),
+          )
+          if (insertIndex === -1) {
+            surveys.push(survey)
+          } else {
+            surveys.splice(insertIndex, 0, survey)
+          }
         }
       })
     })
