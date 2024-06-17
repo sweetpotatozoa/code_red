@@ -597,6 +597,7 @@
           const button = document.querySelector(trigger.selector)
           if (button) {
             button.addEventListener('click', showSurvey)
+            console.log(`CSS Selector trigger set for ${trigger.selector}`)
             cleanupFunctions.set(trigger.selector, () =>
               button.removeEventListener('click', showSurvey),
             )
@@ -607,6 +608,7 @@
           document.querySelectorAll('button, a, div').forEach((element) => {
             if (element.innerText.includes(trigger.text)) {
               element.addEventListener('click', showSurvey)
+              console.log(`Inner Text trigger set for ${trigger.text}`)
               cleanupFunctions.set(element, () =>
                 element.removeEventListener('click', showSurvey),
               )
@@ -621,6 +623,7 @@
             }
           }
           document.addEventListener('mouseleave', handleExitIntent)
+          console.log(`Exit Intent trigger set`)
           cleanupFunctions.set('mouseleave', () =>
             document.removeEventListener('mouseleave', handleExitIntent),
           )
@@ -628,11 +631,13 @@
 
         if (trigger.type === 'newSession') {
           showSurvey()
+          console.log(`New Session trigger set`)
         }
 
         if (trigger.type === 'url') {
-          setupUrlChangeListener(handleUrlChange) // URL 변경 감지 설정
-          handleUrlChange() // 초기 URL 체크
+          setupUrlChangeListener(handleUrlChange)
+          handleUrlChange()
+          console.log(`URL trigger set for ${trigger.url}`)
         }
 
         if (trigger.type === 'scroll') {
@@ -645,7 +650,7 @@
           }
           const debouncedHandleScroll = debounce(handleScroll, 200)
           window.addEventListener('scroll', debouncedHandleScroll)
-
+          console.log(`Scroll trigger set`)
           cleanupFunctions.set('scroll', () =>
             window.removeEventListener('scroll', debouncedHandleScroll),
           )
@@ -655,7 +660,6 @@
       console.error('Error in setupTriggers:', error)
     }
 
-    // 정리 함수 반환
     return (surveyId) => {
       cleanupFunctions.forEach((cleanup) => cleanup())
       cleanupFunctions.clear()
