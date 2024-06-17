@@ -68,33 +68,46 @@
 
   // 설문조사 응답 생성
   async function createResponse(customerId, surveyId, response) {
-    const result = await fetch(`${API_URI}/api/appliedSurvey/response`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ customerId, surveyId, responses: [response] }),
-    })
-    const data = await result.json()
-    return data.data._id
+    try {
+      const result = await fetch(`${API_URI}/api/appliedSurvey/response`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ customerId, surveyId, responses: [response] }),
+      })
+      if (!result.ok) {
+        throw new Error(`HTTP error! status: ${result.status}`)
+      }
+      const data = await result.json()
+      return data.data._id
+    } catch (error) {
+      console.error('Error in createResponse:', error)
+      throw error
+    }
   }
 
   // 설문조사 응답 업데이트
   async function updateResponse(responseId, responses) {
-    const result = await fetch(
-      `${API_URI}/api/appliedSurvey/response/${responseId}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+    try {
+      const result = await fetch(
+        `${API_URI}/api/appliedSurvey/response/${responseId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ responses }),
         },
-        body: JSON.stringify({ responses }),
-      },
-    )
-    if (!result.ok) {
-      throw new Error('Network response was not ok')
+      )
+      if (!result.ok) {
+        throw new Error(`HTTP error! status: ${result.status}`)
+      }
+      return result.json()
+    } catch (error) {
+      console.error('Error in updateResponse:', error)
+      throw error
     }
-    return result.json()
   }
 
   // 2. Survey Validation Functions - 설문조사의 데이터 유효성을 검증하는 함수들로, 각 트리거와 스텝이 올바르게 구성되어 있는지 확인합니다.
@@ -265,21 +278,29 @@
       const stepResponse = getResponse(step)
       saveResponse(stepIndex, stepResponse, step.type)
 
-      if (surveyResponseId) {
-        await updateResponse(surveyResponseId, surveyResponses)
-      } else {
-        surveyResponseId = await createResponse(survey.customerId, survey._id, {
-          stepIndex,
-          response: stepResponse,
-          type: step.type,
-        })
-      }
+      try {
+        if (surveyResponseId) {
+          await updateResponse(surveyResponseId, surveyResponses)
+        } else {
+          surveyResponseId = await createResponse(
+            survey.customerId,
+            survey._id,
+            {
+              stepIndex,
+              response: stepResponse,
+              type: step.type,
+            },
+          )
+        }
 
-      if (step.type === 'info') {
-        window.open(step.buttonUrl, '_blank')
-      }
+        if (step.type === 'info') {
+          window.open(step.buttonUrl, '_blank')
+        }
 
-      nextStep(survey, stepIndex)
+        nextStep(survey, stepIndex)
+      } catch (error) {
+        console.error('Error while submitting survey:', error)
+      }
     }
   }
 
@@ -361,6 +382,7 @@
       case 'welcome':
         return ''
       case 'singleChoice':
+        // 단일 선택 질문의 선택지를 라디오 버튼으로 렌더링
         return step.options
           .map(
             (option, index) =>
@@ -368,6 +390,7 @@
           )
           .join('')
       case 'multiChoice':
+        // 다중 선택 질문의 선택지를 체크박스로 렌더링
         return step.options
           .map(
             (option, index) =>
@@ -375,6 +398,7 @@
           )
           .join('')
       case 'rating':
+        // 평점 질문을 별점으로 렌더링
         return `<span class="star-rating">${[1, 2, 3, 4, 5]
           .map(
             (i) =>
@@ -382,10 +406,12 @@
           )
           .join('')}</span>`
       case 'text':
+        // 텍스트 입력 질문을 textarea로 렌더링
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
       case 'info':
         return ''
       case 'thankyou':
+        // 감사 인사 카드를 이모지와 함께 렌더링
         return `<div class="thank-you-card"><span class="emoji">😊</span></div>`
       default:
         return ''
@@ -477,8 +503,10 @@
 
   // 트리거 설정 및 처리
   function setupTriggers(surveysData) {
-    surveys = surveysData // 전역 변수에 할당
+    surveys = surveysData
     const surveyMap = new Map()
+
+    // 트리거 유형별 우선순위 설정
     const triggerPriority = {
       newSession: 1,
       url: 2,
@@ -488,6 +516,9 @@
       innerText: 6,
     }
 
+    // 각 설문조사의 트리거를 surveyMap에 추가
+    // 트리거 유형과 우선순위를 키로 사용하여 설문조사를 그룹화
+    // 동일한 트리거를 가진 설문조사 중 가장 최신 업데이트된 설문조사만 남김
     surveys.forEach((survey) => {
       survey.triggers.forEach((trigger) => {
         const key = JSON.stringify({
@@ -505,6 +536,8 @@
       })
     })
 
+    // surveyMap의 엔트리를 트리거 우선순위에 따라 정렬
+    // 우선순위가 같은 경우, 최신 업데이트된 설문조사가 앞에 오도록 정렬
     const sortedTriggers = Array.from(surveyMap.entries()).sort((a, b) => {
       const triggerA = JSON.parse(a[0])
       const triggerB = JSON.parse(b[0])
