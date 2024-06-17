@@ -368,8 +368,20 @@
         : true,
     )
     if (stepIndex === activeSteps.length - 1) {
-      closeSurvey(survey._id, true)
-      console.log('Survey submitted successfully')
+      // 마지막 스텝이 "thankyou" 스텝이고 활성화되어 있는 경우
+      if (
+        activeSteps[stepIndex].type === 'thankyou' &&
+        activeSteps[stepIndex].isActived
+      ) {
+        // "thankyou" 카드에서의 닫기 버튼 클릭 시 completed를 true로 설정
+        document.getElementById('closeSurvey').onclick = () => {
+          closeSurvey(survey._id, true)
+          console.log('Survey submitted successfully')
+        }
+      } else {
+        closeSurvey(survey._id, false)
+        console.log('Survey closed')
+      }
     } else {
       currentStep++
       showStep(survey, currentStep)
