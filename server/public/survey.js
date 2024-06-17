@@ -269,8 +269,10 @@
 
     surveyContainer.innerHTML = generateStepHTML(step, buttonText)
 
+    // 여기에서 'closeSurvey' 이벤트 리스너를 설정
     document.getElementById('closeSurvey').onclick = () => {
-      closeSurvey(survey._id, false)
+      const isThankYouStep = step.type === 'thankyou'
+      closeSurvey(survey._id, isThankYouStep)
     }
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
@@ -297,7 +299,12 @@
           window.open(step.buttonUrl, '_blank')
         }
 
-        nextStep(survey, stepIndex)
+        // 마지막 스텝인지 확인 (감사 카드 제외)
+        if (isLastStep && step.type !== 'thankyou') {
+          closeSurvey(survey._id, true)
+        } else {
+          nextStep(survey, stepIndex)
+        }
       } catch (error) {
         console.error('Error while submitting survey:', error)
       }
@@ -346,7 +353,7 @@
   }
 
   // 설문조사 닫기
-  function closeSurvey(surveyId, completed) {
+  function closeSurvey(surveyId, completed = false) {
     const surveyPopup = document.getElementById('survey-popup')
     if (surveyPopup) {
       surveyPopup.remove()
@@ -367,19 +374,18 @@
         ? step.isActived
         : true,
     )
+
+    // 현재 스텝이 마지막 스텝일 때
     if (stepIndex === activeSteps.length - 1) {
       // 마지막 스텝이 "thankyou" 스텝이고 활성화되어 있는 경우
       if (
         activeSteps[stepIndex].type === 'thankyou' &&
         activeSteps[stepIndex].isActived
       ) {
-        // "thankyou" 카드에서의 닫기 버튼 클릭 시 completed를 true로 설정
-        document.getElementById('closeSurvey').onclick = () => {
-          closeSurvey(survey._id, true)
-          console.log('Survey submitted successfully')
-        }
+        closeSurvey(survey._id, true) // 완료된 것으로 설정
+        console.log('Survey submitted successfully')
       } else {
-        closeSurvey(survey._id, false)
+        closeSurvey(survey._id, true)
         console.log('Survey closed')
       }
     } else {
