@@ -1,4 +1,4 @@
-(async function () {
+;(async function () {
   console.log('Survey script loaded')
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
@@ -48,7 +48,9 @@
   // HTTP 요청을 통해 설문조사 데이터 가져오기
   async function fetchSurvey(customerId) {
     try {
-      const response = await fetch(`${API_URI}/api/appliedSurvey?customerId=${customerId}`)
+      const response = await fetch(
+        `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
+      )
       if (!response.ok) {
         throw new Error('Network response was not ok')
       }
@@ -79,13 +81,16 @@
 
   // 설문조사 응답 업데이트
   async function updateResponse(responseId, responses) {
-    const result = await fetch(`${API_URI}/api/appliedSurvey/response/${responseId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
+    const result = await fetch(
+      `${API_URI}/api/appliedSurvey/response/${responseId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ responses }),
       },
-      body: JSON.stringify({ responses }),
-    })
+    )
     if (!result.ok) {
       throw new Error('Network response was not ok')
     }
@@ -96,12 +101,21 @@
 
   // 설문조사 데이터 유효성 검사
   function validateSurvey(survey) {
-    if (!survey.updateAt || !survey.triggers || !survey.steps || !Array.isArray(survey.steps) || !survey.displayOption) {
+    if (
+      !survey.updateAt ||
+      !survey.triggers ||
+      !survey.steps ||
+      !Array.isArray(survey.steps) ||
+      !survey.displayOption
+    ) {
       console.error(`Invalid survey structure: ${survey._id}`)
       return false
     }
 
-    if (survey.displayOption !== 'once' && (survey.cooldown === undefined || isNaN(survey.cooldown))) {
+    if (
+      survey.displayOption !== 'once' &&
+      (survey.cooldown === undefined || isNaN(survey.cooldown))
+    ) {
       console.error(`Missing or invalid cooldown for survey ${survey._id}`)
       return false
     }
@@ -120,13 +134,17 @@
           break
         case 'cssSelector':
           if (!trigger.selector) {
-            console.error(`Missing selector for cssSelector trigger in survey ${survey._id}`)
+            console.error(
+              `Missing selector for cssSelector trigger in survey ${survey._id}`,
+            )
             return false
           }
           break
         case 'innerText':
           if (!trigger.text) {
-            console.error(`Missing text for innerText trigger in survey ${survey._id}`)
+            console.error(
+              `Missing text for innerText trigger in survey ${survey._id}`,
+            )
             return false
           }
           break
@@ -135,7 +153,9 @@
         case 'newSession':
           break
         default:
-          console.error(`Unknown trigger type: ${trigger.type} in survey ${survey._id}`)
+          console.error(
+            `Unknown trigger type: ${trigger.type} in survey ${survey._id}`,
+          )
           return false
       }
     }
@@ -149,20 +169,26 @@
         case 'welcome':
         case 'thankyou':
           if (step.isActived === undefined) {
-            console.error(`Missing isActived for ${step.type} step in survey ${survey._id}`)
+            console.error(
+              `Missing isActived for ${step.type} step in survey ${survey._id}`,
+            )
             return false
           }
           break
         case 'singleChoice':
         case 'multiChoice':
           if (!step.options || !Array.isArray(step.options)) {
-            console.error(`Invalid options for ${step.type} step in survey ${survey._id}`)
+            console.error(
+              `Invalid options for ${step.type} step in survey ${survey._id}`,
+            )
             return false
           }
           break
         case 'info':
           if (!step.buttonText || !step.buttonUrl) {
-            console.error(`Missing buttonText or buttonUrl for info step in survey ${survey._id}`)
+            console.error(
+              `Missing buttonText or buttonUrl for info step in survey ${survey._id}`,
+            )
             return false
           }
           break
@@ -170,7 +196,9 @@
         case 'text':
           break
         default:
-          console.error(`Unknown step type: ${step.type} in survey ${survey._id}`)
+          console.error(
+            `Unknown step type: ${step.type} in survey ${survey._id}`,
+          )
           return false
       }
     }
@@ -204,7 +232,11 @@
 
   // 설문조사 스텝 표시
   function showStep(survey, stepIndex) {
-    const activeSteps = survey.steps.filter((step) => (step.type === 'welcome' || step.type === 'thankyou') ? step.isActived : true)
+    const activeSteps = survey.steps.filter((step) =>
+      step.type === 'welcome' || step.type === 'thankyou'
+        ? step.isActived
+        : true,
+    )
     const step = activeSteps[stepIndex]
     const surveyContainer = document.getElementById('survey-popup')
 
@@ -216,7 +248,9 @@
     }
 
     const isLastStep = stepIndex === activeSteps.length - 1
-    const isSecondToLastStep = stepIndex === activeSteps.length - 2 && activeSteps[activeSteps.length - 1].type === 'thankyou'
+    const isSecondToLastStep =
+      stepIndex === activeSteps.length - 2 &&
+      activeSteps[activeSteps.length - 1].type === 'thankyou'
 
     const buttonText = getButtonText(step, isLastStep, isSecondToLastStep)
 
@@ -258,11 +292,19 @@
         </div>
         <form id="surveyForm">
           ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
-          ${step.description ? `<p class="survey-description">${step.description}</p>` : ''}
+          ${
+            step.description
+              ? `<p class="survey-description">${step.description}</p>`
+              : ''
+          }
           <div>
             ${generateStepContent(step)}
           </div>
-          ${buttonText ? `<button type="submit" id="submitSurvey">${buttonText}</button>` : ''}
+          ${
+            buttonText
+              ? `<button type="submit" id="submitSurvey">${buttonText}</button>`
+              : ''
+          }
         </form>
       </div>
     `
@@ -290,13 +332,20 @@
     }
     window.activeSurveyId = null
     console.log('Survey closed')
-    saveSurveyData(surveyId, { lastShownTime: new Date().toISOString(), completed })
+    saveSurveyData(surveyId, {
+      lastShownTime: new Date().toISOString(),
+      completed,
+    })
     window.dispatchEvent(new Event('surveyCompleted')) // 설문조사 완료 이벤트 발생
   }
 
   // 다음 스텝으로 이동
   function nextStep(survey, stepIndex) {
-    const activeSteps = survey.steps.filter((step) => (step.type === 'welcome' || step.type === 'thankyou') ? step.isActived : true)
+    const activeSteps = survey.steps.filter((step) =>
+      step.type === 'welcome' || step.type === 'thankyou'
+        ? step.isActived
+        : true,
+    )
     if (stepIndex === activeSteps.length - 1) {
       closeSurvey(survey._id, true)
       console.log('Survey submitted successfully')
@@ -312,11 +361,26 @@
       case 'welcome':
         return ''
       case 'singleChoice':
-        return step.options.map((option, index) => `<input type="radio" name="choice" value="${option}" id="choice-${index}"><label for="choice-${index}">${option}</label>`).join('')
+        return step.options
+          .map(
+            (option, index) =>
+              `<input type="radio" name="choice" value="${option}" id="choice-${index}"><label for="choice-${index}">${option}</label>`,
+          )
+          .join('')
       case 'multiChoice':
-        return step.options.map((option, index) => `<input type="checkbox" name="multiChoice" value="${option}" id="multiChoice-${index}"><label for="multiChoice-${index}">${option}</label>`).join('')
+        return step.options
+          .map(
+            (option, index) =>
+              `<input type="checkbox" name="multiChoice" value="${option}" id="multiChoice-${index}"><label for="multiChoice-${index}">${option}</label>`,
+          )
+          .join('')
       case 'rating':
-        return `<span class="star-rating">${[1, 2, 3, 4, 5].map((i) => `<input type="radio" name="rating" value="${i}" id="rating-${i}"><label for="rating-${i}">★</label>`).join('')}</span>`
+        return `<span class="star-rating">${[1, 2, 3, 4, 5]
+          .map(
+            (i) =>
+              `<input type="radio" name="rating" value="${i}" id="rating-${i}"><label for="rating-${i}">★</label>`,
+          )
+          .join('')}</span>`
       case 'text':
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
       case 'info':
@@ -336,7 +400,9 @@
       case 'singleChoice':
         return document.querySelector('input[name="choice"]:checked').value
       case 'multiChoice':
-        return Array.from(document.querySelectorAll('input[name="multiChoice"]:checked')).map((checkbox) => checkbox.value)
+        return Array.from(
+          document.querySelectorAll('input[name="multiChoice"]:checked'),
+        ).map((checkbox) => checkbox.value)
       case 'rating':
         return document.querySelector('input[name="rating"]:checked').value
       case 'text':
@@ -347,8 +413,6 @@
         return ''
     }
   }
-
-  
 
   // 4. Event Listener and Trigger Setup - 이벤트 리스너를 설정하고, 각 트리거가 발생할 때 설문조사를 표시하도록 처리하는 함수들입니다. 이벤트 리스너를 제거하는 클린업 함수도 포함되어 있습니다.
 
@@ -368,49 +432,52 @@
   // Debounce와 조건 체크를 포함한 showSurvey 함수
   const showSurvey = debounce((survey) => {
     if (window.activeSurveyId === null && canShowSurvey(survey)) {
-      loadSurvey(survey);
+      loadSurvey(survey)
     }
-  }, 200);
+  }, 200)
 
   // URL 변경 감지 함수
   function setupUrlChangeListener(callback) {
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
+    const originalPushState = history.pushState
+    const originalReplaceState = history.replaceState
 
     // history.pushState를 감지
-    history.pushState = function() {
-      originalPushState.apply(this, arguments);
-      callback();
-    };
+    history.pushState = function () {
+      originalPushState.apply(this, arguments)
+      callback()
+    }
 
     // history.replaceState를 감지
-    history.replaceState = function() {
-      originalReplaceState.apply(this, arguments);
-      callback();
-    };
+    history.replaceState = function () {
+      originalReplaceState.apply(this, arguments)
+      callback()
+    }
 
     // popstate 이벤트를 감지
-    window.addEventListener('popstate', callback);
+    window.addEventListener('popstate', callback)
   }
 
   // URL 트리거를 감지하고 설문조사를 표시하는 함수
   function handleUrlChange() {
-    const currentUrl = new URL(window.location.href);
-    surveys.forEach(survey => {
-      survey.triggers.forEach(trigger => {
+    const currentUrl = new URL(window.location.href)
+    surveys.forEach((survey) => {
+      survey.triggers.forEach((trigger) => {
         if (trigger.type === 'url') {
-          const triggerUrl = new URL(trigger.url, window.location.origin);
-          if (currentUrl.pathname === triggerUrl.pathname || (currentUrl.pathname === '/' && triggerUrl.pathname === '')) {
-            showSurvey(survey);
+          const triggerUrl = new URL(trigger.url, window.location.origin)
+          if (
+            currentUrl.pathname === triggerUrl.pathname ||
+            (currentUrl.pathname === '/' && triggerUrl.pathname === '')
+          ) {
+            showSurvey(survey)
           }
         }
-      });
-    });
+      })
+    })
   }
 
   // 트리거 설정 및 처리
   function setupTriggers(surveysData) {
-    surveys = surveysData;  // 전역 변수에 할당
+    surveys = surveysData // 전역 변수에 할당
     const surveyMap = new Map()
     const triggerPriority = {
       newSession: 1,
@@ -423,8 +490,14 @@
 
     surveys.forEach((survey) => {
       survey.triggers.forEach((trigger) => {
-        const key = JSON.stringify({ ...trigger, priority: triggerPriority[trigger.type] })
-        if (!surveyMap.has(key) || new Date(survey.updateAt) > new Date(surveyMap.get(key)[0].updateAt)) {
+        const key = JSON.stringify({
+          ...trigger,
+          priority: triggerPriority[trigger.type],
+        })
+        if (
+          !surveyMap.has(key) ||
+          new Date(survey.updateAt) > new Date(surveyMap.get(key)[0].updateAt)
+        ) {
           surveyMap.set(key, [survey])
         } else {
           surveyMap.get(key).push(survey)
@@ -436,7 +509,10 @@
       const triggerA = JSON.parse(a[0])
       const triggerB = JSON.parse(b[0])
       if (triggerA.priority === triggerB.priority) {
-        return new Date(surveyMap.get(b[0])[0].updateAt) - new Date(surveyMap.get(a[0])[0].updateAt)
+        return (
+          new Date(surveyMap.get(b[0])[0].updateAt) -
+          new Date(surveyMap.get(a[0])[0].updateAt)
+        )
       }
       return triggerA.priority - triggerB.priority
     })
@@ -460,7 +536,9 @@
           const button = document.querySelector(trigger.selector)
           if (button) {
             button.addEventListener('click', showSurvey)
-            cleanupFunctions.set(trigger.selector, () => button.removeEventListener('click', showSurvey))
+            cleanupFunctions.set(trigger.selector, () =>
+              button.removeEventListener('click', showSurvey),
+            )
           }
         }
 
@@ -468,7 +546,9 @@
           document.querySelectorAll('button, a, div').forEach((element) => {
             if (element.innerText.includes(trigger.text)) {
               element.addEventListener('click', showSurvey)
-              cleanupFunctions.set(element, () => element.removeEventListener('click', showSurvey))
+              cleanupFunctions.set(element, () =>
+                element.removeEventListener('click', showSurvey),
+              )
             }
           })
         }
@@ -480,7 +560,9 @@
             }
           }
           document.addEventListener('mouseleave', handleExitIntent)
-          cleanupFunctions.set('mouseleave', () => document.removeEventListener('mouseleave', handleExitIntent))
+          cleanupFunctions.set('mouseleave', () =>
+            document.removeEventListener('mouseleave', handleExitIntent),
+          )
         }
 
         if (trigger.type === 'newSession') {
@@ -488,13 +570,14 @@
         }
 
         if (trigger.type === 'url') {
-          setupUrlChangeListener(handleUrlChange);  // URL 변경 감지 설정
-          handleUrlChange();  // 초기 URL 체크
+          setupUrlChangeListener(handleUrlChange) // URL 변경 감지 설정
+          handleUrlChange() // 초기 URL 체크
         }
 
         if (trigger.type === 'scroll') {
           const handleScroll = () => {
-            const scrollPercentage = (window.scrollY + window.innerHeight) / document.body.scrollHeight
+            const scrollPercentage =
+              (window.scrollY + window.innerHeight) / document.body.scrollHeight
             if (scrollPercentage >= 0.01) {
               showSurvey()
             }
@@ -502,7 +585,9 @@
           const debouncedHandleScroll = debounce(handleScroll, 200)
           window.addEventListener('scroll', debouncedHandleScroll)
 
-          cleanupFunctions.set('scroll', () => window.removeEventListener('scroll', debouncedHandleScroll))
+          cleanupFunctions.set('scroll', () =>
+            window.removeEventListener('scroll', debouncedHandleScroll),
+          )
         }
       })
     } catch (error) {
@@ -529,7 +614,9 @@
         const cleanupTriggers = setupTriggers(surveyData.data)
 
         // 페이지 언로드 시 클린업 수행
-        window.addEventListener('beforeunload', () => cleanupTriggers(window.activeSurveyId))
+        window.addEventListener('beforeunload', () =>
+          cleanupTriggers(window.activeSurveyId),
+        )
 
         // 설문조사 완료 시 클린업 수행 + 닫기 버튼을 눌러서 완료할 시에도 동작
         function handleSurveyCompletion() {
@@ -561,14 +648,20 @@
     link.href = `${API_URI}/survey.css`
     document.head.appendChild(link)
 
-    const surveyContainer = document.createElement('div')
-    surveyContainer.id = 'survey-popup'
-    document.body.appendChild(surveyContainer)
+    // CSS 파일이 로드된 후 설문조사를 표시
+    link.onload = () => {
+      const surveyContainer = document.createElement('div')
+      surveyContainer.id = 'survey-popup'
+      document.body.appendChild(surveyContainer)
 
-    showStep(survey, currentStep)
-    console.log('Survey container created and appended to body')
+      showStep(survey, currentStep)
+      console.log('Survey container created and appended to body')
 
-    saveSurveyData(survey._id, { lastShownTime: new Date().toISOString(), completed: false })
+      saveSurveyData(survey._id, {
+        lastShownTime: new Date().toISOString(),
+        completed: false,
+      })
+    }
   }
 
   // 스크립트 초기화 호출
