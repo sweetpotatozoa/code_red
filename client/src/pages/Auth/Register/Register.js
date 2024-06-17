@@ -2,7 +2,7 @@ import styles from './Register.module.css'
 
 const Register = () => {
   return (
-    <div>
+    <div className={styles.container}>
       <h1>Register</h1>
     </div>
   )
