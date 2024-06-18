@@ -49,7 +49,7 @@
   async function fetchSurvey(customerId) {
     try {
       const response = await fetch(
-        `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
+        `${API_URI}/api/appliedSurvey?customerId=${customerId}&isActive=true`,
       )
       if (!response.ok) {
         throw new Error('Network response was not ok')
@@ -279,6 +279,12 @@
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
       const stepResponse = getResponse(step)
+
+      if (stepResponse === null) {
+        // 응답이 없는 경우, 제출을 막습니다.
+        return
+      }
+
       saveResponse(stepIndex, stepResponse, step.type)
 
       try {
@@ -449,16 +455,28 @@
     switch (step.type) {
       case 'welcome':
         return 'clicked'
-      case 'singleChoice':
-        return document.querySelector('input[name="choice"]:checked').value
-      case 'multipleChoice':
-        return Array.from(
+      case 'singleChoice': {
+        const selectedOption = document.querySelector(
+          'input[name="choice"]:checked',
+        )
+        return selectedOption ? selectedOption.value : null
+      }
+      case 'multipleChoice': {
+        const selectedOptions = Array.from(
           document.querySelectorAll('input[name="multipleChoice"]:checked'),
         ).map((checkbox) => checkbox.value)
-      case 'rating':
-        return document.querySelector('input[name="rating"]:checked').value
-      case 'text':
-        return document.getElementById('response').value
+        return selectedOptions.length > 0 ? selectedOptions : null
+      }
+      case 'rating': {
+        const selectedRating = document.querySelector(
+          'input[name="rating"]:checked',
+        )
+        return selectedRating ? selectedRating.value : null
+      }
+      case 'text': {
+        const textResponse = document.getElementById('response')
+        return textResponse ? textResponse.value : ''
+      }
       case 'link':
         return 'clicked'
       case 'info':
