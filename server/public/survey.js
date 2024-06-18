@@ -281,7 +281,6 @@
       const stepResponse = getResponse(step)
 
       if (stepResponse === null) {
-        // 응답이 없는 경우, 제출을 막습니다.
         return
       }
 
