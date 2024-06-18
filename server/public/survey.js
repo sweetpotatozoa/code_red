@@ -649,8 +649,8 @@
         // 나머지 트리거 처리 (cssSelector, exitIntent, newSession, scroll, url)
         if (trigger.type === 'cssSelector' && isCorrectPage(trigger)) {
           const escapedSelector = trigger.selector.replace(
-            /[!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]/g,
-            '\\$&',
+            /([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g,
+            '\\$1',
           )
           const button = document.querySelector(escapedSelector)
           if (button) {
