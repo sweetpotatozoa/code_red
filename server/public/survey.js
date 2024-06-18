@@ -207,6 +207,7 @@
           break
         case 'rating':
         case 'text':
+        case 'info':
           break
         default:
           console.error(
@@ -433,6 +434,8 @@
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
       case 'link':
         return ''
+      case 'info':
+        return ''
       case 'thankyou':
         // 감사 인사 카드를 이모지와 함께 렌더링
         return `<div class="thank-you-card"><span class="emoji">😊</span></div>`
@@ -457,6 +460,8 @@
       case 'text':
         return document.getElementById('response').value
       case 'link':
+        return 'clicked'
+      case 'info':
         return 'clicked'
       default:
         return ''
