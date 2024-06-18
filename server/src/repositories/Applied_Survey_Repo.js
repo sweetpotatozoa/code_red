@@ -13,8 +13,8 @@ class AppliedSurveyRepo {
     return result
   }
 
-  async getSurveysByCustomerId(customerId) {
-    const result = await this.collection.find({ customerId }).toArray()
+  async getSurveysByQuery(query) {
+    const result = await this.collection.find(query).toArray()
     return result
   }
 

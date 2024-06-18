@@ -49,7 +49,7 @@
   async function fetchSurvey(customerId) {
     try {
       const response = await fetch(
-        `${API_URI}/api/appliedSurvey?customerId=${customerId}`,
+        `${API_URI}/api/appliedSurvey?customerId=${customerId}&isActive=true`,
       )
       if (!response.ok) {
         throw new Error('Network response was not ok')
@@ -181,15 +181,15 @@
       switch (step.type) {
         case 'welcome':
         case 'thankyou':
-          if (step.isActived === undefined) {
+          if (step.isActive === undefined) {
             console.error(
-              `Missing isActived for ${step.type} step in survey ${survey._id}`,
+              `Missing isActive for ${step.type} step in survey ${survey._id}`,
             )
             return false
           }
           break
         case 'singleChoice':
-        case 'multiChoice':
+        case 'multipleChoice':
           if (!step.options || !Array.isArray(step.options)) {
             console.error(
               `Invalid options for ${step.type} step in survey ${survey._id}`,
@@ -197,16 +197,17 @@
             return false
           }
           break
-        case 'info':
+        case 'link':
           if (!step.buttonText || !step.buttonUrl) {
             console.error(
-              `Missing buttonText or buttonUrl for info step in survey ${survey._id}`,
+              `Missing buttonText or buttonUrl for link step in survey ${survey._id}`,
             )
             return false
           }
           break
         case 'rating':
         case 'text':
+        case 'info':
           break
         default:
           console.error(
@@ -247,7 +248,7 @@
   function showStep(survey, stepIndex) {
     const activeSteps = survey.steps.filter((step) =>
       step.type === 'welcome' || step.type === 'thankyou'
-        ? step.isActived
+        ? step.isActive
         : true,
     )
     const step = activeSteps[stepIndex]
@@ -278,6 +279,11 @@
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
       const stepResponse = getResponse(step)
+
+      if (stepResponse === null) {
+        return
+      }
+
       saveResponse(stepIndex, stepResponse, step.type)
 
       try {
@@ -295,7 +301,7 @@
           )
         }
 
-        if (step.type === 'info') {
+        if (step.type === 'link') {
           window.open(
             step.buttonUrl.startsWith('http')
               ? step.buttonUrl
@@ -348,7 +354,7 @@
     switch (step.type) {
       case 'welcome':
         return '참여하기'
-      case 'info':
+      case 'link':
         return step.buttonText
       case 'thankyou':
         return ''
@@ -376,7 +382,7 @@
   function nextStep(survey, stepIndex) {
     const activeSteps = survey.steps.filter((step) =>
       step.type === 'welcome' || step.type === 'thankyou'
-        ? step.isActived
+        ? step.isActive
         : true,
     )
 
@@ -385,7 +391,7 @@
       // 마지막 스텝이 "thankyou" 스텝이고 활성화되어 있는 경우
       if (
         activeSteps[stepIndex].type === 'thankyou' &&
-        activeSteps[stepIndex].isActived
+        activeSteps[stepIndex].isActive
       ) {
         closeSurvey(survey._id, true) // 완료된 것으로 설정
         console.log('Survey submitted successfully')
@@ -412,12 +418,12 @@
               `<input type="radio" name="choice" value="${option}" id="choice-${index}"><label for="choice-${index}">${option}</label>`,
           )
           .join('')
-      case 'multiChoice':
+      case 'multipleChoice':
         // 다중 선택 질문의 선택지를 체크박스로 렌더링
         return step.options
           .map(
             (option, index) =>
-              `<input type="checkbox" name="multiChoice" value="${option}" id="multiChoice-${index}"><label for="multiChoice-${index}">${option}</label>`,
+              `<input type="checkbox" name="multipleChoice" value="${option}" id="multipleChoice-${index}"><label for="multipleChoice-${index}">${option}</label>`,
           )
           .join('')
       case 'rating':
@@ -431,6 +437,8 @@
       case 'text':
         // 텍스트 입력 질문을 textarea로 렌더링
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
+      case 'link':
+        return ''
       case 'info':
         return ''
       case 'thankyou':
@@ -446,16 +454,30 @@
     switch (step.type) {
       case 'welcome':
         return 'clicked'
-      case 'singleChoice':
-        return document.querySelector('input[name="choice"]:checked').value
-      case 'multiChoice':
-        return Array.from(
-          document.querySelectorAll('input[name="multiChoice"]:checked'),
+      case 'singleChoice': {
+        const selectedOption = document.querySelector(
+          'input[name="choice"]:checked',
+        )
+        return selectedOption ? selectedOption.value : null
+      }
+      case 'multipleChoice': {
+        const selectedOptions = Array.from(
+          document.querySelectorAll('input[name="multipleChoice"]:checked'),
         ).map((checkbox) => checkbox.value)
-      case 'rating':
-        return document.querySelector('input[name="rating"]:checked').value
-      case 'text':
-        return document.getElementById('response').value
+        return selectedOptions.length > 0 ? selectedOptions : null
+      }
+      case 'rating': {
+        const selectedRating = document.querySelector(
+          'input[name="rating"]:checked',
+        )
+        return selectedRating ? selectedRating.value : null
+      }
+      case 'text': {
+        const textResponse = document.getElementById('response')
+        return textResponse ? textResponse.value : ''
+      }
+      case 'link':
+        return 'clicked'
       case 'info':
         return 'clicked'
       default:

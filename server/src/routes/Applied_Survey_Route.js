@@ -5,9 +5,20 @@ const router = express.Router()
 
 // 모든 설문조사 가져오기
 router.get('/', async (req, res) => {
-  const { customerId } = req.query
-  const surveys = await appliedSurveyRepo.getSurveysByCustomerId(customerId)
-  res.status(200).json({ status: 200, data: surveys })
+  const { customerId, isActive } = req.query
+  let query = { customerId }
+
+  // isActive 쿼리 파라미터가 존재할 경우 추가
+  if (isActive !== undefined) {
+    query.isActive = isActive === 'true'
+  }
+
+  try {
+    const surveys = await appliedSurveyRepo.getSurveysByQuery(query)
+    res.status(200).json({ status: 200, data: surveys })
+  } catch (error) {
+    res.status(500).json({ status: 500, message: error.message })
+  }
 })
 
 // 설문조사 응답 추가
