@@ -181,15 +181,15 @@
       switch (step.type) {
         case 'welcome':
         case 'thankyou':
-          if (step.isActived === undefined) {
+          if (step.isActive === undefined) {
             console.error(
-              `Missing isActived for ${step.type} step in survey ${survey._id}`,
+              `Missing isActive for ${step.type} step in survey ${survey._id}`,
             )
             return false
           }
           break
         case 'singleChoice':
-        case 'multiChoice':
+        case 'multipleChoice':
           if (!step.options || !Array.isArray(step.options)) {
             console.error(
               `Invalid options for ${step.type} step in survey ${survey._id}`,
@@ -197,10 +197,10 @@
             return false
           }
           break
-        case 'info':
+        case 'link':
           if (!step.buttonText || !step.buttonUrl) {
             console.error(
-              `Missing buttonText or buttonUrl for info step in survey ${survey._id}`,
+              `Missing buttonText or buttonUrl for link step in survey ${survey._id}`,
             )
             return false
           }
@@ -247,7 +247,7 @@
   function showStep(survey, stepIndex) {
     const activeSteps = survey.steps.filter((step) =>
       step.type === 'welcome' || step.type === 'thankyou'
-        ? step.isActived
+        ? step.isActive
         : true,
     )
     const step = activeSteps[stepIndex]
@@ -295,7 +295,7 @@
           )
         }
 
-        if (step.type === 'info') {
+        if (step.type === 'link') {
           window.open(
             step.buttonUrl.startsWith('http')
               ? step.buttonUrl
@@ -348,7 +348,7 @@
     switch (step.type) {
       case 'welcome':
         return '참여하기'
-      case 'info':
+      case 'link':
         return step.buttonText
       case 'thankyou':
         return ''
@@ -376,7 +376,7 @@
   function nextStep(survey, stepIndex) {
     const activeSteps = survey.steps.filter((step) =>
       step.type === 'welcome' || step.type === 'thankyou'
-        ? step.isActived
+        ? step.isActive
         : true,
     )
 
@@ -385,7 +385,7 @@
       // 마지막 스텝이 "thankyou" 스텝이고 활성화되어 있는 경우
       if (
         activeSteps[stepIndex].type === 'thankyou' &&
-        activeSteps[stepIndex].isActived
+        activeSteps[stepIndex].isActive
       ) {
         closeSurvey(survey._id, true) // 완료된 것으로 설정
         console.log('Survey submitted successfully')
@@ -412,12 +412,12 @@
               `<input type="radio" name="choice" value="${option}" id="choice-${index}"><label for="choice-${index}">${option}</label>`,
           )
           .join('')
-      case 'multiChoice':
+      case 'multipleChoice':
         // 다중 선택 질문의 선택지를 체크박스로 렌더링
         return step.options
           .map(
             (option, index) =>
-              `<input type="checkbox" name="multiChoice" value="${option}" id="multiChoice-${index}"><label for="multiChoice-${index}">${option}</label>`,
+              `<input type="checkbox" name="multipleChoice" value="${option}" id="multipleChoice-${index}"><label for="multipleChoice-${index}">${option}</label>`,
           )
           .join('')
       case 'rating':
@@ -431,7 +431,7 @@
       case 'text':
         // 텍스트 입력 질문을 textarea로 렌더링
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
-      case 'info':
+      case 'link':
         return ''
       case 'thankyou':
         // 감사 인사 카드를 이모지와 함께 렌더링
@@ -448,15 +448,15 @@
         return 'clicked'
       case 'singleChoice':
         return document.querySelector('input[name="choice"]:checked').value
-      case 'multiChoice':
+      case 'multipleChoice':
         return Array.from(
-          document.querySelectorAll('input[name="multiChoice"]:checked'),
+          document.querySelectorAll('input[name="multipleChoice"]:checked'),
         ).map((checkbox) => checkbox.value)
       case 'rating':
         return document.querySelector('input[name="rating"]:checked').value
       case 'text':
         return document.getElementById('response').value
-      case 'info':
+      case 'link':
         return 'clicked'
       default:
         return ''
