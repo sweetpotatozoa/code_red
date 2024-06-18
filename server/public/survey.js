@@ -164,6 +164,12 @@
         case 'scroll':
         case 'exitIntent':
         case 'newSession':
+          if (!trigger.pageType || !trigger.pageValue) {
+            console.error(
+              `Missing pageType or pageValue for ${trigger.type} trigger in survey ${survey._id}`,
+            )
+            return false
+          }
           break
         default:
           console.error(
@@ -546,6 +552,17 @@
     })
   }
 
+  // 페이지가 특정 URL인지 확인하는 함수
+  function isCorrectPage(trigger) {
+    if (trigger.pageType === 'all') {
+      return true
+    } else if (trigger.pageType === 'specific') {
+      const currentUrl = new URL(window.location.href)
+      return currentUrl.pathname === trigger.pageValue
+    }
+    return false
+  }
+
   // 트리거 설정 및 처리
   function setupTriggers(surveysData) {
     surveys = surveysData
@@ -612,7 +629,7 @@
           }
         }, 200)
 
-        if (trigger.type === 'cssSelector') {
+        if (trigger.type === 'cssSelector' && isCorrectPage(trigger)) {
           const button = document.querySelector(trigger.selector)
           if (button) {
             button.addEventListener('click', showSurvey)
@@ -625,7 +642,7 @@
           }
         }
 
-        if (trigger.type === 'innerText') {
+        if (trigger.type === 'innerText' && isCorrectPage(trigger)) {
           const elements = document.querySelectorAll('button, a, div')
           let found = false
           elements.forEach((element) => {
@@ -643,7 +660,7 @@
           }
         }
 
-        if (trigger.type === 'exitIntent') {
+        if (trigger.type === 'exitIntent' && isCorrectPage(trigger)) {
           const handleExitIntent = (event) => {
             console.log('Exit Intent detected')
             if (event.clientY <= 0) {
@@ -657,7 +674,7 @@
           )
         }
 
-        if (trigger.type === 'newSession') {
+        if (trigger.type === 'newSession' && isCorrectPage(trigger)) {
           showSurvey()
           console.log(`New Session trigger set`)
         }
@@ -668,7 +685,7 @@
           console.log(`URL trigger set for ${trigger.url}`)
         }
 
-        if (trigger.type === 'scroll') {
+        if (trigger.type === 'scroll' && isCorrectPage(trigger)) {
           const handleScroll = () => {
             const scrollPercentage =
               (window.scrollY + window.innerHeight) / document.body.scrollHeight
