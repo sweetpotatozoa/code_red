@@ -629,8 +629,30 @@
           }
         }, 200)
 
+        // innerText 트리거에 대한 처리
+        if (trigger.type === 'innerText' && isCorrectPage(trigger)) {
+          const elements = document.querySelectorAll('button, a, div')
+          elements.forEach((element) => {
+            if (element.innerText.includes(trigger.text)) {
+              element.addEventListener('click', (event) => {
+                event.stopPropagation()
+                showSurvey()
+              })
+              console.log(`Inner Text trigger set for ${trigger.text}`)
+              cleanupFunctions.set(element, () =>
+                element.removeEventListener('click', showSurvey),
+              )
+            }
+          })
+        }
+
+        // 나머지 트리거 처리 (cssSelector, exitIntent, newSession, scroll, url)
         if (trigger.type === 'cssSelector' && isCorrectPage(trigger)) {
-          const button = document.querySelector(trigger.selector)
+          const escapedSelector = trigger.selector.replace(
+            /([\.#:=\+\*])/g,
+            '\\$1',
+          )
+          const button = document.querySelector(escapedSelector)
           if (button) {
             button.addEventListener('click', showSurvey)
             console.log(`CSS Selector trigger set for ${trigger.selector}`)
@@ -639,24 +661,6 @@
             )
           } else {
             console.log(`CSS Selector not found: ${trigger.selector}`)
-          }
-        }
-
-        if (trigger.type === 'innerText' && isCorrectPage(trigger)) {
-          const elements = document.querySelectorAll('button, a, div')
-          let found = false
-          elements.forEach((element) => {
-            if (element.innerText.includes(trigger.text)) {
-              element.addEventListener('click', showSurvey)
-              console.log(`Inner Text trigger set for ${trigger.text}`)
-              found = true
-              cleanupFunctions.set(element, () =>
-                element.removeEventListener('click', showSurvey),
-              )
-            }
-          })
-          if (!found) {
-            console.log(`Inner Text not found: ${trigger.text}`)
           }
         }
 
