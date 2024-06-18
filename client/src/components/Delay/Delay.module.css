@@ -1,0 +1,66 @@
+.delay {
+  display: flex;
+  flex-direction: column;
+  margin-top: 32px;
+  margin-left: 16px;
+  margin-right: 16px;
+  background-color: white;
+  height: 668px;
+  border-radius: 10px;
+}
+
+.explain {
+  padding: 16px;
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.explainTitle {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.explainContent {
+  font-size: 16px;
+  margin-bottom: 24px;
+}
+
+.delayContent {
+  display: flex;
+  flex-direction: column;
+  padding: 0 16px;
+  justify-content: left;
+}
+
+.types {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+  margin-bottom: 16px;
+  background-color: #e2e8f0;
+  border-radius: 5px;
+}
+
+.type {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  width: 205px;
+  background-color: #ffffff;
+  padding: 8px;
+  border-radius: 5px;
+}
+
+.type:hover {
+  background-color: #141d2f;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.selected {
+  background-color: #141d2f;
+  color: #ffffff;
+}

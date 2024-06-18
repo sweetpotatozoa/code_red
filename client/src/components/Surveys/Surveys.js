@@ -9,9 +9,10 @@ import EditingLink from '../EditingQuestion/EditingLink'
 import EditingInfo from '../EditingQuestion/EditingInfo'
 import EditingWelcome from '../EditingQuestion/EditingWelcome'
 import EditingThank from '../EditingQuestion/EditingThank'
+import { useNavigate } from 'react-router-dom'
 
 const Surveys = ({ survey, setSurvey }) => {
-  if (!survey) return null // survey가 없으면 아무것도 렌더링하지 않음
+  if (!survey || !survey.questions) return null // survey나 survey.questions가 없으면 아무것도 렌더링하지 않음
 
   // 새로운 질문 추가를 위한 모달 상태
   const [isAddQuestion, setIsAddQuestion] = useState(false)

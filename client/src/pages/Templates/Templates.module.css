@@ -24,6 +24,7 @@
   color: #6b7b90;
   padding: 16px;
   border-radius: 5px;
+  cursor: pointer;
 }
 
 .main {
@@ -113,4 +114,31 @@
   align-items: center;
   margin-right: 16px;
   padding-bottom: 16px;
+}
+
+.selected {
+  background-color: #f1f3f6;
+}
+
+.option:hover {
+  background-color: #f1f3f6;
+  cursor: pointer;
+}
+
+.smallBottom {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #11192c;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 32px;
+  font-weight: bold;
 }

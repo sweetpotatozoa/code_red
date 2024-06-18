@@ -6,6 +6,9 @@ const EditingMultipleChoice = ({ question, onSave, onCancel, questions }) => {
   const [title, setTitle] = useState(question.title)
   const [description, setDescription] = useState(question.description)
   const [options, setOptions] = useState(question.options)
+  const [nextQuestionId, setNextQuestionId] = useState(
+    question.nextQuestionId || '',
+  )
 
   //저장 핸들러
   const handleSave = () => {
@@ -22,20 +25,12 @@ const EditingMultipleChoice = ({ question, onSave, onCancel, questions }) => {
       alert('선택지을 모두 채워주세요.')
       return
     }
-    onSave({ ...question, title, description, options })
+    onSave({ ...question, title, description, options, nextQuestionId })
   }
 
   //삭제 핸들러
   const deleteOptionHandler = (id) => {
     const newOptions = options.filter((option) => option.id !== id)
-    setOptions(newOptions)
-  }
-
-  //다음 질문 선택 핸들러
-  const nextQuestionHandler = (optionId, nextQuestionId) => {
-    const newOptions = options.map((option) =>
-      option.id === optionId ? { ...option, nextQuestionId } : option,
-    )
     setOptions(newOptions)
   }
 
@@ -84,24 +79,17 @@ const EditingMultipleChoice = ({ question, onSave, onCancel, questions }) => {
       >
         선택지 추가
       </div>
-      <div className={styles.title}>선택지별 액션</div>
-      {options.map((option) => (
-        <div key={option.id} className={styles.optionAction}>
-          <div className={styles.optionLabel}>{option.value}</div>
-          <select
-            value={option.nextQuestionId || ''}
-            onChange={(e) => nextQuestionHandler(option.id, e.target.value)}
-            className={styles.action}
-          >
-            <option value=''>다음 질문 선택</option>
-            {questions.map((q) => (
-              <option key={q.id} value={q.id}>
-                {q.title}
-              </option>
-            ))}
-          </select>
-        </div>
-      ))}
+      <div className={styles.title}>응답에 따른 대응</div>
+      <select
+        className={styles.action}
+        value={nextQuestionId}
+        onChange={(e) => setNextQuestionId(e.target.value)}
+      >
+        <option value=''>다음 질문으로 이동</option>
+        {questions.map((q) => (
+          <option key={q.id}>{q.title}</option>
+        ))}
+      </select>
       <div className={styles.bottom}>
         <div className={styles.leftBtn} onClick={onCancel}>
           취소

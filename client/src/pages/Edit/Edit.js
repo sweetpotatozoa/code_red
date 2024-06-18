@@ -4,8 +4,8 @@ import Triggers from '../../components/Triggers/Triggers'
 import Delay from '../../components/Delay/Delay'
 import { useState } from 'react'
 import { useEffect } from 'react'
-
 import { useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 const surveys = [
   {
@@ -80,6 +80,7 @@ const surveys = [
         type: 'multipleChoice',
         title: 'CPO라니!',
         description: '저희 제품을 사용하시는 이유가 뭐죠?',
+        nextQuestionId: 7,
         options: [
           {
             id: 1,
@@ -242,10 +243,6 @@ const surveys = [
 const Edit = () => {
   const { id } = useParams()
 
-  console.log('컴포넌트 랜딩됨')
-
-  console.log('id:', id)
-
   const [survey, setSurvey] = useState({})
 
   useEffect(() => {
@@ -257,7 +254,14 @@ const Edit = () => {
     }
   }, [id])
 
-  const [mode, setMode] = useState('triggers')
+  const navigate = useNavigate()
+
+  // 뒤로가기
+  const goBack = () => {
+    navigate('/templates')
+  }
+
+  const [mode, setMode] = useState('surveys')
 
   const renderMain = () => {
     if (!survey) return null // survey가 없으면 아무것도 렌더링하지 않음
@@ -275,7 +279,9 @@ const Edit = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.headerPart}>
-          <div className={styles.bigButton}>◀︎ 뒤로가기</div>
+          <div className={styles.bigButton} onClick={goBack}>
+            ◀︎ 뒤로가기
+          </div>
           <div className={styles.title}>온보딩 세그먼트</div>
         </div>
         <div className={styles.headerPart}>

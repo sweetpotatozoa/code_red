@@ -3,8 +3,9 @@ import { useState } from 'react'
 
 const EditingLink = ({ question, onSave, onCancel, questions }) => {
   const [title, setTitle] = useState(question.title)
-  const [description, setDescription] = useState(question.description)
-  const [url, setUrl] = useState(question.url)
+  const [description, setDescription] = useState(question.description || '')
+  const [url, setUrl] = useState(question.url || '')
+  const [buttonText, setButtonText] = useState(question.buttonText || '')
   const [nextQuestionId, setNextQuestionId] = useState(
     question.nextQuestionId || '',
   )
@@ -19,7 +20,12 @@ const EditingLink = ({ question, onSave, onCancel, questions }) => {
       alert('URL을 입력해주세요.')
       return
     }
-    onSave({ ...question, title, description, url, nextQuestionId })
+
+    if (buttonText.trim() === '') {
+      alert('버튼 텍스트를 입력해주세요.')
+      return
+    }
+    onSave({ ...question, title, description, url, nextQuestionId, buttonText })
   }
 
   return (
@@ -44,6 +50,13 @@ const EditingLink = ({ question, onSave, onCancel, questions }) => {
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         placeholder='URL을 입력하세요.'
+      />
+      <div className={styles.title}>버튼 텍스트</div>
+      <input
+        type='text'
+        value={buttonText}
+        onChange={(e) => setButtonText(e.target.value)}
+        placeholder='버튼의 텍스트를 입력하세요.'
       />
       <div className={styles.title}>응답에 따른 대응</div>
       <select
