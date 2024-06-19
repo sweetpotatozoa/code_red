@@ -630,7 +630,9 @@
         }, 200)
 
         if (trigger.type === 'cssSelector' && isCorrectPage(trigger)) {
-          const button = document.querySelector(trigger.selector)
+          // selector 값을 이스케이프 처리
+          const escapedSelector = escapeClassName(trigger.selector)
+          const button = document.querySelector(escapedSelector)
           if (button) {
             button.addEventListener('click', showSurvey)
             console.log(`CSS Selector trigger set for ${trigger.selector}`)
@@ -711,6 +713,11 @@
       cleanupFunctions.forEach((cleanup) => cleanup())
       cleanupFunctions.clear()
     }
+  }
+
+  // 이스케이프 처리 함수 정의
+  function escapeClassName(className) {
+    return className.replace(/([!"#$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g, '\\$1')
   }
 
   // 초기화 함수 - 초기화 함수로, 고객 ID를 추출하고 설문조사 데이터를 가져온 후 트리거를 설정합니다.
