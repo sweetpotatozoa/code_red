@@ -95,7 +95,7 @@ const TriggerSchema = new mongoose.Schema({
 
 // Main Survey Schema
 const surveySchema = new mongoose.Schema({
-  userId: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가
   isDeploy: { type: Boolean, default: false }, // 필드가 반드시 존재해야 하며, 빈문자열 불가
   steps: [StepSchema],
   triggers: [TriggerSchema],
@@ -104,6 +104,7 @@ const surveySchema = new mongoose.Schema({
     delayValue: { type: Number, required: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가
   },
   views: { type: Number, required: true }, // 필드가 반드시 존재해야 하며, 빈문자열 불가
+  template: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며, 빈문자열 불가
   createAt: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며, 빈문자열 불가
   updateAt: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며, 빈문자열 불가
 })
