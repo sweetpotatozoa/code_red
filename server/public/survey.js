@@ -116,12 +116,15 @@
   function validateSurvey(survey) {
     if (
       !survey.updateAt ||
+      !survey.createAt ||
       !survey.triggers ||
       !survey.steps ||
       !Array.isArray(survey.steps) ||
       !survey.delay ||
       !survey.delay.delayType ||
-      survey.delay.delayValue === undefined
+      survey.delay.delayValue === undefined ||
+      !survey.template ||
+      !survey.views
     ) {
       console.error(`Invalid survey structure: ${survey._id}`)
       return false
@@ -248,6 +251,12 @@
             `Unknown step type: ${step.type} in survey ${survey._id}`,
           )
           return false
+      }
+      if (step.type !== 'singleChoice' && step.type !== 'rating') {
+        if (!step.nextStepId || step.nextStepId.trim() === '') {
+          console.error(`Missing or empty nextStepId in survey ${survey._id}`)
+          return false
+        }
       }
     }
     return true
