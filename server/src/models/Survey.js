@@ -89,7 +89,7 @@ const TriggerSchema = new mongoose.Schema({
     },
     required: function () {
       return this.type !== 'url'
-    }, // this.type이 url이 아닌 경우 필수이며, 빈문자열 불가
+    }, // this.type이 url이 아닌 경우 필수이며, 빈문자열 가능
   },
 })
 

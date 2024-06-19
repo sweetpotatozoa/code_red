@@ -150,7 +150,7 @@
         case 'scroll':
         case 'exitIntent':
         case 'newSession':
-          if (!trigger.pageType || !trigger.pageValue) {
+          if (!trigger.pageType || trigger.pageValue === undefined) {
             console.error(
               `Missing pageType or pageValue for ${trigger.type} trigger in survey ${survey._id}`,
             )
