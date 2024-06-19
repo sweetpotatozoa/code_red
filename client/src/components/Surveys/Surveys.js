@@ -9,7 +9,6 @@ import EditingLink from '../EditingQuestion/EditingLink'
 import EditingInfo from '../EditingQuestion/EditingInfo'
 import EditingWelcome from '../EditingQuestion/EditingWelcome'
 import EditingThank from '../EditingQuestion/EditingThank'
-import { useNavigate } from 'react-router-dom'
 
 const Surveys = ({ survey, setSurvey }) => {
   if (!survey || !survey.questions) return null // survey나 survey.questions가 없으면 아무것도 렌더링하지 않음
@@ -34,26 +33,22 @@ const Surveys = ({ survey, setSurvey }) => {
       return
     }
 
-    const updatedQuestions = survey.questions
-      .filter((questions) => questions.id !== id)
-      .map((question, index) => ({ ...question, order: index }))
+    const updatedQuestions = survey.questions.filter(
+      (questions) => questions.id !== id,
+    )
 
     setSurvey({ ...survey, questions: updatedQuestions })
   }
 
   // 질문 추가 핸들러
   const addQuestionHandler = (type) => {
-    const newQuestionOrder = survey.questions.filter(
-      (q) => q.type !== 'thank',
-    ).length
     const newQuestion = {
       id: uuidv4(),
       title: '새 질문',
       description: '',
       type: type,
-      order: newQuestionOrder,
-      options: ['singleChoice', 'multipleChoice'].includes(type)
-        ? ['옵션1', '옵션2']
+      options: ['singleChoice', 'multipleChoice', 'rating'].includes(type)
+        ? ['옵션1', '옵션2', '옵션3', '옵션4', '옵션5']
         : [],
     }
 
@@ -64,10 +59,6 @@ const Surveys = ({ survey, setSurvey }) => {
 
     if (thankQuestionIndex !== -1) {
       updatedQuestions.splice(thankQuestionIndex, 0, newQuestion)
-      updatedQuestions[thankQuestionIndex + 1] = {
-        ...updatedQuestions[thankQuestionIndex + 1],
-        order: thankQuestionIndex + 1,
-      }
     } else {
       updatedQuestions.push(newQuestion)
     }
@@ -164,7 +155,7 @@ const Surveys = ({ survey, setSurvey }) => {
           if (b.type === 'welcome') return 1
           if (a.type === 'thank') return 1
           if (b.type === 'thank') return -1
-          return a.order - b.order
+          return 0
         })
         .map((question, index) => (
           <div

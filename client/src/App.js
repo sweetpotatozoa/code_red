@@ -17,7 +17,7 @@ function App() {
       <Route path='/register' element={<Register />} />
       <Route path='/onboarding' element={<Onboarding />} />
       <Route path='/responses' element={<Responses />} />
-      <Route path='/summary' element={<Summary />} />
+      <Route path='/summary/:id' element={<Summary />} />
       <Route path='/templates' element={<Templates />} />
       <Route path='/edit/:id' element={<Edit />} />
     </Routes>

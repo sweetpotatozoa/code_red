@@ -73,6 +73,28 @@ const surveys = [
         type: 'rating',
         title: 'CFO라구요?',
         description: '저희 제품의 가격에 대해 어떻게 생각하세요?',
+        options: [
+          {
+            id: 1,
+            nextQuestionId: 6,
+          },
+          {
+            id: 2,
+            nextQuestionId: 6,
+          },
+          {
+            id: 3,
+            nextQuestionId: 6,
+          },
+          {
+            id: 4,
+            nextQuestionId: 6,
+          },
+          {
+            id: 5,
+            nextQuestionId: 6,
+          },
+        ],
       },
       {
         id: 6,
@@ -258,7 +280,7 @@ const Edit = () => {
 
   // 뒤로가기
   const goBack = () => {
-    navigate('/templates')
+    navigate(-1)
   }
 
   const [mode, setMode] = useState('surveys')
