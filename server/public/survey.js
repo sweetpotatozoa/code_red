@@ -631,10 +631,10 @@
 
         if (trigger.type === 'cssSelector' && isCorrectPage(trigger)) {
           const originalSelector = trigger.selector
-          const escapedSelector = originalSelector.replace(
-            /([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g,
-            '\\$1',
-          )
+          const escapedSelector = originalSelector
+            .replace(/([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g, '\\$1')
+            .replace(/\\\\/g, '\\')
+
           const button = document.querySelector(escapedSelector)
           if (button) {
             button.addEventListener('click', showSurvey)
