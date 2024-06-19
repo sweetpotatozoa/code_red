@@ -115,6 +115,7 @@
   // 설문조사 데이터 유효성 검사
   function validateSurvey(survey) {
     if (
+      !survey.userId ||
       !survey.updateAt ||
       !survey.createAt ||
       !survey.triggers ||
@@ -123,8 +124,7 @@
       !survey.delay ||
       !survey.delay.delayType ||
       survey.delay.delayValue === undefined ||
-      !survey.template ||
-      !survey.views
+      survey.views === undefined
     ) {
       console.error(`Invalid survey structure: ${survey._id}`)
       return false
@@ -174,8 +174,7 @@
           if (
             !trigger.pageType ||
             trigger.pageType.trim() === '' ||
-            !trigger.pageValue ||
-            trigger.pageValue.trim() === ''
+            trigger.pageValue === undefined
           ) {
             console.error(
               `Missing or empty pageType or pageValue for ${trigger.type} trigger in survey ${survey._id}`,
