@@ -121,8 +121,7 @@
       !Array.isArray(survey.steps) ||
       !survey.delay ||
       !survey.delay.delayType ||
-      !survey.delay.delayValue ||
-      survey.views === undefined
+      !survey.delay.delayValue
     ) {
       console.error(`Invalid survey structure: ${survey._id}`)
       return false
@@ -184,7 +183,7 @@
         case 'link':
         case 'text':
         case 'info':
-          if (!step.nextStepId) {
+          if (step.nextStepId === undefined) {
             console.error(
               `Missing nextStepId for ${step.type} step in survey ${survey._id}`,
             )
