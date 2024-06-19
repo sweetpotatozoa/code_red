@@ -36,11 +36,12 @@
   }
 
   // 설문조사 응답을 저장
-  function saveResponse(stepIndex, response, type) {
+  function saveResponse(stepIndex, response, step) {
     surveyResponses[stepIndex] = {
-      stepIndex,
-      response,
-      type,
+      stepId: step.id,
+      stepTitle: step.title,
+      stepDescription: step.description,
+      answer: response,
       timestamp: new Date().toISOString(),
     }
   }
@@ -74,7 +75,7 @@
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId, surveyId, responses: [response] }),
+        body: JSON.stringify({ userId, surveyId, answers: [response] }),
       })
       if (!result.ok) {
         throw new Error(`HTTP error! status: ${result.status}`)
@@ -88,7 +89,7 @@
   }
 
   // 설문조사 응답 업데이트
-  async function updateResponse(responseId, responses) {
+  async function updateResponse(responseId, answers, isComplete) {
     try {
       const result = await fetch(
         `${API_URI}/api/appliedSurvey/response/${responseId}`,
@@ -97,7 +98,7 @@
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ responses }),
+          body: JSON.stringify({ answers, isComplete }),
         },
       )
       if (!result.ok) {
@@ -281,16 +282,16 @@
         return
       }
 
-      saveResponse(stepIndex, stepResponse, step.type)
+      saveResponse(stepIndex, stepResponse, step)
 
       try {
         if (surveyResponseId) {
-          await updateResponse(surveyResponseId, surveyResponses)
+          const isComplete = step.type === 'thankyou' && isLastStep
+          await updateResponse(surveyResponseId, surveyResponses, isComplete)
         } else {
           surveyResponseId = await createResponse(survey.userId, survey._id, {
-            stepIndex,
-            response: stepResponse,
-            type: step.type,
+            ...surveyResponses[0],
+            timestamp: new Date().toISOString(),
           })
         }
 
