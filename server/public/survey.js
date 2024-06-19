@@ -651,6 +651,7 @@
               const eventListener = function (event) {
                 // 이벤트 타겟이 실제 트리거 조건에 맞는지 확인
                 if (event.target.innerText.includes(trigger.text)) {
+                  event.stopPropagation() // 이벤트 버블링 방지
                   showSurvey()
                   console.log(`Inner Text trigger set for ${trigger.text}`)
                   found = true
@@ -714,7 +715,7 @@
       console.error('Error in setupTriggers:', error)
     }
 
-    return (surveyId) => {
+    return () => {
       cleanupFunctions.forEach((cleanup) => cleanup())
       cleanupFunctions.clear()
     }
