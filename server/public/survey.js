@@ -77,7 +77,7 @@
         },
         body: JSON.stringify({
           userId,
-          surveyId: new ObjectId(surveyId),
+          surveyId,
           answers: [answer],
           createAt: answer.timestamp,
           completeAt: null,
