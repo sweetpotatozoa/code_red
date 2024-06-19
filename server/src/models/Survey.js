@@ -4,7 +4,13 @@ const mongoose = require('mongoose')
 const OptionSchema = new mongoose.Schema({
   id: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가
   value: { type: String, required: false }, // 필드가 존재하지 않아도 되며 빈문자열 가능
-  nextStepId: { type: String, required: false }, // 필드가 존재하지 않아도 되며 빈문자열 가능
+  nextStepId: {
+    type: String,
+    required: function () {
+      return this.type === 'singleChoice'
+    }, // step.type이 singleChoice인 경우 필수이며, 빈문자열 불가
+    trim: true,
+  },
 })
 
 // Step Schema
@@ -12,7 +18,21 @@ const StepSchema = new mongoose.Schema({
   id: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가
   title: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가
   description: { type: String, required: false }, // 필드가 존재하지 않아도 되며 빈문자열 가능
-  type: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가
+  type: {
+    type: String,
+    required: true,
+    trim: true,
+    enum: [
+      'singleChoice',
+      'multipleChoice',
+      'rating',
+      'link',
+      'text',
+      'info',
+      'welcome',
+      'thankyou',
+    ],
+  }, // 필드가 반드시 존재해야 하며 빈문자열 불가
   options: [OptionSchema],
   buttonText: {
     type: String,
@@ -32,9 +52,9 @@ const StepSchema = new mongoose.Schema({
     type: String,
     required: function () {
       return this.type !== 'singleChoice' && this.type !== 'rating'
-    },
+    }, // step.type이 singleChoice, rating을 제외한 나머지일 경우 반드시 존재해야 하며 빈문자열 가능
     trim: true,
-  }, // step.type이 singleChoice, rating을 제외한 나머지일 경우 반드시 존재해야 하며 빈문자열 불가
+  },
 })
 
 // Trigger Schema
@@ -42,7 +62,12 @@ const TriggerSchema = new mongoose.Schema({
   id: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가
   title: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가
   description: { type: String, required: false }, // 필드가 존재하지 않아도 되며 빈문자열 가능
-  type: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가, 'newSession, scroll, exitIntent, click, url'
+  type: {
+    type: String,
+    required: true,
+    trim: true,
+    enum: ['newSession', 'scroll', 'exitIntent', 'click', 'url'],
+  }, // 필드가 반드시 존재해야 하며 빈문자열 불가
   clickType: {
     type: String,
     validate: {
@@ -104,7 +129,7 @@ const surveySchema = new mongoose.Schema({
     delayValue: { type: Number, required: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가
   },
   views: { type: Number, required: true }, // 필드가 반드시 존재해야 하며, 빈문자열 불가
-  template: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며, 빈문자열 불가
+  template: { type: String, required: false, trim: true }, // 필드가 존재하지 않아도 되며, 빈문자열 가능
   createAt: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며, 빈문자열 불가
   updateAt: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며, 빈문자열 불가
 })
