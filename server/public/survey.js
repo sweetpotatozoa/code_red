@@ -36,14 +36,14 @@
   }
 
   // 설문조사 응답을 저장
-  function saveResponse(stepIndex, response, step) {
-    surveyResponses[stepIndex] = {
+  function saveResponse(step, answer) {
+    surveyResponses.push({
       stepId: step.id,
       stepTitle: step.title,
       stepDescription: step.description,
-      answer: response,
+      answer,
       timestamp: new Date().toISOString(),
-    }
+    })
   }
 
   // HTTP 요청을 통해 설문조사 데이터 가져오기
@@ -68,14 +68,21 @@
   }
 
   // 설문조사 응답 생성
-  async function createResponse(userId, surveyId, response) {
+  async function createResponse(userId, surveyId, answer) {
     try {
       const result = await fetch(`${API_URI}/api/appliedSurvey/response`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId, surveyId, answers: [response] }),
+        body: JSON.stringify({
+          userId,
+          surveyId: new ObjectId(surveyId),
+          answers: [answer],
+          createAt: answer.timestamp,
+          completeAt: null,
+          isComplete: false,
+        }),
       })
       if (!result.ok) {
         throw new Error(`HTTP error! status: ${result.status}`)
@@ -98,7 +105,11 @@
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ answers, isComplete }),
+          body: JSON.stringify({
+            answers,
+            completeAt: isComplete ? new Date().toISOString() : null,
+            isComplete,
+          }),
         },
       )
       if (!result.ok) {
@@ -276,22 +287,21 @@
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
-      const stepResponse = getResponse(step)
+      const stepAnswer = getResponse(step)
 
-      if (stepResponse === null) {
+      if (stepAnswer === null) {
         return
       }
 
-      saveResponse(stepIndex, stepResponse, step)
+      saveResponse(step, stepAnswer)
 
       try {
         if (surveyResponseId) {
-          const isComplete = step.type === 'thankyou' && isLastStep
+          const isComplete = isLastStep && step.type !== 'thankyou'
           await updateResponse(surveyResponseId, surveyResponses, isComplete)
         } else {
           surveyResponseId = await createResponse(survey.userId, survey._id, {
             ...surveyResponses[0],
-            timestamp: new Date().toISOString(),
           })
         }
 
@@ -368,6 +378,11 @@
       completed,
     })
     window.dispatchEvent(new Event('surveyCompleted')) // 설문조사 완료 이벤트 발생
+
+    // isComplete 값 업데이트
+    if (completed && surveyResponseId) {
+      updateResponse(surveyResponseId, surveyResponses, true)
+    }
   }
 
   // 다음 스텝으로 이동
