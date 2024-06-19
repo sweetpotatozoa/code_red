@@ -331,28 +331,28 @@
   // 설문조사 단계별 내용 생성
   function generateStepHTML(step, buttonText) {
     return `
-        <div class="survey-step">
-          <div class="survey-header">
-            <button type="button" id="closeSurvey" class="close-button">X</button>
-          </div>
-          <form id="surveyForm">
-            ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
-            ${
-              step.description
-                ? `<p class="survey-description">${step.description}</p>`
-                : ''
-            }
-            <div>
-              ${generateStepContent(step)}
-            </div>
-            ${
-              buttonText
-                ? `<button type="submit" id="submitSurvey">${buttonText}</button>`
-                : ''
-            }
-          </form>
+      <div class="survey-step">
+        <div class="survey-header">
+          <button type="button" id="closeSurvey" class="close-button">X</button>
         </div>
-      `
+        <form id="surveyForm">
+          ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
+          ${
+            step.description
+              ? `<p class="survey-description">${step.description}</p>`
+              : ''
+          }
+          <div>
+            ${generateStepContent(step)}
+          </div>
+          ${
+            buttonText
+              ? `<button type="submit" id="submitSurvey">${buttonText}</button>`
+              : ''
+          }
+        </form>
+      </div>
+    `
   }
 
   // 설문조사 단계별 버튼 텍스트 설정
@@ -629,56 +629,35 @@
           }
         }, 200)
 
-        // innerText 트리거에 대한 처리
+        if (trigger.type === 'cssSelector' && isCorrectPage(trigger)) {
+          const button = document.querySelector(trigger.selector)
+          if (button) {
+            button.addEventListener('click', showSurvey)
+            console.log(`CSS Selector trigger set for ${trigger.selector}`)
+            cleanupFunctions.set(trigger.selector, () =>
+              button.removeEventListener('click', showSurvey),
+            )
+          } else {
+            console.log(`CSS Selector not found: ${trigger.selector}`)
+          }
+        }
+
         if (trigger.type === 'innerText' && isCorrectPage(trigger)) {
           const elements = document.querySelectorAll('button, a, div')
+          let found = false
           elements.forEach((element) => {
             if (element.innerText.includes(trigger.text)) {
               element.addEventListener('click', showSurvey)
               console.log(`Inner Text trigger set for ${trigger.text}`)
+              found = true
               cleanupFunctions.set(element, () =>
                 element.removeEventListener('click', showSurvey),
               )
             }
           })
-        }
-
-        // 나머지 트리거 처리 (cssSelector, exitIntent, newSession, scroll, url)
-        if (trigger.type === 'cssSelector' && isCorrectPage(trigger)) {
-          const setupButtonListener = () => {
-            console.log('Setup Button Listener Called') // 추가된 디버깅 메시지
-            const escapedSelector = trigger.selector.replace(
-              /([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g,
-              '\\$1',
-            )
-            console.log(`Escaped selector: ${escapedSelector}`) // 디버깅 메시지 추가
-
-            const findButtonAndAttachListener = () => {
-              const button = document.querySelector(escapedSelector)
-              if (button) {
-                console.log(`Button found: ${button}`) // 디버깅 메시지 추가
-                button.addEventListener('click', showSurvey)
-                console.log(`CSS Selector trigger set for ${trigger.selector}`)
-                cleanupFunctions.set(trigger.selector, () =>
-                  button.removeEventListener('click', showSurvey),
-                )
-              } else {
-                console.log(`CSS Selector not found yet: ${trigger.selector}`)
-                setTimeout(findButtonAndAttachListener, 500) // 500ms 후 다시 시도
-              }
-            }
-
-            findButtonAndAttachListener()
+          if (!found) {
+            console.log(`Inner Text not found: ${trigger.text}`)
           }
-
-          document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOMContentLoaded Event Fired') // 추가된 디버깅 메시지
-            setupButtonListener()
-          })
-          window.addEventListener('load', () => {
-            console.log('Window Load Event Fired') // 추가된 디버깅 메시지
-            setupButtonListener()
-          })
         }
 
         if (trigger.type === 'exitIntent' && isCorrectPage(trigger)) {
