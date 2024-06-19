@@ -6,6 +6,14 @@ import { useParams } from 'react-router-dom'
 import data from '../../utils/data'
 import customerData from '../../utils/customerData'
 
+import SummaryFreeText from '../../components/Summaries/SummaryFreeText'
+import SummaryRating from '../../components/Summaries/SummaryRating'
+import SummarySingleChoice from '../../components/Summaries/SummarySingleChoice'
+import SummaryWelcome from '../../components/Summaries/SummaryWelcome'
+import SummaryMultipleChoice from '../../components/Summaries/SummaryMultipleChoice'
+import SummaryInfo from '../../components/Summaries/SummaryInfo'
+import SummaryLink from '../../components/Summaries/SummaryLink'
+
 const Summary = () => {
   const [surveys, setSurveys] = useState(data)
   const [customerInfo, setCustomerInfo] = useState(customerData)
@@ -28,10 +36,6 @@ const Summary = () => {
   //설문조사 수정하기
   const handleEdit = (surveyId) => {
     navigate(`/edit/${surveyId}`)
-  }
-
-  const newSurveyHandler = () => {
-    navigate('/templates')
   }
 
   //설문조사 삭제하기
@@ -158,16 +162,30 @@ const Summary = () => {
               <div className={styles.summaryNum}>1</div>
             </div>
           </div>
-          <div className={styles.download}>
-            <div className={styles.downloadButton}>다운로드</div>
-          </div>
           <div className={styles.steps}>
-            <div className={styles.step}>
-              <div className={styles.stepTitle}>설문조사 제목</div>
-              <div className={styles.stepContent}>{survey.title}</div>
-            </div>
-            <div className={styles.step}></div>
-            <div className={styles.step}></div>
+            {survey.questions.map((question) => {
+              if (question.type === 'welcome') {
+                return <SummaryWelcome key={question.id} />
+              }
+              if (question.type === 'freeText') {
+                return <SummaryFreeText key={question.id} />
+              }
+              if (question.type === 'rating') {
+                return <SummaryRating key={question.id} />
+              }
+              if (question.type === 'singleChoice') {
+                return <SummarySingleChoice key={question.id} />
+              }
+              if (question.type === 'multipleChoice') {
+                return <SummaryMultipleChoice key={question.id} />
+              }
+              if (question.type === 'info') {
+                return <SummaryInfo key={question.id} />
+              }
+              if (question.type === 'link') {
+                return <SummaryLink key={question.id} />
+              }
+            })}
           </div>
         </div>
       </div>

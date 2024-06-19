@@ -1,0 +1,67 @@
+.progressBar {
+  width: 100%;
+  height: 20px;
+  background-color: #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.progressValue {
+  height: 100%;
+  background-color: #4caf50;
+  transition: width 0.3s ease-in-out;
+  border-radius: 10px;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 1px 3px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.informations {
+  display: flex;
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+.info {
+  margin-right: 16px;
+  font-size: 16px;
+}
+
+.contents {
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+}
+
+.content {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 16px;
+  background-color: #f1f3f6;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.option {
+  margin-bottom: 16px;
+}
+
+.optionTitle {
+  display: flex;
+  justify-content: space-between;
+}

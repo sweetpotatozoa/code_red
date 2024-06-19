@@ -347,4 +347,15 @@ input:checked + .slider:before {
 .steps {
   display: flex;
   flex-direction: column;
+  margin-top: 32px;
+}
+
+.step {
+  display: flex;
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 1px 3px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
 }
