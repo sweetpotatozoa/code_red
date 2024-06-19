@@ -634,10 +634,7 @@
           const elements = document.querySelectorAll('button, a, div')
           elements.forEach((element) => {
             if (element.innerText.includes(trigger.text)) {
-              element.addEventListener('click', (event) => {
-                event.stopPropagation()
-                showSurvey()
-              })
+              element.addEventListener('click', showSurvey)
               console.log(`Inner Text trigger set for ${trigger.text}`)
               cleanupFunctions.set(element, () =>
                 element.removeEventListener('click', showSurvey),
@@ -649,6 +646,7 @@
         // 나머지 트리거 처리 (cssSelector, exitIntent, newSession, scroll, url)
         if (trigger.type === 'cssSelector' && isCorrectPage(trigger)) {
           const setupButtonListener = () => {
+            console.log('Setup Button Listener Called') // 추가된 디버깅 메시지
             const escapedSelector = trigger.selector.replace(
               /([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g,
               '\\$1',
@@ -673,8 +671,14 @@
             findButtonAndAttachListener()
           }
 
-          document.addEventListener('DOMContentLoaded', setupButtonListener)
-          window.addEventListener('load', setupButtonListener)
+          document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOMContentLoaded Event Fired') // 추가된 디버깅 메시지
+            setupButtonListener()
+          })
+          window.addEventListener('load', () => {
+            console.log('Window Load Event Fired') // 추가된 디버깅 메시지
+            setupButtonListener()
+          })
         }
 
         if (trigger.type === 'exitIntent' && isCorrectPage(trigger)) {
