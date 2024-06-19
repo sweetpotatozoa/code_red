@@ -644,7 +644,7 @@
         }
 
         if (trigger.type === 'innerText' && isCorrectPage(trigger)) {
-          const elements = document.querySelectorAll('button, a, div')
+          const elements = document.querySelectorAll('button')
           let found = false
           elements.forEach((element) => {
             if (element.innerText.includes(trigger.text)) {
