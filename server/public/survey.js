@@ -630,13 +630,12 @@
         }, 200)
 
         if (trigger.type === 'cssSelector' && isCorrectPage(trigger)) {
-          // selector 값을 이스케이프 처리
           const escapedSelector = escapeClassName(trigger.selector)
           const button = document.querySelector(escapedSelector)
           if (button) {
             button.addEventListener('click', showSurvey)
             console.log(`CSS Selector trigger set for ${trigger.selector}`)
-            cleanupFunctions.set(trigger.selector, () =>
+            cleanupFunctions.set(escapedSelector, () =>
               button.removeEventListener('click', showSurvey),
             )
           } else {
@@ -649,11 +648,17 @@
           let found = false
           elements.forEach((element) => {
             if (element.innerText.includes(trigger.text)) {
-              element.addEventListener('click', showSurvey)
-              console.log(`Inner Text trigger set for ${trigger.text}`)
-              found = true
+              const eventListener = function (event) {
+                // 이벤트 타겟이 실제 트리거 조건에 맞는지 확인
+                if (event.target.innerText.includes(trigger.text)) {
+                  showSurvey()
+                  console.log(`Inner Text trigger set for ${trigger.text}`)
+                  found = true
+                }
+              }
+              element.addEventListener('click', eventListener)
               cleanupFunctions.set(element, () =>
-                element.removeEventListener('click', showSurvey),
+                element.removeEventListener('click', eventListener),
               )
             }
           })
