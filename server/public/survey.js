@@ -654,17 +654,23 @@
               '\\$1',
             )
             console.log(`Escaped selector: ${escapedSelector}`) // 디버깅 메시지 추가
-            const button = document.querySelector(escapedSelector)
-            if (button) {
-              console.log(`Button found: ${button}`) // 디버깅 메시지 추가
-              button.addEventListener('click', showSurvey)
-              console.log(`CSS Selector trigger set for ${trigger.selector}`)
-              cleanupFunctions.set(trigger.selector, () =>
-                button.removeEventListener('click', showSurvey),
-              )
-            } else {
-              console.log(`CSS Selector not found: ${trigger.selector}`)
+
+            const findButtonAndAttachListener = () => {
+              const button = document.querySelector(escapedSelector)
+              if (button) {
+                console.log(`Button found: ${button}`) // 디버깅 메시지 추가
+                button.addEventListener('click', showSurvey)
+                console.log(`CSS Selector trigger set for ${trigger.selector}`)
+                cleanupFunctions.set(trigger.selector, () =>
+                  button.removeEventListener('click', showSurvey),
+                )
+              } else {
+                console.log(`CSS Selector not found yet: ${trigger.selector}`)
+                setTimeout(findButtonAndAttachListener, 500) // 500ms 후 다시 시도
+              }
             }
+
+            findButtonAndAttachListener()
           }
 
           document.addEventListener('DOMContentLoaded', setupButtonListener)
