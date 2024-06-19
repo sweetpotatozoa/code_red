@@ -331,28 +331,28 @@
   // 설문조사 단계별 내용 생성
   function generateStepHTML(step, buttonText) {
     return `
-      <div class="survey-step">
-        <div class="survey-header">
-          <button type="button" id="closeSurvey" class="close-button">X</button>
-        </div>
-        <form id="surveyForm">
-          ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
-          ${
-            step.description
-              ? `<p class="survey-description">${step.description}</p>`
-              : ''
-          }
-          <div>
-            ${generateStepContent(step)}
+        <div class="survey-step">
+          <div class="survey-header">
+            <button type="button" id="closeSurvey" class="close-button">X</button>
           </div>
-          ${
-            buttonText
-              ? `<button type="submit" id="submitSurvey">${buttonText}</button>`
-              : ''
-          }
-        </form>
-      </div>
-    `
+          <form id="surveyForm">
+            ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
+            ${
+              step.description
+                ? `<p class="survey-description">${step.description}</p>`
+                : ''
+            }
+            <div>
+              ${generateStepContent(step)}
+            </div>
+            ${
+              buttonText
+                ? `<button type="submit" id="submitSurvey">${buttonText}</button>`
+                : ''
+            }
+          </form>
+        </div>
+      `
   }
 
   // 설문조사 단계별 버튼 텍스트 설정
@@ -648,20 +648,22 @@
 
         // 나머지 트리거 처리 (cssSelector, exitIntent, newSession, scroll, url)
         if (trigger.type === 'cssSelector' && isCorrectPage(trigger)) {
-          const escapedSelector = trigger.selector.replace(
-            /([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g,
-            '\\$1',
-          )
-          const button = document.querySelector(escapedSelector)
-          if (button) {
-            button.addEventListener('click', showSurvey)
-            console.log(`CSS Selector trigger set for ${trigger.selector}`)
-            cleanupFunctions.set(trigger.selector, () =>
-              button.removeEventListener('click', showSurvey),
+          document.addEventListener('DOMContentLoaded', function () {
+            const escapedSelector = trigger.selector.replace(
+              /([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g,
+              '\\$1',
             )
-          } else {
-            console.log(`CSS Selector not found: ${trigger.selector}`)
-          }
+            const button = document.querySelector(escapedSelector)
+            if (button) {
+              button.addEventListener('click', showSurvey)
+              console.log(`CSS Selector trigger set for ${trigger.selector}`)
+              cleanupFunctions.set(trigger.selector, () =>
+                button.removeEventListener('click', showSurvey),
+              )
+            } else {
+              console.log(`CSS Selector not found: ${trigger.selector}`)
+            }
+          })
         }
 
         if (trigger.type === 'exitIntent' && isCorrectPage(trigger)) {
