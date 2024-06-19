@@ -630,19 +630,20 @@
         }, 200)
 
         if (trigger.type === 'cssSelector' && isCorrectPage(trigger)) {
-          const escapedSelector = trigger.selector.replace(
+          const originalSelector = trigger.selector
+          const escapedSelector = originalSelector.replace(
             /([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g,
             '\\$1',
           )
           const button = document.querySelector(escapedSelector)
           if (button) {
             button.addEventListener('click', showSurvey)
-            console.log(`CSS Selector trigger set for ${trigger.selector}`)
-            cleanupFunctions.set(trigger.selector, () =>
+            console.log(`CSS Selector trigger set for ${originalSelector}`)
+            cleanupFunctions.set(escapedSelector, () =>
               button.removeEventListener('click', showSurvey),
             )
           } else {
-            console.log(`CSS Selector not found: ${trigger.selector}`)
+            console.log(`CSS Selector not found: ${originalSelector}`)
           }
         }
 
