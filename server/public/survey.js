@@ -121,7 +121,7 @@
       !Array.isArray(survey.steps) ||
       !survey.delay ||
       !survey.delay.delayType ||
-      !survey.delay.delayValue
+      survey.delay.delayValue === undefined
     ) {
       console.error(`Invalid survey structure: ${survey._id}`)
       return false
@@ -134,15 +134,33 @@
       }
       switch (trigger.type) {
         case 'url':
-          if (trigger.url === undefined) {
-            console.error(`Missing url for url trigger in survey ${survey._id}`)
+          if (trigger.url === undefined || trigger.url.trim() === '') {
+            console.error(
+              `Missing or empty url for url trigger in survey ${survey._id}`,
+            )
             return false
           }
           break
         case 'click':
-          if (!trigger.clickType || !trigger.clickValue) {
+          if (
+            !trigger.clickType ||
+            trigger.clickType.trim() === '' ||
+            !trigger.clickValue ||
+            trigger.clickValue.trim() === ''
+          ) {
             console.error(
-              `Missing clickType or clickValue for click trigger in survey ${survey._id}`,
+              `Missing or empty clickType or clickValue for click trigger in survey ${survey._id}`,
+            )
+            return false
+          }
+          if (
+            !trigger.pageType ||
+            trigger.pageType.trim() === '' ||
+            !trigger.pageValue ||
+            trigger.pageValue.trim() === ''
+          ) {
+            console.error(
+              `Missing or empty pageType or pageValue for click trigger in survey ${survey._id}`,
             )
             return false
           }
@@ -150,9 +168,14 @@
         case 'scroll':
         case 'exitIntent':
         case 'newSession':
-          if (!trigger.pageType || trigger.pageValue === undefined) {
+          if (
+            !trigger.pageType ||
+            trigger.pageType.trim() === '' ||
+            !trigger.pageValue ||
+            trigger.pageValue.trim() === ''
+          ) {
             console.error(
-              `Missing pageType or pageValue for ${trigger.type} trigger in survey ${survey._id}`,
+              `Missing or empty pageType or pageValue for ${trigger.type} trigger in survey ${survey._id}`,
             )
             return false
           }
@@ -168,11 +191,13 @@
     for (let step of survey.steps) {
       if (
         !step.id ||
-        step.title === undefined ||
+        step.id.trim() === '' ||
+        !step.title ||
+        step.title.trim() === '' ||
         step.description === undefined
       ) {
         console.error(
-          `Missing id, title or description in survey ${survey._id}`,
+          `Missing or empty id, title or description in survey ${survey._id}`,
         )
         return false
       }
@@ -195,16 +220,21 @@
             return false
           }
           for (let option of step.options) {
-            if (!option.id || !option.value || !option.nextStepId) {
+            if (!option.id || option.id.trim() === '') {
               console.error(`Invalid option structure in survey ${survey._id}`)
               return false
             }
           }
           break
         case 'link':
-          if (!step.buttonText || !step.url) {
+          if (
+            !step.buttonText ||
+            step.buttonText.trim() === '' ||
+            !step.url ||
+            step.url.trim() === ''
+          ) {
             console.error(
-              `Missing buttonText or url for link step in survey ${survey._id}`,
+              `Missing or empty buttonText or url for link step in survey ${survey._id}`,
             )
             return false
           }
