@@ -648,13 +648,15 @@
 
         // 나머지 트리거 처리 (cssSelector, exitIntent, newSession, scroll, url)
         if (trigger.type === 'cssSelector' && isCorrectPage(trigger)) {
-          document.addEventListener('DOMContentLoaded', function () {
+          const setupButtonListener = () => {
             const escapedSelector = trigger.selector.replace(
               /([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g,
               '\\$1',
             )
+            console.log(`Escaped selector: ${escapedSelector}`) // 디버깅 메시지 추가
             const button = document.querySelector(escapedSelector)
             if (button) {
+              console.log(`Button found: ${button}`) // 디버깅 메시지 추가
               button.addEventListener('click', showSurvey)
               console.log(`CSS Selector trigger set for ${trigger.selector}`)
               cleanupFunctions.set(trigger.selector, () =>
@@ -663,7 +665,10 @@
             } else {
               console.log(`CSS Selector not found: ${trigger.selector}`)
             }
-          })
+          }
+
+          document.addEventListener('DOMContentLoaded', setupButtonListener)
+          window.addEventListener('load', setupButtonListener)
         }
 
         if (trigger.type === 'exitIntent' && isCorrectPage(trigger)) {
