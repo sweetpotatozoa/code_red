@@ -630,7 +630,11 @@
         }, 200)
 
         if (trigger.type === 'cssSelector' && isCorrectPage(trigger)) {
-          const button = document.querySelector(trigger.selector)
+          const escapedSelector = trigger.selector.replace(
+            /([!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g,
+            '\\$1',
+          )
+          const button = document.querySelector(escapedSelector)
           if (button) {
             button.addEventListener('click', showSurvey)
             console.log(`CSS Selector trigger set for ${trigger.selector}`)
