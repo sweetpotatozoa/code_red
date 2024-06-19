@@ -5,12 +5,12 @@ const router = express.Router()
 
 // 모든 설문조사 가져오기
 router.get('/', async (req, res) => {
-  const { customerId, isActive } = req.query
-  let query = { customerId }
+  const { userId, isDeploy } = req.query
+  let query = { userId }
 
-  // isActive 쿼리 파라미터가 존재할 경우 추가
-  if (isActive !== undefined) {
-    query.isActive = isActive === 'true'
+  // isDeploy 쿼리 파라미터가 존재할 경우 추가
+  if (isDeploy !== undefined) {
+    query.isDeploy = isDeploy === 'true'
   }
 
   try {
