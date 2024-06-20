@@ -19,14 +19,24 @@ class AppliedSurveyRepo {
   }
 
   async addResponse(response) {
-    const result = await this.responsesCollection.insertOne(response)
+    const surveyId = new ObjectId(response.surveyId)
+    const result = await this.responsesCollection.insertOne({
+      ...response,
+      surveyId,
+    })
     return { ...response, _id: result.insertedId }
   }
 
   async updateResponse(responseId, response) {
     const result = await this.responsesCollection.updateOne(
       { _id: new ObjectId(responseId) },
-      { $set: { responses: response.responses } },
+      {
+        $set: {
+          answers: response.answers,
+          completeAt: response.completeAt,
+          isComplete: response.isComplete,
+        },
+      },
     )
     return result
   }

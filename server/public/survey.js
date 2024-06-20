@@ -9,14 +9,14 @@
   let activeSurveys = new Set()
   let surveys = []
 
-  // 1. Helper Functions - 각종 보조 기능을 수행하는 함수들로, URL에서 고객 ID를 추출하거나 로컬 스토리지에 데이터를 저장하고 불러오는 기능을 합니다.
+  // 1. Helper Functions
 
-  // URL에서 customerId 추출
-  function getCustomerIdFromUrl() {
+  // URL에서 userId 추출
+  function getUserIdFromUrl() {
     const scriptElements = document.getElementsByTagName('script')
     for (let script of scriptElements) {
       const src = script.src
-      const match = src.match(/customerId=([^&]+)/)
+      const match = src.match(/userId=([^&]+)/)
       if (match) {
         return match[1]
       }
@@ -36,20 +36,21 @@
   }
 
   // 설문조사 응답을 저장
-  function saveResponse(stepIndex, response, type) {
-    surveyResponses[stepIndex] = {
-      stepIndex,
-      response,
-      type,
+  function saveResponse(step, answer) {
+    surveyResponses.push({
+      stepId: step.id,
+      stepTitle: step.title,
+      stepDescription: step.description,
+      answer,
       timestamp: new Date().toISOString(),
-    }
+    })
   }
 
   // HTTP 요청을 통해 설문조사 데이터 가져오기
-  async function fetchSurvey(customerId) {
+  async function fetchSurvey(userId) {
     try {
       const response = await fetch(
-        `${API_URI}/api/appliedSurvey?customerId=${customerId}&isActive=true`,
+        `${API_URI}/api/appliedSurvey?userId=${userId}&isDeploy=true`,
       )
       if (!response.ok) {
         throw new Error('Network response was not ok')
@@ -67,14 +68,21 @@
   }
 
   // 설문조사 응답 생성
-  async function createResponse(customerId, surveyId, response) {
+  async function createResponse(userId, surveyId, answer) {
     try {
       const result = await fetch(`${API_URI}/api/appliedSurvey/response`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ customerId, surveyId, responses: [response] }),
+        body: JSON.stringify({
+          userId,
+          surveyId,
+          answers: [answer],
+          createAt: answer.timestamp,
+          completeAt: null,
+          isComplete: false,
+        }),
       })
       if (!result.ok) {
         throw new Error(`HTTP error! status: ${result.status}`)
@@ -88,7 +96,7 @@
   }
 
   // 설문조사 응답 업데이트
-  async function updateResponse(responseId, responses) {
+  async function updateResponse(responseId, answers, isComplete) {
     try {
       const result = await fetch(
         `${API_URI}/api/appliedSurvey/response/${responseId}`,
@@ -97,7 +105,11 @@
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ responses }),
+          body: JSON.stringify({
+            answers,
+            completeAt: isComplete ? new Date().toISOString() : null,
+            isComplete,
+          }),
         },
       )
       if (!result.ok) {
@@ -110,7 +122,7 @@
     }
   }
 
-  // 2. Survey Validation Functions - 설문조사의 데이터 유효성을 검증하는 함수들로, 각 트리거와 스텝이 올바르게 구성되어 있는지 확인합니다.
+  // 2. Survey Validation Functions
 
   // 설문조사 데이터 유효성 검사
   function validateSurvey(survey) {
@@ -119,17 +131,11 @@
       !survey.triggers ||
       !survey.steps ||
       !Array.isArray(survey.steps) ||
-      !survey.displayOption
+      !survey.delay ||
+      !survey.delay.delayType ||
+      !survey.delay.delayValue
     ) {
       console.error(`Invalid survey structure: ${survey._id}`)
-      return false
-    }
-
-    if (
-      survey.displayOption !== 'once' &&
-      (survey.cooldown === undefined || isNaN(survey.cooldown))
-    ) {
-      console.error(`Missing or invalid cooldown for survey ${survey._id}`)
       return false
     }
 
@@ -145,18 +151,10 @@
             return false
           }
           break
-        case 'cssSelector':
-          if (!trigger.selector) {
+        case 'click':
+          if (!trigger.clickType || !trigger.clickValue) {
             console.error(
-              `Missing selector for cssSelector trigger in survey ${survey._id}`,
-            )
-            return false
-          }
-          break
-        case 'innerText':
-          if (!trigger.text) {
-            console.error(
-              `Missing text for innerText trigger in survey ${survey._id}`,
+              `Missing clickType or clickValue for click trigger in survey ${survey._id}`,
             )
             return false
           }
@@ -164,6 +162,12 @@
         case 'scroll':
         case 'exitIntent':
         case 'newSession':
+          if (!trigger.pageType || trigger.pageValue === undefined) {
+            console.error(
+              `Missing pageType or pageValue for ${trigger.type} trigger in survey ${survey._id}`,
+            )
+            return false
+          }
           break
         default:
           console.error(
@@ -174,40 +178,57 @@
     }
 
     for (let step of survey.steps) {
-      if (step.title === undefined || step.description === undefined) {
-        console.error(`Missing title or description in survey ${survey._id}`)
+      if (
+        !step.id ||
+        step.title === undefined ||
+        step.description === undefined
+      ) {
+        console.error(
+          `Missing id, title or description in survey ${survey._id}`,
+        )
         return false
       }
       switch (step.type) {
         case 'welcome':
         case 'thankyou':
-          if (step.isActive === undefined) {
+        case 'multipleChoice':
+        case 'link':
+        case 'text':
+        case 'info':
+          if (step.nextStepId === undefined) {
             console.error(
-              `Missing isActive for ${step.type} step in survey ${survey._id}`,
+              `Missing nextStepId for ${step.type} step in survey ${survey._id}`,
             )
             return false
           }
           break
         case 'singleChoice':
-        case 'multipleChoice':
           if (!step.options || !Array.isArray(step.options)) {
             console.error(
               `Invalid options for ${step.type} step in survey ${survey._id}`,
             )
             return false
           }
-          break
-        case 'link':
-          if (!step.buttonText || !step.buttonUrl) {
-            console.error(
-              `Missing buttonText or buttonUrl for link step in survey ${survey._id}`,
-            )
-            return false
+          for (let option of step.options) {
+            if (!option.id || !option.value || !option.nextStepId) {
+              console.error(`Invalid option structure in survey ${survey._id}`)
+              return false
+            }
           }
           break
         case 'rating':
-        case 'text':
-        case 'info':
+          if (!step.options || !Array.isArray(step.options)) {
+            console.error(
+              `Invalid options for ${step.type} step in survey ${survey._id}`,
+            )
+            return false
+          }
+          for (let option of step.options) {
+            if (!option.id || !option.nextStepId) {
+              console.error(`Invalid option structure in survey ${survey._id}`)
+              return false
+            }
+          }
           break
         default:
           console.error(
@@ -219,7 +240,7 @@
     return true
   }
 
-  // 3. Survey Display Functions - 설문조사를 표시하고, 단계별로 응답을 수집하고 저장하는 함수들로 구성되어 있습니다.
+  // 3. Survey Display Functions
 
   // 설문조사 표시 조건 확인
   function canShowSurvey(survey) {
@@ -231,14 +252,14 @@
     const lastShown = new Date(lastShownTime)
     const secondsSinceLastShown = (now - lastShown) / 1000
 
-    switch (survey.displayOption) {
+    switch (survey.delay.delayType) {
       case 'once':
         return false
       case 'untilCompleted':
         if (completed) return false
-        return secondsSinceLastShown >= survey.cooldown
+        return secondsSinceLastShown >= survey.delay.delayValue
       case 'always':
-        return secondsSinceLastShown >= survey.cooldown
+        return secondsSinceLastShown >= survey.delay.delayValue
       default:
         return false
     }
@@ -278,34 +299,27 @@
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
-      const stepResponse = getResponse(step)
+      const stepAnswer = getResponse(step)
 
-      if (stepResponse === null) {
+      if (stepAnswer === null) {
         return
       }
 
-      saveResponse(stepIndex, stepResponse, step.type)
+      saveResponse(step, stepAnswer)
 
       try {
         if (surveyResponseId) {
-          await updateResponse(surveyResponseId, surveyResponses)
+          const isComplete = isLastStep && step.type !== 'thankyou'
+          await updateResponse(surveyResponseId, surveyResponses, isComplete)
         } else {
-          surveyResponseId = await createResponse(
-            survey.customerId,
-            survey._id,
-            {
-              stepIndex,
-              response: stepResponse,
-              type: step.type,
-            },
-          )
+          surveyResponseId = await createResponse(survey.userId, survey._id, {
+            ...surveyResponses[0],
+          })
         }
 
         if (step.type === 'link') {
           window.open(
-            step.buttonUrl.startsWith('http')
-              ? step.buttonUrl
-              : `https://${step.buttonUrl}`,
+            step.url.startsWith('http') ? step.url : `https://${step.url}`,
             '_blank',
           )
         }
@@ -320,9 +334,12 @@
         console.error('Error while submitting survey:', error)
       }
     }
+
+    if (step.type !== 'thankyou') {
+      updateProgressBar(stepIndex, activeSteps.length - 1)
+    }
   }
 
-  // 설문조사 단계별 내용 생성
   function generateStepHTML(step, buttonText) {
     return `
       <div class="survey-step">
@@ -346,7 +363,25 @@
           }
         </form>
       </div>
+      ${
+        step.type !== 'thankyou'
+          ? `<div class="survey-progress">
+              <div class="progress-bar">
+                <div class="progress"></div>
+              </div>
+              <p class="powered-by">Powered by Codered</p>
+            </div>`
+          : ''
+      }
     `
+  }
+
+  function updateProgressBar(currentStepIndex, totalSteps) {
+    const progressBar = document.querySelector('.progress')
+    if (progressBar) {
+      const progressPercentage = ((currentStepIndex + 1) / totalSteps) * 100
+      progressBar.style.width = `${progressPercentage}%`
+    }
   }
 
   // 설문조사 단계별 버튼 텍스트 설정
@@ -376,6 +411,11 @@
       completed,
     })
     window.dispatchEvent(new Event('surveyCompleted')) // 설문조사 완료 이벤트 발생
+
+    // isComplete 값 업데이트
+    if (completed && surveyResponseId) {
+      updateResponse(surveyResponseId, surveyResponses, true)
+    }
   }
 
   // 다음 스텝으로 이동
@@ -415,7 +455,7 @@
         return step.options
           .map(
             (option, index) =>
-              `<input type="radio" name="choice" value="${option}" id="choice-${index}"><label for="choice-${index}">${option}</label>`,
+              `<input type="radio" name="choice" value="${option.value}" id="choice-${option.id}"><label for="choice-${option.id}">${option.value}</label>`,
           )
           .join('')
       case 'multipleChoice':
@@ -423,15 +463,17 @@
         return step.options
           .map(
             (option, index) =>
-              `<input type="checkbox" name="multipleChoice" value="${option}" id="multipleChoice-${index}"><label for="multipleChoice-${index}">${option}</label>`,
+              `<input type="checkbox" name="multipleChoice" value="${option.value}" id="multipleChoice-${option.id}"><label for="multipleChoice-${option.id}">${option.value}</label>`,
           )
           .join('')
       case 'rating':
         // 평점 질문을 별점으로 렌더링
-        return `<span class="star-rating">${[1, 2, 3, 4, 5]
+        return `<span class="star-rating">${step.options
           .map(
-            (i) =>
-              `<input type="radio" name="rating" value="${i}" id="rating-${i}"><label for="rating-${i}">★</label>`,
+            (_, index) =>
+              `<input type="radio" name="rating" value="${
+                index + 1
+              }" id="rating-${index}"><label for="rating-${index}">★</label>`,
           )
           .join('')}</span>`
       case 'text':
@@ -470,7 +512,7 @@
         const selectedRating = document.querySelector(
           'input[name="rating"]:checked',
         )
-        return selectedRating ? selectedRating.value : null
+        return selectedRating ? parseInt(selectedRating.value) : null
       }
       case 'text': {
         const textResponse = document.getElementById('response')
@@ -485,7 +527,7 @@
     }
   }
 
-  // 4. Event Listener and Trigger Setup - 이벤트 리스너를 설정하고, 각 트리거가 발생할 때 설문조사를 표시하도록 처리하는 함수들입니다. 이벤트 리스너를 제거하는 클린업 함수도 포함되어 있습니다.
+  // 4. Event Listener and Trigger Setup
 
   // Debounce 함수
   function debounce(func, wait) {
@@ -546,6 +588,17 @@
     })
   }
 
+  // 페이지가 특정 URL인지 확인하는 함수
+  function isCorrectPage(trigger) {
+    if (trigger.pageType === 'all') {
+      return true
+    } else if (trigger.pageType === 'specific') {
+      const currentUrl = new URL(window.location.href)
+      return currentUrl.pathname === trigger.pageValue
+    }
+    return false
+  }
+
   // 트리거 설정 및 처리
   function setupTriggers(surveysData) {
     surveys = surveysData
@@ -557,8 +610,7 @@
       url: 2,
       exitIntent: 3,
       scroll: 4,
-      cssSelector: 5,
-      innerText: 6,
+      click: 5,
     }
 
     // 각 설문조사의 트리거를 surveyMap에 추가
@@ -612,38 +664,48 @@
           }
         }, 200)
 
-        if (trigger.type === 'cssSelector') {
-          const button = document.querySelector(trigger.selector)
-          if (button) {
-            button.addEventListener('click', showSurvey)
-            console.log(`CSS Selector trigger set for ${trigger.selector}`)
-            cleanupFunctions.set(trigger.selector, () =>
-              button.removeEventListener('click', showSurvey),
-            )
-          } else {
-            console.log(`CSS Selector not found: ${trigger.selector}`)
-          }
-        }
-
-        if (trigger.type === 'innerText') {
-          const elements = document.querySelectorAll('button, a, div')
-          let found = false
-          elements.forEach((element) => {
-            if (element.innerText.includes(trigger.text)) {
-              element.addEventListener('click', showSurvey)
-              console.log(`Inner Text trigger set for ${trigger.text}`)
-              found = true
-              cleanupFunctions.set(element, () =>
-                element.removeEventListener('click', showSurvey),
+        if (trigger.type === 'click' && isCorrectPage(trigger)) {
+          if (trigger.clickType === 'cssSelector') {
+            const escapedSelector = escapeClassName(trigger.clickValue)
+            const button = document.querySelector(escapedSelector)
+            if (button) {
+              button.addEventListener('click', showSurvey)
+              console.log(`Click trigger set for ${trigger.clickValue}`)
+              cleanupFunctions.set(escapedSelector, () =>
+                button.removeEventListener('click', showSurvey),
               )
+            } else {
+              console.log(`Click not found: ${trigger.clickValue}`)
             }
-          })
-          if (!found) {
-            console.log(`Inner Text not found: ${trigger.text}`)
+          } else if (trigger.clickType === 'innerText') {
+            const elements = document.querySelectorAll('button')
+            let found = false
+            elements.forEach((element) => {
+              if (element.innerText.includes(trigger.clickValue)) {
+                const eventListener = function (event) {
+                  // 이벤트 타겟이 실제 트리거 조건에 맞는지 확인
+                  if (event.target.innerText.includes(trigger.clickValue)) {
+                    event.stopPropagation() // 이벤트 버블링 방지
+                    showSurvey()
+                    console.log(
+                      `Inner Text trigger set for ${trigger.clickValue}`,
+                    )
+                    found = true
+                  }
+                }
+                element.addEventListener('click', eventListener)
+                cleanupFunctions.set(element, () =>
+                  element.removeEventListener('click', eventListener),
+                )
+              }
+            })
+            if (!found) {
+              console.log(`Inner Text not found: ${trigger.clickValue}`)
+            }
           }
         }
 
-        if (trigger.type === 'exitIntent') {
+        if (trigger.type === 'exitIntent' && isCorrectPage(trigger)) {
           const handleExitIntent = (event) => {
             console.log('Exit Intent detected')
             if (event.clientY <= 0) {
@@ -657,7 +719,7 @@
           )
         }
 
-        if (trigger.type === 'newSession') {
+        if (trigger.type === 'newSession' && isCorrectPage(trigger)) {
           showSurvey()
           console.log(`New Session trigger set`)
         }
@@ -668,7 +730,7 @@
           console.log(`URL trigger set for ${trigger.url}`)
         }
 
-        if (trigger.type === 'scroll') {
+        if (trigger.type === 'scroll' && isCorrectPage(trigger)) {
           const handleScroll = () => {
             const scrollPercentage =
               (window.scrollY + window.innerHeight) / document.body.scrollHeight
@@ -690,21 +752,26 @@
       console.error('Error in setupTriggers:', error)
     }
 
-    return (surveyId) => {
+    return () => {
       cleanupFunctions.forEach((cleanup) => cleanup())
       cleanupFunctions.clear()
     }
   }
 
+  // 이스케이프 처리 함수 정의
+  function escapeClassName(className) {
+    return className.replace(/([!"#$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g, '\\$1')
+  }
+
   // 초기화 함수 - 초기화 함수로, 고객 ID를 추출하고 설문조사 데이터를 가져온 후 트리거를 설정합니다.
   async function init() {
     console.log('Initializing survey script')
-    const customerId = getCustomerIdFromUrl()
-    if (!customerId) {
-      throw new Error('Customer ID is not provided in the URL')
+    const userId = getUserIdFromUrl()
+    if (!userId) {
+      throw new Error('User ID is not provided in the URL')
     }
     try {
-      const surveyData = await fetchSurvey(customerId)
+      const surveyData = await fetchSurvey(userId)
       if (surveyData) {
         const cleanupTriggers = setupTriggers(surveyData.data)
 
