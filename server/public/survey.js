@@ -41,7 +41,8 @@
       stepId: step.id,
       stepTitle: step.title,
       stepDescription: step.description,
-      answer,
+      answer: answer,
+      type: step.type,
       timestamp: new Date().toISOString(),
     })
   }
@@ -500,19 +501,36 @@
         const selectedOption = document.querySelector(
           'input[name="choice"]:checked',
         )
-        return selectedOption ? selectedOption.value : null
+        return selectedOption
+          ? {
+              id: selectedOption.id.split('-')[1],
+              value: selectedOption.value,
+            }
+          : null
       }
       case 'multipleChoice': {
         const selectedOptions = Array.from(
           document.querySelectorAll('input[name="multipleChoice"]:checked'),
-        ).map((checkbox) => checkbox.value)
+        ).map((checkbox) => ({
+          id: checkbox.id.split('-')[1],
+          value: checkbox.value,
+        }))
         return selectedOptions.length > 0 ? selectedOptions : null
       }
       case 'rating': {
         const selectedRating = document.querySelector(
           'input[name="rating"]:checked',
         )
-        return selectedRating ? parseInt(selectedRating.value) : null
+        const ratingValue = selectedRating
+          ? parseInt(selectedRating.value)
+          : null
+        const ratingOption = step.options[ratingValue - 1]
+        return ratingOption
+          ? {
+              id: ratingOption.id,
+              value: ratingValue,
+            }
+          : null
       }
       case 'text': {
         const textResponse = document.getElementById('response')
