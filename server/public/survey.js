@@ -217,6 +217,18 @@
           }
           break
         case 'rating':
+          if (!step.options || !Array.isArray(step.options)) {
+            console.error(
+              `Invalid options for ${step.type} step in survey ${survey._id}`,
+            )
+            return false
+          }
+          for (let option of step.options) {
+            if (!option.id || !option.nextStepId) {
+              console.error(`Invalid option structure in survey ${survey._id}`)
+              return false
+            }
+          }
           break
         default:
           console.error(
@@ -456,10 +468,12 @@
           .join('')
       case 'rating':
         // 평점 질문을 별점으로 렌더링
-        return `<span class="star-rating">${[1, 2, 3, 4, 5]
+        return `<span class="star-rating">${step.options
           .map(
-            (i) =>
-              `<input type="radio" name="rating" value="${i}" id="rating-${i}"><label for="rating-${i}">★</label>`,
+            (_, index) =>
+              `<input type="radio" name="rating" value="${
+                index + 1
+              }" id="rating-${index}"><label for="rating-${index}">★</label>`,
           )
           .join('')}</span>`
       case 'text':
@@ -498,7 +512,12 @@
         const selectedRating = document.querySelector(
           'input[name="rating"]:checked',
         )
-        return selectedRating ? selectedRating.value : null
+        const ratingIndex = selectedRating
+          ? step.options.findIndex(
+              (option) => option.id === selectedRating.id.split('-')[1],
+            )
+          : -1
+        return ratingIndex !== -1 ? step.options[ratingIndex].value : null
       }
       case 'text': {
         const textResponse = document.getElementById('response')
