@@ -325,11 +325,29 @@
           )
         }
 
-        // 마지막 스텝인지 확인 (감사 카드 제외)
-        if (isLastStep && step.type !== 'thankyou') {
-          closeSurvey(survey._id, true)
+        let nextStepId
+        if (step.type === 'singleChoice' || step.type === 'rating') {
+          const selectedOptionId = stepAnswer.id
+          const selectedOption = step.options.find(
+            (option) => option.id === selectedOptionId,
+          )
+          nextStepId = selectedOption ? selectedOption.nextStepId : null
         } else {
-          nextStep(survey, stepIndex)
+          nextStepId = step.nextStepId
+        }
+
+        if (nextStepId) {
+          const nextStepIndex = survey.steps.findIndex(
+            (s) => s.id === nextStepId,
+          )
+          if (nextStepIndex !== -1) {
+            currentStep = nextStepIndex
+            showStep(survey, currentStep)
+          } else {
+            closeSurvey(survey._id, true)
+          }
+        } else {
+          closeSurvey(survey._id, true)
         }
       } catch (error) {
         console.error('Error while submitting survey:', error)
