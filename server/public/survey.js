@@ -512,12 +512,7 @@
         const selectedRating = document.querySelector(
           'input[name="rating"]:checked',
         )
-        const ratingIndex = selectedRating
-          ? step.options.findIndex(
-              (option) => option.id === selectedRating.id.split('-')[1],
-            )
-          : -1
-        return ratingIndex !== -1 ? step.options[ratingIndex].value : null
+        return selectedRating ? parseInt(selectedRating.value) : null
       }
       case 'text': {
         const textResponse = document.getElementById('response')
