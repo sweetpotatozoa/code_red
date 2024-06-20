@@ -322,6 +322,18 @@
         console.error('Error while submitting survey:', error)
       }
     }
+
+    // 게이지바 업데이트
+    updateProgressBar(stepIndex, activeSteps.length)
+  }
+
+  // 게이지바 업데이트 함수
+  function updateProgressBar(currentStepIndex, totalSteps) {
+    const progress = ((currentStepIndex + 1) / totalSteps) * 100
+    const progressBar = document.getElementById('progressBar')
+    if (progressBar) {
+      progressBar.style.width = `${progress}%`
+    }
   }
 
   // 설문조사 단계별 내용 생성
@@ -347,6 +359,9 @@
               : ''
           }
         </form>
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
       </div>
     `
   }
