@@ -323,20 +323,11 @@
       }
     }
 
-    // 게이지바 업데이트
-    updateProgressBar(stepIndex, activeSteps.length)
-  }
-
-  // 게이지바 업데이트 함수
-  function updateProgressBar(currentStepIndex, totalSteps) {
-    const progress = ((currentStepIndex + 1) / totalSteps) * 100
-    const progressBar = document.getElementById('progressBar')
-    if (progressBar) {
-      progressBar.style.width = `${progress}%`
+    if (step.type !== 'thankyou') {
+      updateProgressBar(stepIndex, activeSteps.length - 1)
     }
   }
 
-  // 설문조사 단계별 내용 생성
   function generateStepHTML(step, buttonText) {
     return `
       <div class="survey-step">
@@ -359,11 +350,26 @@
               : ''
           }
         </form>
-        <div class="progress-bar-container">
-          <div class="progress-bar" id="progressBar"></div>
-        </div>
       </div>
+      ${
+        step.type !== 'thankyou'
+          ? `<div class="survey-progress">
+              <div class="progress-bar">
+                <div class="progress"></div>
+              </div>
+              <p class="powered-by">Powered by Codered</p>
+            </div>`
+          : ''
+      }
     `
+  }
+
+  function updateProgressBar(currentStepIndex, totalSteps) {
+    const progressBar = document.querySelector('.progress')
+    if (progressBar) {
+      const progressPercentage = ((currentStepIndex + 1) / totalSteps) * 100
+      progressBar.style.width = `${progressPercentage}%`
+    }
   }
 
   // 설문조사 단계별 버튼 텍스트 설정
