@@ -420,29 +420,42 @@
   }
 
   // 다음 스텝으로 이동
-  function nextStep(survey, stepIndex) {
-    const activeSteps = survey.steps.filter((step) =>
-      step.type === 'welcome' || step.type === 'thankyou'
-        ? step.isActive
-        : true,
+  function nextStep(survey, stepIndex, selectedOptionId = null) {
+    const currentStep = survey.steps[stepIndex]
+
+    let nextStepId
+    if (currentStep.type === 'singleChoice' || currentStep.type === 'rating') {
+      const selectedOption = currentStep.options.find(
+        (option) => option.id === selectedOptionId,
+      )
+      nextStepId = selectedOption ? selectedOption.nextStepId : null
+    } else {
+      nextStepId = currentStep.nextStepId
+    }
+
+    const nextStepIndex = survey.steps.findIndex(
+      (step) => step.id === nextStepId,
     )
 
-    // 현재 스텝이 마지막 스텝일 때
-    if (stepIndex === activeSteps.length - 1) {
-      // 마지막 스텝이 "thankyou" 스텝이고 활성화되어 있는 경우
-      if (
-        activeSteps[stepIndex].type === 'thankyou' &&
-        activeSteps[stepIndex].isActive
-      ) {
+    if (nextStepIndex !== -1) {
+      currentStep = nextStepIndex
+      showStep(survey, currentStep)
+    } else {
+      // "thankyou" 스텝이 활성화되어 있는 경우
+      const thankyouStep = survey.steps.find(
+        (step) => step.type === 'thankyou' && step.isActive,
+      )
+      if (thankyouStep) {
+        currentStep = survey.steps.findIndex(
+          (step) => step.id === thankyouStep.id,
+        )
+        showStep(survey, currentStep)
         closeSurvey(survey._id, true) // 완료된 것으로 설정
         console.log('Survey submitted successfully')
       } else {
         closeSurvey(survey._id, true)
         console.log('Survey closed')
       }
-    } else {
-      currentStep++
-      showStep(survey, currentStep)
     }
   }
 
