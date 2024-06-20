@@ -42,6 +42,7 @@
       stepTitle: step.title,
       stepDescription: step.description,
       answer: answer,
+      type: step.type,
       timestamp: new Date().toISOString(),
     })
   }
@@ -520,10 +521,14 @@
         const selectedRating = document.querySelector(
           'input[name="rating"]:checked',
         )
-        return selectedRating
+        const ratingValue = selectedRating
+          ? parseInt(selectedRating.value)
+          : null
+        const ratingOption = step.options[ratingValue - 1]
+        return ratingOption
           ? {
-              id: selectedRating.id.split('-')[1],
-              value: parseInt(selectedRating.value),
+              id: ratingOption.id,
+              value: ratingValue,
             }
           : null
       }
