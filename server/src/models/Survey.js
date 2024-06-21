@@ -42,7 +42,7 @@ const TriggerSchema = new mongoose.Schema({
   id: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가
   title: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가
   description: { type: String, required: false }, // 필드가 존재하지 않아도 되며 빈문자열 가능
-  type: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가, 'newSession, scroll, exitIntent, click, url'
+  type: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며 빈문자열 불가
   clickType: {
     type: String,
     validate: {
