@@ -161,8 +161,8 @@
           }
           break
         case 'scroll':
-        case 'exitIntent':
-        case 'newSession':
+        case 'exit':
+        case 'firstVisit':
           if (!trigger.pageType || trigger.pageValue === undefined) {
             console.error(
               `Missing pageType or pageValue for ${trigger.type} trigger in survey ${survey._id}`,
@@ -191,10 +191,10 @@
       }
       switch (step.type) {
         case 'welcome':
-        case 'thankyou':
+        case 'thank':
         case 'multipleChoice':
         case 'link':
-        case 'text':
+        case 'freeText':
         case 'info':
           if (step.nextStepId === undefined) {
             console.error(
@@ -269,9 +269,7 @@
   // 설문조사 스텝 표시
   function showStep(survey, stepIndex) {
     const activeSteps = survey.steps.filter((step) =>
-      step.type === 'welcome' || step.type === 'thankyou'
-        ? step.isActive
-        : true,
+      step.type === 'welcome' || step.type === 'thank' ? step.isActive : true,
     )
     const step = activeSteps[stepIndex]
     const surveyContainer = document.getElementById('survey-popup')
@@ -286,7 +284,7 @@
     const isLastStep = stepIndex === activeSteps.length - 1
     const isSecondToLastStep =
       stepIndex === activeSteps.length - 2 &&
-      activeSteps[activeSteps.length - 1].type === 'thankyou'
+      activeSteps[activeSteps.length - 1].type === 'thank'
 
     const buttonText = getButtonText(step, isLastStep, isSecondToLastStep)
 
@@ -294,8 +292,8 @@
 
     // 여기에서 'closeSurvey' 이벤트 리스너를 설정
     document.getElementById('closeSurvey').onclick = () => {
-      const isThankYouStep = step.type === 'thankyou'
-      closeSurvey(survey._id, isThankYouStep)
+      const isThankStep = step.type === 'thank'
+      closeSurvey(survey._id, isThankStep)
     }
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
@@ -310,7 +308,7 @@
 
       try {
         if (surveyResponseId) {
-          const isComplete = isLastStep && step.type !== 'thankyou'
+          const isComplete = isLastStep && step.type !== 'thank'
           await updateResponse(surveyResponseId, surveyResponses, isComplete)
         } else {
           surveyResponseId = await createResponse(survey.userId, survey._id, {
@@ -325,18 +323,36 @@
           )
         }
 
-        // 마지막 스텝인지 확인 (감사 카드 제외)
-        if (isLastStep && step.type !== 'thankyou') {
-          closeSurvey(survey._id, true)
+        let nextStepId
+        if (step.type === 'singleChoice' || step.type === 'rating') {
+          const selectedOptionId = stepAnswer.id
+          const selectedOption = step.options.find(
+            (option) => option.id === selectedOptionId,
+          )
+          nextStepId = selectedOption ? selectedOption.nextStepId : null
         } else {
-          nextStep(survey, stepIndex)
+          nextStepId = step.nextStepId
+        }
+
+        if (nextStepId) {
+          const nextStepIndex = survey.steps.findIndex(
+            (s) => s.id === nextStepId,
+          )
+          if (nextStepIndex !== -1) {
+            currentStep = nextStepIndex
+            showStep(survey, currentStep)
+          } else {
+            closeSurvey(survey._id, true)
+          }
+        } else {
+          closeSurvey(survey._id, true)
         }
       } catch (error) {
         console.error('Error while submitting survey:', error)
       }
     }
 
-    if (step.type !== 'thankyou') {
+    if (step.type !== 'thank') {
       updateProgressBar(stepIndex, activeSteps.length - 1)
     }
   }
@@ -365,7 +381,7 @@
         </form>
       </div>
       ${
-        step.type !== 'thankyou'
+        step.type !== 'thank'
           ? `<div class="survey-progress">
               <div class="progress-bar">
                 <div class="progress"></div>
@@ -392,7 +408,7 @@
         return '참여하기'
       case 'link':
         return step.buttonText
-      case 'thankyou':
+      case 'thank':
         return ''
       default:
         return isLastStep || isSecondToLastStep ? '제출하기' : '다음'
@@ -420,29 +436,40 @@
   }
 
   // 다음 스텝으로 이동
-  function nextStep(survey, stepIndex) {
-    const activeSteps = survey.steps.filter((step) =>
-      step.type === 'welcome' || step.type === 'thankyou'
-        ? step.isActive
-        : true,
+  function nextStep(survey, stepIndex, selectedOptionId = null) {
+    const currentStep = survey.steps[stepIndex]
+
+    let nextStepId
+    if (currentStep.type === 'singleChoice' || currentStep.type === 'rating') {
+      const selectedOption = currentStep.options.find(
+        (option) => option.id === selectedOptionId,
+      )
+      nextStepId = selectedOption ? selectedOption.nextStepId : null
+    } else {
+      nextStepId = currentStep.nextStepId
+    }
+
+    const nextStepIndex = survey.steps.findIndex(
+      (step) => step.id === nextStepId,
     )
 
-    // 현재 스텝이 마지막 스텝일 때
-    if (stepIndex === activeSteps.length - 1) {
-      // 마지막 스텝이 "thankyou" 스텝이고 활성화되어 있는 경우
-      if (
-        activeSteps[stepIndex].type === 'thankyou' &&
-        activeSteps[stepIndex].isActive
-      ) {
+    if (nextStepIndex !== -1) {
+      currentStep = nextStepIndex
+      showStep(survey, currentStep)
+    } else {
+      // "thank" 스텝이 활성화되어 있는 경우
+      const thankStep = survey.steps.find(
+        (step) => step.type === 'thank' && step.isActive,
+      )
+      if (thankStep) {
+        currentStep = survey.steps.findIndex((step) => step.id === thankStep.id)
+        showStep(survey, currentStep)
         closeSurvey(survey._id, true) // 완료된 것으로 설정
         console.log('Survey submitted successfully')
       } else {
         closeSurvey(survey._id, true)
         console.log('Survey closed')
       }
-    } else {
-      currentStep++
-      showStep(survey, currentStep)
     }
   }
 
@@ -477,14 +504,14 @@
               }" id="rating-${index}"><label for="rating-${index}">★</label>`,
           )
           .join('')}</span>`
-      case 'text':
+      case 'freeText':
         // 텍스트 입력 질문을 textarea로 렌더링
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
       case 'link':
         return ''
       case 'info':
         return ''
-      case 'thankyou':
+      case 'thank':
         // 감사 인사 카드를 이모지와 함께 렌더링
         return `<div class="thank-you-card"><span class="emoji">😊</span></div>`
       default:
@@ -532,7 +559,7 @@
             }
           : null
       }
-      case 'text': {
+      case 'freeText': {
         const textResponse = document.getElementById('response')
         return textResponse ? textResponse.value : ''
       }
@@ -624,9 +651,9 @@
 
     // 트리거 유형별 우선순위 설정
     const triggerPriority = {
-      newSession: 1,
+      firstVisit: 1,
       url: 2,
-      exitIntent: 3,
+      exit: 3,
       scroll: 4,
       click: 5,
     }
@@ -683,7 +710,7 @@
         }, 200)
 
         if (trigger.type === 'click' && isCorrectPage(trigger)) {
-          if (trigger.clickType === 'cssSelector') {
+          if (trigger.clickType === 'css') {
             const escapedSelector = escapeClassName(trigger.clickValue)
             const button = document.querySelector(escapedSelector)
             if (button) {
@@ -695,7 +722,7 @@
             } else {
               console.log(`Click not found: ${trigger.clickValue}`)
             }
-          } else if (trigger.clickType === 'innerText') {
+          } else if (trigger.clickType === 'text') {
             const elements = document.querySelectorAll('button')
             let found = false
             elements.forEach((element) => {
@@ -723,7 +750,7 @@
           }
         }
 
-        if (trigger.type === 'exitIntent' && isCorrectPage(trigger)) {
+        if (trigger.type === 'exit' && isCorrectPage(trigger)) {
           const handleExitIntent = (event) => {
             console.log('Exit Intent detected')
             if (event.clientY <= 0) {
@@ -731,15 +758,15 @@
             }
           }
           document.addEventListener('mouseleave', handleExitIntent)
-          console.log(`Exit Intent trigger set`)
+          console.log(`Exit trigger set`)
           cleanupFunctions.set('mouseleave', () =>
             document.removeEventListener('mouseleave', handleExitIntent),
           )
         }
 
-        if (trigger.type === 'newSession' && isCorrectPage(trigger)) {
+        if (trigger.type === 'firstVisit' && isCorrectPage(trigger)) {
           showSurvey()
-          console.log(`New Session trigger set`)
+          console.log(`First Visit trigger set`)
         }
 
         if (trigger.type === 'url') {
