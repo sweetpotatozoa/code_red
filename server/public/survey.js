@@ -194,7 +194,7 @@
         case 'thank':
         case 'multipleChoice':
         case 'link':
-        case 'text':
+        case 'freeText':
         case 'info':
           if (step.nextStepId === undefined) {
             console.error(
@@ -504,7 +504,7 @@
               }" id="rating-${index}"><label for="rating-${index}">★</label>`,
           )
           .join('')}</span>`
-      case 'text':
+      case 'freeText':
         // 텍스트 입력 질문을 textarea로 렌더링
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
       case 'link':
@@ -559,7 +559,7 @@
             }
           : null
       }
-      case 'text': {
+      case 'freeText': {
         const textResponse = document.getElementById('response')
         return textResponse ? textResponse.value : ''
       }
