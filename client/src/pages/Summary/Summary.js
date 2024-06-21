@@ -38,13 +38,6 @@ const Summary = () => {
     navigate(`/edit/${surveyId}`)
   }
 
-  //설문조사 삭제하기
-  const surveyDeleteHandler = (surveyId) => {
-    if (!window.confirm('정말로 설문조사를 삭제하시겠습니까?')) return
-    const newSurveys = surveys.filter((survey) => survey.id !== surveyId)
-    setSurveys(newSurveys)
-  }
-
   //설문조사 켜기/끄기
   const surveyDeployHandler = (surveyId) => {
     const newSurveys = surveys.map((survey) => {
@@ -69,6 +62,11 @@ const Summary = () => {
     }
     setCustomerInfo(newCustomerInfo)
     setIsSetting(false)
+  }
+
+  //개별응답으로 이동
+  const goToResponses = () => {
+    navigate(`/responses/${survey.id}`)
   }
 
   return (
@@ -123,7 +121,9 @@ const Summary = () => {
         </div>
         <div className={styles.smallNavs}>
           <div className={styles.selectedNavs}>전체 요약</div>
-          <div className={styles.navs}>개별 응답</div>
+          <div className={styles.navs} onClick={goToResponses}>
+            개별 응답
+          </div>
         </div>
         <div className={styles.contents}>
           <div className={styles.summaries}>
@@ -189,6 +189,31 @@ const Summary = () => {
           </div>
         </div>
       </div>
+      {isSetting && (
+        <div className={styles.modalBackground}>
+          <div className={styles.settingModal}>
+            <div className={styles.title}>설문조사 위치설정</div>
+            <select
+              className={styles.select}
+              onChange={(e) => setSelectedPosition(e.target.value)}
+              value={selectedPosition}
+            >
+              <option value='4'>우측 하단</option>
+              <option value='1'>좌측 하단</option>
+              <option value='2'>좌측 상단</option>
+              <option value='3'>우측 상단</option>
+            </select>
+            <div className={styles.bottom}>
+              <div className={styles.btnButton2} onClick={settingModalHandler}>
+                취소
+              </div>
+              <div className={styles.btnButton} onClick={settingSaveHandler}>
+                저장
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

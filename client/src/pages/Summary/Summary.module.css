@@ -359,3 +359,33 @@ input:checked + .slider:before {
   box-shadow: 1px 3px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 16px;
 }
+
+.bottom {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 120px;
+}
+
+.btnButton {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #11192c;
+  color: #ffffff;
+  border-radius: 5px;
+  height: 34px;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.btnButton2 {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #f1f5f9;
+  color: #11192c;
+  border-radius: 5px;
+  height: 34px;
+  cursor: pointer;
+  margin-left: 8px;
+}
