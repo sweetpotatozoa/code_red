@@ -2,7 +2,7 @@ import styles from './Onboarding.module.css'
 
 const Onboarding = () => {
   return (
-    <div>
+    <div className={styles.container}>
       <h1>Onboarding</h1>
     </div>
   )
