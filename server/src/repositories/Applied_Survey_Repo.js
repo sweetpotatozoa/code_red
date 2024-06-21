@@ -1,10 +1,11 @@
 const mongodb = require('../utils/mongodb')
+const { ObjectId } = require('mongodb')
 
 class AppliedSurveyRepo {
   constructor() {
     this.db = mongodb.mainDb
     this.collection = this.db.collection('surveys')
-    this.responsesCollection = this.db.collection('responses') // 응답 컬렉션 추가
+    this.responsesCollection = this.db.collection('responses')
   }
 
   async getAllSurveys() {
@@ -12,19 +13,32 @@ class AppliedSurveyRepo {
     return result
   }
 
-  async getSurveysByCustomerId(customerId) {
-    const result = await this.collection.find({ customerId }).toArray()
+  async getSurveysByQuery(query) {
+    const result = await this.collection.find(query).toArray()
     return result
   }
 
-  async addSurvey(survey) {
-    const result = await this.collection.insertOne(survey)
-    return { ...survey, _id: result.insertedId } // 추가한 설문조사의 내용과 _id를 반환
+  async addResponse(response) {
+    const surveyId = new ObjectId(response.surveyId)
+    const result = await this.responsesCollection.insertOne({
+      ...response,
+      surveyId,
+    })
+    return { ...response, _id: result.insertedId }
   }
 
-  async addResponse(response) {
-    const result = await this.responsesCollection.insertOne(response)
-    return { ...response, _id: result.insertedId } // 추가한 응답의 내용과 _id를 반환
+  async updateResponse(responseId, response) {
+    const result = await this.responsesCollection.updateOne(
+      { _id: new ObjectId(responseId) },
+      {
+        $set: {
+          answers: response.answers,
+          completeAt: response.completeAt,
+          isComplete: response.isComplete,
+        },
+      },
+    )
+    return result
   }
 }
 
