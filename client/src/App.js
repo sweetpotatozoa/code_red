@@ -8,7 +8,7 @@ import Responses from './pages/Responses/Responses'
 import Summary from './pages/Summary/Summary'
 import Templates from './pages/Templates/Templates'
 import Edit from './pages/Edit/Edit'
-import TestSummaryPage from './pages/Summary/TestSummary'
+import TestSummary from './pages/Summary/TestSummary'
 
 function App() {
   return (
