@@ -41,10 +41,10 @@ class AppliedSurveyRepo {
     return result
   }
 
-  async incrementExposureCount(surveyId) {
+  async incrementViews(surveyId) {
     const result = await this.collection.updateOne(
       { _id: new ObjectId(surveyId) },
-      { $inc: { exposureCount: 1 } },
+      { $inc: { views: 1 } },
     )
     return result
   }

@@ -124,9 +124,9 @@
   }
 
   // 설문조사 노출 수 카운트
-  async function incrementExposureCount(surveyId) {
+  async function incrementViews(surveyId) {
     try {
-      await fetch(`${API_URI}/appliedSurvey/${surveyId}/increment-exposure`, {
+      await fetch(`${API_URI}/appliedSurvey/${surveyId}/increment-views`, {
         method: 'POST',
       })
       console.log('노출 카운트가 증가되었습니다.')
@@ -874,7 +874,7 @@
       document.body.appendChild(surveyContainer)
 
       // 노출 카운트 증가 함수 호출
-      await incrementExposureCount(survey._id)
+      await incrementViews(survey._id)
 
       showStep(survey, currentStep)
       console.log('Survey container created and appended to body')
