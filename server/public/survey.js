@@ -71,7 +71,7 @@
   // 설문조사 응답 생성
   async function createResponse(userId, surveyId, answer) {
     try {
-      const result = await fetch(`${API_URI}/api/appliedSurvey/response`, {
+      const result = await fetch(`${API_URI}/appliedSurvey/response`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +100,7 @@
   async function updateResponse(responseId, answers, isComplete) {
     try {
       const result = await fetch(
-        `${API_URI}/api/appliedSurvey/response/${responseId}`,
+        `${API_URI}/appliedSurvey/response/${responseId}`,
         {
           method: 'PUT',
           headers: {
