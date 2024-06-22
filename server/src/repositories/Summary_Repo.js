@@ -10,20 +10,13 @@ class SummaryRepo {
   async getSurveySummary(surveyId) {
     try {
       const objectId = new ObjectId(surveyId)
-
-      // survey 컬렉션에서는 _id로 조회
       const survey = await this.surveysCollection.findOne({ _id: objectId })
-
       if (!survey) {
         throw new Error('Survey not found')
       }
-
-      // response 컬렉션에서는 surveyId로 조회
       const responses = await this.responsesCollection
         .find({ surveyId: objectId })
         .toArray()
-
-      // 여기서 필요한 계산을 수행합니다
       const startCount = responses.length
       const completedResponses = responses.filter((r) => r.isComplete)
       const completedCount = completedResponses.length
@@ -52,8 +45,6 @@ class SummaryRepo {
       throw error
     }
   }
-
-  // 기타 메서드들...
 }
 
 module.exports = new SummaryRepo()
