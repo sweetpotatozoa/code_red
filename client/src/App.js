@@ -8,6 +8,7 @@ import Responses from './pages/Responses/Responses'
 import Summary from './pages/Summary/Summary'
 import Templates from './pages/Templates/Templates'
 import Edit from './pages/Edit/Edit'
+import TestSummaryPage from './pages/Summary/TestSummaryPage'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Route path='/summary/:id' element={<Summary />} />
       <Route path='/templates' element={<Templates />} />
       <Route path='/edit/:id' element={<Edit />} />
+      <Route path='/test-summary/:surveyId' element={<TestSummaryPage />} />
     </Routes>
   )
 }

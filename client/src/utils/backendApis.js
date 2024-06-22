@@ -31,6 +31,10 @@ class BackendApis {
     if (result?.status === 200) this.token = result.token
     return result
   }
+
+  async getSurveySummary(surveyId) {
+    return await fetcher(`/summary/${surveyId}`, this.token, 'GET')
+  }
 }
 
 export default new BackendApis()
