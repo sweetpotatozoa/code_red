@@ -34,6 +34,7 @@ const Summary = () => {
   const fetchSummaryData = async () => {
     try {
       const data = await BackendApis.getSurveySummary(id)
+      console.log('Summary Data:', data) // Add console log
       setSummaryData(data)
     } catch (error) {
       console.error('Error fetching summary data:', error)
@@ -43,6 +44,7 @@ const Summary = () => {
   const fetchSurveyQuestions = async () => {
     try {
       const data = await BackendApis.getSurveyQuestions(id)
+      console.log('Survey Questions:', data) // Add console log
       setSurveyQuestions(data)
     } catch (error) {
       console.error('Error fetching survey questions:', error)
@@ -146,7 +148,7 @@ const Summary = () => {
                 <div>시작</div>
                 <div className={styles.percent}>
                   {summaryData
-                    ? `${summaryData.exposureStartRatio.toFixed(2)}%`
+                    ? `${(summaryData.exposureStartRatio * 100).toFixed(2)}%`
                     : '-'}
                 </div>
               </div>
@@ -159,7 +161,9 @@ const Summary = () => {
                 <div>응답완료</div>
                 <div className={styles.percent}>
                   {summaryData
-                    ? `${summaryData.exposureCompletedRatio.toFixed(2)}%`
+                    ? `${(summaryData.exposureCompletedRatio * 100).toFixed(
+                        2,
+                      )}%`
                     : '-'}
                 </div>
               </div>
@@ -172,7 +176,7 @@ const Summary = () => {
                 <div>이탈</div>
                 <div className={styles.percent}>
                   {summaryData
-                    ? `${summaryData.exposureDropoutRatio.toFixed(2)}%`
+                    ? `${(summaryData.exposureDropoutRatio * 100).toFixed(2)}%`
                     : '-'}
                 </div>
               </div>
@@ -186,7 +190,7 @@ const Summary = () => {
               </div>
               <div className={styles.summaryNum}>
                 {summaryData?.avgResponseTime
-                  ? `${summaryData.avgResponseTime} ms`
+                  ? `${summaryData.avgResponseTime.toFixed(2)} ms`
                   : '-'}
               </div>
             </div>
@@ -195,19 +199,23 @@ const Summary = () => {
             {surveyQuestions.map((question) => {
               switch (question.type) {
                 case 'welcome':
-                  return <SummaryWelcome key={question.id} />
+                  return <SummaryWelcome key={question.id} data={question} />
                 case 'freeText':
-                  return <SummaryFreeText key={question.id} />
+                  return <SummaryFreeText key={question.id} data={question} />
                 case 'rating':
-                  return <SummaryRating key={question.id} />
+                  return <SummaryRating key={question.id} data={question} />
                 case 'singleChoice':
-                  return <SummarySingleChoice key={question.id} />
+                  return (
+                    <SummarySingleChoice key={question.id} data={question} />
+                  )
                 case 'multipleChoice':
-                  return <SummaryMultipleChoice key={question.id} />
+                  return (
+                    <SummaryMultipleChoice key={question.id} data={question} />
+                  )
                 case 'info':
-                  return <SummaryInfo key={question.id} />
+                  return <SummaryInfo key={question.id} data={question} />
                 case 'link':
-                  return <SummaryLink key={question.id} />
+                  return <SummaryLink key={question.id} data={question} />
                 default:
                   return null
               }

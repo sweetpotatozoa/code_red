@@ -1,6 +1,7 @@
 import styles from './Summaries.module.css'
 
 const SummaryWelcome = ({ data }) => {
+  if (!data) return null
   const { views, responses } = data
   const ctr = views > 0 ? ((responses / views) * 100).toFixed(2) : '0.00'
   return (

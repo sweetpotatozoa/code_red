@@ -35,6 +35,14 @@ class BackendApis {
   async getSurveySummary(surveyId) {
     return await fetcher(`/api/summary/${surveyId}`, this.token, 'GET')
   }
+
+  async getSurveyQuestions(surveyId) {
+    return await fetcher(
+      `/api/summary/${surveyId}/questions`,
+      this.token,
+      'GET',
+    )
+  }
 }
 
 export default new BackendApis()

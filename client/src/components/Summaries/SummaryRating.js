@@ -1,6 +1,7 @@
 import styles from './Summaries.module.css'
 
 const SummaryRating = ({ data }) => {
+  if (!data) return null
   const { options, totalResponses, averageScore } = data
 
   const eachPercentage = (eachResponses, allResponses) => {

@@ -1,6 +1,7 @@
 import styles from './Summaries.module.css'
 
 const SummaryLink = ({ data }) => {
+  if (!data) return null
   return (
     <div className={styles.summary}>
       <div className={styles.title}>{data.title}</div>

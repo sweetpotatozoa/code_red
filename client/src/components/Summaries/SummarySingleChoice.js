@@ -1,6 +1,7 @@
 import styles from './Summaries.module.css'
 
 const SummarySingleChoice = ({ data }) => {
+  if (!data) return null
   const { options, totalResponses } = data
 
   const eachPercentage = (eachResponses, allResponses) => {

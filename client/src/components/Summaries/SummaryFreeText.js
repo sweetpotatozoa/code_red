@@ -1,6 +1,7 @@
 import styles from './Summaries.module.css'
 
 const SummaryFreeText = ({ data }) => {
+  if (!data) return null
   const { responses, contents } = data
   return (
     <div className={styles.summary}>
