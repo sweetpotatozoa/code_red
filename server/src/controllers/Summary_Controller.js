@@ -1,7 +1,7 @@
 const SummaryService = require('../services/Summary_Service')
 
 class SummaryController {
-  static async getSurveySummary(req, res) {
+  async getSurveySummary(req, res) {
     try {
       const { surveyId } = req.params
       const summary = await SummaryService.getSurveySummary(surveyId)
@@ -13,4 +13,4 @@ class SummaryController {
   }
 }
 
-module.exports = SummaryController
+module.exports = new SummaryController()

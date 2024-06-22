@@ -56,4 +56,4 @@ class SummaryRepo {
   // 기타 메서드들...
 }
 
-module.exports = SummaryRepo
+module.exports = new SummaryRepo()
