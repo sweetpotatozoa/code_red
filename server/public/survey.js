@@ -16,7 +16,7 @@
     const scriptElements = document.getElementsByTagName('script')
     for (let script of scriptElements) {
       const src = script.src
-      const match = src.match(/userId=([^&]+)/)
+      const match = src.match(/userId=([0-9a-fA-F]{24})/)
       if (match) {
         return match[1]
       }
