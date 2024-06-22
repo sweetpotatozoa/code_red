@@ -147,9 +147,7 @@ const Summary = () => {
               <div className={styles.summaryTitle}>
                 <div>시작</div>
                 <div className={styles.percent}>
-                  {summaryData
-                    ? `${(summaryData.exposureStartRatio * 100).toFixed(2)}%`
-                    : '-'}
+                  {summaryData ? `${summaryData.exposureStartRatio}%` : '-'}
                 </div>
               </div>
               <div className={styles.summaryNum}>
@@ -160,11 +158,7 @@ const Summary = () => {
               <div className={styles.summaryTitle}>
                 <div>응답완료</div>
                 <div className={styles.percent}>
-                  {summaryData
-                    ? `${(summaryData.exposureCompletedRatio * 100).toFixed(
-                        2,
-                      )}%`
-                    : '-'}
+                  {summaryData ? `${summaryData.exposureCompletedRatio}%` : '-'}
                 </div>
               </div>
               <div className={styles.summaryNum}>
@@ -175,9 +169,7 @@ const Summary = () => {
               <div className={styles.summaryTitle}>
                 <div>이탈</div>
                 <div className={styles.percent}>
-                  {summaryData
-                    ? `${(summaryData.exposureDropoutRatio * 100).toFixed(2)}%`
-                    : '-'}
+                  {summaryData ? `${summaryData.exposureDropoutRatio}%` : '-'}
                 </div>
               </div>
               <div className={styles.summaryNum}>
@@ -190,7 +182,7 @@ const Summary = () => {
               </div>
               <div className={styles.summaryNum}>
                 {summaryData?.avgResponseTime
-                  ? `${summaryData.avgResponseTime.toFixed(2)} ms`
+                  ? `${summaryData.avgResponseTime} 초`
                   : '-'}
               </div>
             </div>

@@ -24,9 +24,12 @@ class SummaryRepo {
       let avgResponseTime = 0
       if (completedResponses.length > 0) {
         const totalTime = completedResponses.reduce((sum, r) => {
-          return sum + (new Date(r.completeAt) - new Date(r.createdAt))
+          const createAt = new Date(r.createAt)
+          const completeAt = new Date(r.completeAt)
+          const timeDifference = completeAt - createAt
+          return sum + (timeDifference > 0 ? timeDifference : 0)
         }, 0)
-        avgResponseTime = totalTime / completedResponses.length
+        avgResponseTime = totalTime / completedResponses.length / 1000 // 밀리초를 초로 변환
       }
 
       const views = survey.views || 0
@@ -36,10 +39,13 @@ class SummaryRepo {
         startCount,
         completedCount,
         dropoutCount,
-        avgResponseTime,
-        exposureStartRatio: views > 0 ? startCount / views : 0,
-        exposureCompletedRatio: views > 0 ? completedCount / views : 0,
-        exposureDropoutRatio: views > 0 ? dropoutCount / views : 0,
+        avgResponseTime: avgResponseTime.toFixed(2), // 소수점 두 자리로 반올림
+        exposureStartRatio:
+          views > 0 ? ((startCount / views) * 100).toFixed(2) : '0.00',
+        exposureCompletedRatio:
+          views > 0 ? ((completedCount / views) * 100).toFixed(2) : '0.00',
+        exposureDropoutRatio:
+          views > 0 ? ((dropoutCount / views) * 100).toFixed(2) : '0.00',
       }
     } catch (error) {
       console.error('Error in getSurveySummary:', error)
