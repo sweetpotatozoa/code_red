@@ -1,14 +1,13 @@
 import styles from './Summaries.module.css'
 
-const SummaryInfo = () => {
-  const responses = 30
+const SummaryInfo = ({ data }) => {
   return (
     <div className={styles.summary}>
-      <div className={styles.title}>안녕하세요</div>
+      <div className={styles.title}>{data.title}</div>
       <div className={styles.informations}>
-        <div className={styles.info}>환영인사</div>
+        <div className={styles.info}>정보 제공</div>
       </div>
-      <div className={styles.title}>클릭 {responses}명</div>
+      <div className={styles.title}>클릭 {data.clicks}명</div>
     </div>
   )
 }

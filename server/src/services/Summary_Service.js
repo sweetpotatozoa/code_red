@@ -6,6 +6,11 @@ class SummaryService {
     const objectId = new ObjectId(surveyId)
     return await SummaryRepo.getSurveySummary(objectId)
   }
+
+  async getSurveyQuestions(surveyId) {
+    const objectId = new ObjectId(surveyId)
+    return await SummaryRepo.getSurveyQuestions(objectId)
+  }
 }
 
 module.exports = new SummaryService()

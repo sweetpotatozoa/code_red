@@ -46,6 +46,69 @@ class SummaryRepo {
       throw error
     }
   }
+
+  async getSurveyQuestions(surveyId) {
+    try {
+      const survey = await this.surveysCollection.findOne({ _id: surveyId })
+      if (!survey) {
+        throw new Error('Survey not found')
+      }
+      const responses = await this.responsesCollection
+        .find({ surveyId: surveyId })
+        .toArray()
+
+      return survey.steps.map((step) => {
+        const stepResponses = responses.flatMap((r) =>
+          r.answers.filter((a) => a.stepId === step.id),
+        )
+
+        switch (step.type) {
+          case 'welcome':
+            return {
+              ...step,
+              views: survey.views || 0,
+              responses: stepResponses.length,
+            }
+          case 'freeText':
+            return {
+              ...step,
+              responses: stepResponses.length,
+              contents: stepResponses.map((r) => r.answer),
+            }
+          case 'rating':
+          case 'singleChoice':
+          case 'multipleChoice':
+            const optionCounts = step.options.reduce((acc, option) => {
+              acc[option.id] = stepResponses.filter(
+                (r) =>
+                  r.answer === option.id ||
+                  (Array.isArray(r.answer) && r.answer.includes(option.id)),
+              ).length
+              return acc
+            }, {})
+            return {
+              ...step,
+              totalResponses: stepResponses.length,
+              options: step.options.map((option) => ({
+                ...option,
+                eachResponses: optionCounts[option.id] || 0,
+              })),
+            }
+          case 'info':
+          case 'link':
+            return {
+              ...step,
+              clicks: stepResponses.length,
+            }
+          default:
+            return step
+        }
+      })
+    } catch (error) {
+      console.error('Error in getSurveyQuestions:', error)
+      throw error
+    }
+  }
 }
 
 module.exports = new SummaryRepo()

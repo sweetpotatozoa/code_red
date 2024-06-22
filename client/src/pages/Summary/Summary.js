@@ -6,6 +6,14 @@ import { useParams } from 'react-router-dom'
 import customerData from '../../utils/customerData'
 import BackendApis from '../../utils/backendApis'
 
+import SummaryFreeText from '../../components/Summaries/SummaryFreeText'
+import SummaryRating from '../../components/Summaries/SummaryRating'
+import SummarySingleChoice from '../../components/Summaries/SummarySingleChoice'
+import SummaryWelcome from '../../components/Summaries/SummaryWelcome'
+import SummaryMultipleChoice from '../../components/Summaries/SummaryMultipleChoice'
+import SummaryInfo from '../../components/Summaries/SummaryInfo'
+import SummaryLink from '../../components/Summaries/SummaryLink'
+
 const Summary = () => {
   const [customerInfo] = useState(customerData)
   const [isSetting, setIsSetting] = useState(false)
@@ -13,12 +21,14 @@ const Summary = () => {
     customerInfo.surveyPosition || 4,
   )
   const [summaryData, setSummaryData] = useState(null)
+  const [surveyQuestions, setSurveyQuestions] = useState([])
 
   const navigate = useNavigate()
   const { id } = useParams()
 
   useEffect(() => {
     fetchSummaryData()
+    fetchSurveyQuestions()
   }, [id])
 
   const fetchSummaryData = async () => {
@@ -27,6 +37,15 @@ const Summary = () => {
       setSummaryData(data)
     } catch (error) {
       console.error('Error fetching summary data:', error)
+    }
+  }
+
+  const fetchSurveyQuestions = async () => {
+    try {
+      const data = await BackendApis.getSurveyQuestions(id)
+      setSurveyQuestions(data)
+    } catch (error) {
+      console.error('Error fetching survey questions:', error)
     }
   }
 
@@ -171,6 +190,28 @@ const Summary = () => {
                   : '-'}
               </div>
             </div>
+          </div>
+          <div className={styles.steps}>
+            {surveyQuestions.map((question) => {
+              switch (question.type) {
+                case 'welcome':
+                  return <SummaryWelcome key={question.id} />
+                case 'freeText':
+                  return <SummaryFreeText key={question.id} />
+                case 'rating':
+                  return <SummaryRating key={question.id} />
+                case 'singleChoice':
+                  return <SummarySingleChoice key={question.id} />
+                case 'multipleChoice':
+                  return <SummaryMultipleChoice key={question.id} />
+                case 'info':
+                  return <SummaryInfo key={question.id} />
+                case 'link':
+                  return <SummaryLink key={question.id} />
+                default:
+                  return null
+              }
+            })}
           </div>
         </div>
       </div>
