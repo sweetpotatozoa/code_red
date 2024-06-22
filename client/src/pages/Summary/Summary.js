@@ -3,50 +3,36 @@ import styles from './Summary.module.css'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
-import data from '../../utils/data'
 import customerData from '../../utils/customerData'
-
-import SummaryFreeText from '../../components/Summaries/SummaryFreeText'
-import SummaryRating from '../../components/Summaries/SummaryRating'
-import SummarySingleChoice from '../../components/Summaries/SummarySingleChoice'
-import SummaryWelcome from '../../components/Summaries/SummaryWelcome'
-import SummaryMultipleChoice from '../../components/Summaries/SummaryMultipleChoice'
-import SummaryInfo from '../../components/Summaries/SummaryInfo'
-import SummaryLink from '../../components/Summaries/SummaryLink'
+import BackendApis from '../../utils/backendApis'
 
 const Summary = () => {
-  const [surveys, setSurveys] = useState(data)
-  const [customerInfo, setCustomerInfo] = useState(customerData)
+  const [customerInfo] = useState(customerData)
   const [isSetting, setIsSetting] = useState(false)
   const [selectedPosition, setSelectedPosition] = useState(
     customerInfo.surveyPosition || 4,
   )
+  const [summaryData, setSummaryData] = useState(null)
 
   const navigate = useNavigate()
+  const { id } = useParams()
 
   useEffect(() => {
-    setSurveys(data)
-    setCustomerInfo(customerData)
-  }, [])
+    fetchSummaryData()
+  }, [id])
 
-  //설문조사 불러오기
-  const { id } = useParams()
-  const survey = surveys.find((survey) => survey.id === parseInt(id))
-
-  //설문조사 수정하기
-  const handleEdit = (surveyId) => {
-    navigate(`/edit/${surveyId}`)
+  const fetchSummaryData = async () => {
+    try {
+      const data = await BackendApis.getSurveySummary(id)
+      setSummaryData(data)
+    } catch (error) {
+      console.error('Error fetching summary data:', error)
+    }
   }
 
-  //설문조사 켜기/끄기
-  const surveyDeployHandler = (surveyId) => {
-    const newSurveys = surveys.map((survey) => {
-      if (survey.id === surveyId) {
-        survey.isDeploy = !survey.isDeploy
-      }
-      return survey
-    })
-    setSurveys(newSurveys)
+  //개별응답으로 이동
+  const goToResponses = () => {
+    navigate(`/responses/${id}`)
   }
 
   //설정 모달 켜기/끄기
@@ -60,19 +46,14 @@ const Summary = () => {
       ...customerInfo,
       surveyPosition: selectedPosition,
     }
-    setCustomerInfo(newCustomerInfo)
+    // setCustomerInfo(newCustomerInfo)  // 주석 처리: 백엔드 연동 전까지
     setIsSetting(false)
-  }
-
-  //개별응답으로 이동
-  const goToResponses = () => {
-    navigate(`/responses/${survey.id}`)
   }
 
   return (
     <div className={styles.container}>
       <div className={styles.sideBar}>
-        <img src='/images/logo.png' className={styles.logo}></img>
+        <img src='/images/logo.png' className={styles.logo} alt='Logo'></img>
         <div className={styles.navBar}>
           <div className={styles.nav}>설문조사</div>
         </div>
@@ -93,12 +74,17 @@ const Summary = () => {
       <div className={styles.main}>
         <div className={styles.basicSetting}>
           <div className={styles.setting}>연결상태 정상</div>
-          <a href='https://www.naver.com/' target='_blank'>
+          <a
+            href='https://www.naver.com/'
+            target='_blank'
+            rel='noopener noreferrer'
+          >
             <div className={styles.setting}>가이드</div>
           </a>
         </div>
         <div className={styles.titleBox}>
           <div className={styles.title}>설문조사</div>
+          {/* 주석 처리: 백엔드 연동 전까지
           <div className={styles.surveySettingBox}>
             <div className={styles.toggle}>
               {survey.isDeploy ? 'On' : 'Off'}
@@ -113,11 +99,12 @@ const Summary = () => {
             </label>
             <div
               className={styles.button}
-              onClick={() => handleEdit(parseInt(id))}
+              onClick={() => handleEdit(survey.id)}
             >
               수정하기
             </div>
           </div>
+          */}
         </div>
         <div className={styles.smallNavs}>
           <div className={styles.selectedNavs}>전체 요약</div>
@@ -130,62 +117,60 @@ const Summary = () => {
             <div className={styles.summary}>
               <div className={styles.summaryTitle}>
                 <div>노출</div>
-                <div className={styles.percent}>50%</div>
               </div>
-              <div className={styles.summaryNum}>1</div>
+              <div className={styles.summaryNum}>
+                {summaryData?.views || '-'}
+              </div>
             </div>
             <div className={styles.summary}>
               <div className={styles.summaryTitle}>
                 <div>시작</div>
-                <div className={styles.percent}>50%</div>
+                <div className={styles.percent}>
+                  {summaryData
+                    ? `${summaryData.exposureStartRatio.toFixed(2)}%`
+                    : '-'}
+                </div>
               </div>
-              <div className={styles.summaryNum}>1</div>
+              <div className={styles.summaryNum}>
+                {summaryData?.startCount || '-'}
+              </div>
             </div>
             <div className={styles.summary}>
               <div className={styles.summaryTitle}>
                 <div>응답완료</div>
-                <div className={styles.percent}>50%</div>
+                <div className={styles.percent}>
+                  {summaryData
+                    ? `${summaryData.exposureCompletedRatio.toFixed(2)}%`
+                    : '-'}
+                </div>
               </div>
-              <div className={styles.summaryNum}>1</div>
+              <div className={styles.summaryNum}>
+                {summaryData?.completedCount || '-'}
+              </div>
             </div>
             <div className={styles.summary}>
               <div className={styles.summaryTitle}>
                 <div>이탈</div>
-                <div className={styles.percent}>50%</div>
+                <div className={styles.percent}>
+                  {summaryData
+                    ? `${summaryData.exposureDropoutRatio.toFixed(2)}%`
+                    : '-'}
+                </div>
               </div>
-              <div className={styles.summaryNum}>1</div>
+              <div className={styles.summaryNum}>
+                {summaryData?.dropoutCount || '-'}
+              </div>
             </div>
             <div className={styles.summary}>
               <div className={styles.summaryTitle}>
                 <div>평균 응답 소요시간</div>
               </div>
-              <div className={styles.summaryNum}>1</div>
+              <div className={styles.summaryNum}>
+                {summaryData?.avgResponseTime
+                  ? `${summaryData.avgResponseTime} ms`
+                  : '-'}
+              </div>
             </div>
-          </div>
-          <div className={styles.steps}>
-            {survey.questions.map((question) => {
-              if (question.type === 'welcome') {
-                return <SummaryWelcome key={question.id} />
-              }
-              if (question.type === 'freeText') {
-                return <SummaryFreeText key={question.id} />
-              }
-              if (question.type === 'rating') {
-                return <SummaryRating key={question.id} />
-              }
-              if (question.type === 'singleChoice') {
-                return <SummarySingleChoice key={question.id} />
-              }
-              if (question.type === 'multipleChoice') {
-                return <SummaryMultipleChoice key={question.id} />
-              }
-              if (question.type === 'info') {
-                return <SummaryInfo key={question.id} />
-              }
-              if (question.type === 'link') {
-                return <SummaryLink key={question.id} />
-              }
-            })}
           </div>
         </div>
       </div>
@@ -217,4 +202,5 @@ const Summary = () => {
     </div>
   )
 }
+
 export default Summary

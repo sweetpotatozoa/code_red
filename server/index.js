@@ -51,8 +51,8 @@ app.get('/survey.css', (req, res) => {
 // 라우터 설정
 app.use('/', indexRouter)
 app.use('/example', exampleRouter)
-app.use('/appliedSurvey', appliedSurveyRouter)
-app.use('/summary', summaryRouter)
+app.use('/api/appliedSurvey', appliedSurveyRouter)
+app.use('/api/summary', summaryRouter)
 
 // 에러 핸들링 미들웨어
 app.use((err, req, res, next) => {

@@ -51,7 +51,7 @@
   async function fetchSurvey(userId) {
     try {
       const response = await fetch(
-        `${API_URI}/appliedSurvey?userId=${userId}&isDeploy=true`,
+        `${API_URI}/api/appliedSurvey?userId=${userId}&isDeploy=true`,
       )
       if (!response.ok) {
         throw new Error('Network response was not ok')
@@ -71,7 +71,7 @@
   // 설문조사 응답 생성
   async function createResponse(userId, surveyId, answer) {
     try {
-      const result = await fetch(`${API_URI}/appliedSurvey/response`, {
+      const result = await fetch(`${API_URI}/api/appliedSurvey/response`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +100,7 @@
   async function updateResponse(responseId, answers, isComplete) {
     try {
       const result = await fetch(
-        `${API_URI}/appliedSurvey/response/${responseId}`,
+        `${API_URI}/api/appliedSurvey/response/${responseId}`,
         {
           method: 'PUT',
           headers: {
@@ -126,7 +126,7 @@
   // 설문조사 노출 수 카운트
   async function incrementViews(surveyId) {
     try {
-      await fetch(`${API_URI}/appliedSurvey/${surveyId}/increment-views`, {
+      await fetch(`${API_URI}/api/appliedSurvey/${surveyId}/increment-views`, {
         method: 'POST',
       })
       console.log('노출 카운트가 증가되었습니다.')

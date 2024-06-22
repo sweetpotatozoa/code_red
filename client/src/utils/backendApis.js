@@ -33,7 +33,7 @@ class BackendApis {
   }
 
   async getSurveySummary(surveyId) {
-    return await fetcher(`/summary/${surveyId}`, this.token, 'GET')
+    return await fetcher(`/api/summary/${surveyId}`, this.token, 'GET')
   }
 }
 
