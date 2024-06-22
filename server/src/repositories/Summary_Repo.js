@@ -9,13 +9,12 @@ class SummaryRepo {
 
   async getSurveySummary(surveyId) {
     try {
-      const objectId = new ObjectId(surveyId)
-      const survey = await this.surveysCollection.findOne({ _id: objectId })
+      const survey = await this.surveysCollection.findOne({ _id: surveyId })
       if (!survey) {
         throw new Error('Survey not found')
       }
       const responses = await this.responsesCollection
-        .find({ surveyId: objectId })
+        .find({ surveyId: surveyId })
         .toArray()
       const startCount = responses.length
       const completedResponses = responses.filter((r) => r.isComplete)
@@ -30,15 +29,17 @@ class SummaryRepo {
         avgResponseTime = totalTime / completedResponses.length
       }
 
+      const views = survey.views || 0
+
       return {
-        views: survey.views || 0,
+        views,
         startCount,
         completedCount,
         dropoutCount,
         avgResponseTime,
-        exposureStartRatio: (startCount / survey.views) * 100 || 0,
-        exposureCompletedRatio: (completedCount / survey.views) * 100 || 0,
-        exposureDropoutRatio: (dropoutCount / survey.views) * 100 || 0,
+        exposureStartRatio: views > 0 ? startCount / views : 0,
+        exposureCompletedRatio: views > 0 ? completedCount / views : 0,
+        exposureDropoutRatio: views > 0 ? dropoutCount / views : 0,
       }
     } catch (error) {
       console.error('Error in getSurveySummary:', error)
