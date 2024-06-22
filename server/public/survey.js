@@ -51,7 +51,7 @@
   async function fetchSurvey(userId) {
     try {
       const response = await fetch(
-        `${API_URI}/api/appliedSurvey?userId=${userId}&isDeploy=true`,
+        `${API_URI}/appliedSurvey?userId=${userId}&isDeploy=true`,
       )
       if (!response.ok) {
         throw new Error('Network response was not ok')
@@ -120,6 +120,18 @@
     } catch (error) {
       console.error('Error in updateResponse:', error)
       throw error
+    }
+  }
+
+  // 설문조사 노출 수 카운트
+  async function incrementExposureCount(surveyId) {
+    try {
+      await fetch(`${API_URI}/appliedSurvey/${surveyId}/increment-exposure`, {
+        method: 'POST',
+      })
+      console.log('노출 카운트가 증가되었습니다.')
+    } catch (error) {
+      console.error('노출 카운트 증가 중 오류 발생:', error)
     }
   }
 
@@ -856,10 +868,13 @@
     document.head.appendChild(link)
 
     // CSS 파일이 로드된 후 설문조사를 표시
-    link.onload = () => {
+    link.onload = async () => {
       const surveyContainer = document.createElement('div')
       surveyContainer.id = 'survey-popup'
       document.body.appendChild(surveyContainer)
+
+      // 노출 카운트 증가 함수 호출
+      await incrementExposureCount(survey._id)
 
       showStep(survey, currentStep)
       console.log('Survey container created and appended to body')

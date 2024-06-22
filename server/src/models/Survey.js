@@ -107,6 +107,7 @@ const surveySchema = new mongoose.Schema({
   template: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며, 빈문자열 불가
   createAt: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며, 빈문자열 불가
   updateAt: { type: String, required: true, trim: true }, // 필드가 반드시 존재해야 하며, 빈문자열 불가
+  exposureCount: { type: Number, default: 0 }, // 필드가 반드시 존재해야 하며, 빈문자열 불가
 })
 
 module.exports = mongoose.model('Survey', surveySchema)

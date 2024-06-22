@@ -40,6 +40,14 @@ class AppliedSurveyRepo {
     )
     return result
   }
+
+  async incrementExposureCount(surveyId) {
+    const result = await this.collection.updateOne(
+      { _id: new ObjectId(surveyId) },
+      { $inc: { exposureCount: 1 } },
+    )
+    return result
+  }
 }
 
 module.exports = new AppliedSurveyRepo()
