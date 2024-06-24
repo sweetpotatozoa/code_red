@@ -57,6 +57,11 @@ const Home = () => {
     setIsSetting(false)
   }
 
+  //요약 페이지로 가기
+  const goToSummary = (surveyId) => {
+    navigate(`/summary/${surveyId}`)
+  }
+
   useEffect(() => {
     setSurveys(data)
     setCustomerInfo(customerData)
@@ -104,7 +109,11 @@ const Home = () => {
           </div>
 
           {surveys.map((survey) => (
-            <div key={survey.id} className={styles.surveyBox}>
+            <div
+              key={survey.id}
+              className={styles.surveyBox}
+              onClick={() => goToSummary(survey.id)}
+            >
               <div className={styles.surveyTitle}>{survey.title}</div>
               <div className={styles.surveyDate}>{survey.updatedAt}</div>
               <div className={styles.surveyStatus}>

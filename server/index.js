@@ -7,8 +7,6 @@ const path = require('path')
 const configs = require('./src/utils/configs')
 const mongodb = require('./src/utils/mongodb')
 const indexRouter = require('./src/routes/index')
-const exampleRouter = require('./src/routes/Example_Route')
-const appliedSurveyRouter = require('./src/routes/Applied_Survey_Route')
 
 const app = express()
 
@@ -48,9 +46,7 @@ app.get('/survey.css', (req, res) => {
 })
 
 // 라우터 설정
-app.use('/', indexRouter)
-app.use('/example', exampleRouter)
-app.use('/api/appliedSurvey', appliedSurveyRouter)
+app.use('/api', indexRouter)
 
 // 에러 핸들링 미들웨어
 app.use((err, req, res, next) => {

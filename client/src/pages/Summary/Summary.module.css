@@ -389,3 +389,7 @@ input:checked + .slider:before {
   cursor: pointer;
   margin-left: 8px;
 }
+
+.logo {
+  cursor: pointer;
+}
