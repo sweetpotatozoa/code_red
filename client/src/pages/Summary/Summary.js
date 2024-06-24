@@ -51,11 +51,6 @@ const Summary = () => {
     }
   }
 
-  //개별응답으로 이동
-  const goToResponses = () => {
-    navigate(`/responses/${id}`)
-  }
-
   //설정 모달 켜기/끄기
   const settingModalHandler = () => {
     setIsSetting(!isSetting)
@@ -70,7 +65,7 @@ const Summary = () => {
     // setCustomerInfo(newCustomerInfo)  // 주석 처리: 백엔드 연동 전까지
     setIsSetting(false)
   }
-  
+
   //개별응답으로 이동
   const goToResponses = () => {
     navigate(`/responses/${survey.id}`)
