@@ -40,6 +40,14 @@ class AppliedSurveyRepo {
     )
     return result
   }
+
+  async incrementViews(surveyId) {
+    const result = await this.collection.updateOne(
+      { _id: new ObjectId(surveyId) },
+      { $inc: { views: 1 } },
+    )
+    return result
+  }
 }
 
 module.exports = new AppliedSurveyRepo()

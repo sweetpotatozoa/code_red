@@ -46,6 +46,7 @@ app.get('/survey.css', (req, res) => {
 })
 
 // 라우터 설정
+
 app.use('/api', indexRouter)
 
 // 에러 핸들링 미들웨어
