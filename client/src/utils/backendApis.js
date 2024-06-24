@@ -32,6 +32,17 @@ class BackendApis {
     return result
   }
 
+  async getSurveySummary(surveyId) {
+    return await fetcher(`/api/summary/${surveyId}`, this.token, 'GET')
+  }
+
+  async getSurveyQuestions(surveyId) {
+    return await fetcher(
+      `/api/summary/${surveyId}/questions`,
+      this.token,
+      'GET',
+    )
+    
   async register(method = 'POST', params = {}) {
     const result = await fetcher('/api/auth/register', '', method, params)
     return result
@@ -117,11 +128,6 @@ class BackendApis {
     return result
   }
 
-  async getSummary(method = 'GET', params = {}) {
-    const result = await fetcher('/api/summary', this.token, method, params)
-    return result
-  }
-
   async getResponse(method = 'GET', params = {}) {
     const result = await fetcher('/api/response', this.token, method, params)
     return result
@@ -135,6 +141,7 @@ class BackendApis {
   async downloadResponses(method = 'GET', params = {}) {
     const result = await fetcher('/api/download', this.token, method, params)
     return result
+
   }
 }
 
