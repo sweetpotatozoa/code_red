@@ -70,11 +70,25 @@ const Summary = () => {
     // setCustomerInfo(newCustomerInfo)  // 주석 처리: 백엔드 연동 전까지
     setIsSetting(false)
   }
+  
+  //개별응답으로 이동
+  const goToResponses = () => {
+    navigate(`/responses/${survey.id}`)
+  }
+
+  //홈으로 이동
+  const goToHome = () => {
+    navigate('/')
+  }
 
   return (
     <div className={styles.container}>
       <div className={styles.sideBar}>
-        <img src='/images/logo.png' className={styles.logo} alt='Logo'></img>
+        <img
+          src='/images/logo.png'
+          className={styles.logo}
+          onClick={goToHome}
+        ></img>
         <div className={styles.navBar}>
           <div className={styles.nav}>설문조사</div>
         </div>
