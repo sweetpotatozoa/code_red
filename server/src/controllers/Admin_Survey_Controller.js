@@ -162,45 +162,40 @@ class AdminSurveyController {
   // 설문조사 응답 요약 가져오기
   async getSurveySummary(req, res) {
     try {
-      const userId = req.user.id // userId saved in jwt added by auth middleware
-      const { surveyId } = req.params // 각 설문조사 아이디
+      const userId = req.user.id;
+      const { surveyId } = req.params;
+      
       if (!userId || !isObjectId(userId)) {
-        res.status(400).json({ message: 'Invalid user id' })
-        return
+        return res.status(400).json({ message: 'Invalid user id' });
       }
       if (!surveyId || !isObjectId(surveyId)) {
-        res.status(400).json({ message: 'Invalid survey id' })
-        return
+        return res.status(400).json({ message: 'Invalid survey id' });
       }
-      const result = await AdminSurveyService.getSurveySummary(userId, surveyId)
-      res.status(result.status).json(result)
+      
+      const result = await AdminSurveyService.getSurveySummary(userId, surveyId);
+      res.status(200).json(result);
     } catch (err) {
-      const { status, message } = errorHandler(err, 'getSurveySummary')
-      res.status(status).json({ message })
+      res.status(500).json({ message: 'Internal server error', error: err.message });
     }
   }
 
   // 설문조사 질문별 요약 가져오기
   async getSurveyQuestions(req, res) {
     try {
-      userId = req.user.id // userId saved in jwt added by auth middleware
-      const { surveyId } = req.params
+      const userId = req.user.id;
+      const { surveyId } = req.params;
+      
       if (!userId || !isObjectId(userId)) {
-        res.status(400).json({ message: 'Invalid user id' })
-        return
+        return res.status(400).json({ message: 'Invalid user id' });
       }
       if (!surveyId || !isObjectId(surveyId)) {
-        res.status(400).json({ message: 'Invalid survey id' })
-        return
+        return res.status(400).json({ message: 'Invalid survey id' });
       }
-      const result = await AdminSurveyService.getSurveyQuestions(
-        userId,
-        surveyId,
-      )
-      res.status(result.status).json(result)
+      
+      const result = await AdminSurveyService.getSurveyQuestions(userId, surveyId);
+      res.status(200).json(result);
     } catch (err) {
-      const { status, message } = errorHandler(err, 'getSurveyQuestions')
-      res.status(status).json({ message })
+      res.status(500).json({ message: 'Internal server error', error: err.message });
     }
   }
 }

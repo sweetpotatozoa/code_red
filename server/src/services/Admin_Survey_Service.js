@@ -155,7 +155,7 @@ class AdminSurveyService {
     await this.checkSurveyIdExist(surveyObjectId)
     await this.checkSurveyOwnership(userObjectId, surveyObjectId)
     
-    const survey = await SurveysRepo.getSurveyById(surveyObjectId)
+    const survey = await SurveysRepo.getSurveyViews(surveyObjectId)
     const responses = await ResponsesRepo.getSurveyResponses(surveyObjectId)
 
     return survey.steps.map((step) => {

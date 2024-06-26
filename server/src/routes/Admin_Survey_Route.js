@@ -50,6 +50,12 @@ router.post(
   wrapAsync(AdminSurveyController.createSurvey),
 )
 
+// 설문조사 응답 요약
+router.get('/:surveyId', fakeAuth, wrapAsync(AdminSurveyController.getSurveySummary))
+
+// 설문조사 질문별 요약
+router.get('/:surveyId/questions', fakeAuth, wrapAsync(AdminSurveyController.getSurveyQuestions))
+
 // 설문조사 생성
 router.post(
   '/templates',
@@ -103,12 +109,6 @@ router.put(
     return res.status(result.status).send(result)
   }),
 )
-
-// 설문조사 응답 요약
-router.get('/:surveyId', fakeAuth, wrapAsync(AdminSurveyController.getSurveySummary))
-
-// 설문조사 질문별 요약
-router.get('/:surveyId/questions', fakeAuth, wrapAsync(AdminSurveyController.getSurveyQuestions))
 
 // 설문조사 개별 응답 가져오기
 router.get(
