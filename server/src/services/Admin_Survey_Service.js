@@ -1,6 +1,7 @@
 const UsersRepo = require('../repositories/Users_Repo')
 const SurveysRepo = require('../repositories/Surveys_Repo')
 const templatesRepo = require('../repositories/Templates_Repo')
+const ResponsesRepo = require('../repositories/Responses_Repo')
 
 class AdminSurveyService {
   //헬퍼 함수
@@ -88,6 +89,25 @@ class AdminSurveyService {
   async getTemplates(userId) {
     await this.checkUserIdExist(userId) // 유저 아이디 존재 검사
     return templatesRepo.getTemplates()
+  }
+
+  //설문조사 응답 요약 가져오기
+  async getSurveySummary(userId, surveyId) {
+    await this.checkUserIdExist(userId) // 유저 아이디 존재 검사
+    await this.checkSurveyIdExist(surveyId) // 설문조사 유효성 검사
+    await this.checkSurveyOwnership(userId, surveyId) // 설문조사 소유권 검사
+    const survey = await SurveysRepo.getSurveyViews(surveyId)
+    const responses = await ResponsesRepo.getSurveyResponses(surveyId)
+
+    return await ResponsesRepo.getSurveySummary(surveyId)
+  }
+
+  //설문조사 질문별 요약 가져오기
+  async getSurveyQuestions(userId, surveyId) {
+    await this.checkUserIdExist(userId) // 유저 아이디 존재 검사
+    await this.checkSurveyIdExist(surveyId) // 설문조사 유효성 검사
+    await this.checkSurveyOwnership(userId, surveyId) // 설문조사 소유권 검사
+    return await ResponsesRepo.getSurveyQuestions(surveyId)
   }
 }
 

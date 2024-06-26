@@ -63,6 +63,17 @@ class SurveysRepo {
       _id: new mongoose.Types.ObjectId(surveyId),
     })
   }
+
+  // 설문조사 views 가져오기
+  async getSurveyViews(surveyId) {
+    const survey = await this.collection.findOne(
+      {
+        _id: new mongoose.Types.ObjectId(surveyId),
+      },
+      { projection: { views: 1, _id: 0 } },
+    )
+    return survey
+  }
 }
 
 module.exports = new SurveysRepo()

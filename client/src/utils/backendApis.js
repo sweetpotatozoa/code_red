@@ -42,7 +42,8 @@ class BackendApis {
       this.token,
       'GET',
     )
-    
+  }
+
   async register(method = 'POST', params = {}) {
     const result = await fetcher('/api/auth/register', '', method, params)
     return result
@@ -141,7 +142,6 @@ class BackendApis {
   async downloadResponses(method = 'GET', params = {}) {
     const result = await fetcher('/api/download', this.token, method, params)
     return result
-
   }
 }
 

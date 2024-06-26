@@ -104,18 +104,11 @@ router.put(
   }),
 )
 
-// 설문조사 요약 가져오기
-router.get(
-  '/summary/:id',
-  auth,
-  wrapAsync(async (req, res) => {
-    const result = await AdminSurveyController.getSummary(
-      req.params.id,
-      req.user.id,
-    ) //각 설문조사 아이디, userId saved in jwt added by auth middleware
-    return res.status(result.status).send(result)
-  }),
-)
+// 설문조사 응답 요약
+router.get('/:surveyId', AdminSurveyController.getSurveySummary)
+
+// 설문조사 질문별 요약
+router.get('/:surveyId/questions', AdminSurveyController.getSurveyQuestions)
 
 // 설문조사 개별 응답 가져오기
 router.get(

@@ -142,7 +142,6 @@
   font-size: 16px;
   align-items: center;
   cursor: pointer;
-  z-index: 2;
 }
 
 .surveyTitle {
@@ -160,7 +159,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 3;
 }
 
 .surveyEdit {
@@ -170,7 +168,6 @@
   padding: 8px 16px;
   border-radius: 5px;
   cursor: pointer;
-  z-index: 3;
 }
 
 .surveyDelete {
@@ -181,7 +178,6 @@
   border-radius: 5px;
   color: #ffffff;
   cursor: pointer;
-  z-index: 3;
 }
 
 /* Toggle Switch */

@@ -68,7 +68,7 @@ const Summary = () => {
 
   //개별응답으로 이동
   const goToResponses = () => {
-    navigate(`/responses/${survey.id}`)
+    navigate(`/responses/${id}`)
   }
 
   //홈으로 이동

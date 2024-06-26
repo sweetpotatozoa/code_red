@@ -112,7 +112,7 @@ const Home = () => {
             <div
               key={survey.id}
               className={styles.surveyBox}
-              onClick={() => goToSummary(survey.id)}
+              // onClick={() => goToSummary(survey.id)}
             >
               <div className={styles.surveyTitle}>{survey.title}</div>
               <div className={styles.surveyDate}>{survey.updatedAt}</div>

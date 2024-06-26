@@ -158,6 +158,51 @@ class AdminSurveyController {
       res.status(status).json({ message })
     }
   }
+
+  // 설문조사 응답 요약 가져오기
+  async getSurveySummary(req, res) {
+    try {
+      const userId = req.user.id // userId saved in jwt added by auth middleware
+      const { surveyId } = req.params // 각 설문조사 아이디
+      if (!userId || !isObjectId(userId)) {
+        res.status(400).json({ message: 'Invalid user id' })
+        return
+      }
+      if (!surveyId || !isObjectId(surveyId)) {
+        res.status(400).json({ message: 'Invalid survey id' })
+        return
+      }
+      const result = await AdminSurveyService.getSurveySummary(userId, surveyId)
+      res.status(result.status).json(result)
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'getSurveySummary')
+      res.status(status).json({ message })
+    }
+  }
+
+  // 설문조사 질문별 요약 가져오기
+  async getSurveyQuestions(req, res) {
+    try {
+      userId = req.user.id // userId saved in jwt added by auth middleware
+      const { surveyId } = req.params
+      if (!userId || !isObjectId(userId)) {
+        res.status(400).json({ message: 'Invalid user id' })
+        return
+      }
+      if (!surveyId || !isObjectId(surveyId)) {
+        res.status(400).json({ message: 'Invalid survey id' })
+        return
+      }
+      const result = await AdminSurveyService.getSurveyQuestions(
+        userId,
+        surveyId,
+      )
+      res.status(result.status).json(result)
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'getSurveyQuestions')
+      res.status(status).json({ message })
+    }
+  }
 }
 
 module.exports = new AdminSurveyController()
