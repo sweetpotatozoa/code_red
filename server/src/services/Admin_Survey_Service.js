@@ -2,6 +2,8 @@ const UsersRepo = require('../repositories/Users_Repo')
 const SurveysRepo = require('../repositories/Surveys_Repo')
 const templatesRepo = require('../repositories/Templates_Repo')
 const ResponsesRepo = require('../repositories/Responses_Repo')
+const { ObjectId } = require('mongodb')
+
 
 class AdminSurveyService {
   //헬퍼 함수
@@ -31,6 +33,14 @@ class AdminSurveyService {
     if (!isSurveyOwner) {
       throw new Error('You are not the owner of this survey')
     }
+  }
+
+  // ObjectId로 변환하는 헬퍼 함수 추가
+  convertToObjectId(id) {
+    if (!ObjectId.isValid(id)) {
+      throw new Error('Invalid id format');
+    }
+    return new ObjectId(id);
   }
 
   //실제 함수
@@ -93,21 +103,29 @@ class AdminSurveyService {
 
   //설문조사 응답 요약 가져오기
   async getSurveySummary(userId, surveyId) {
-    await this.checkUserIdExist(userId) // 유저 아이디 존재 검사
-    await this.checkSurveyIdExist(surveyId) // 설문조사 유효성 검사
-    await this.checkSurveyOwnership(userId, surveyId) // 설문조사 소유권 검사
-    const survey = await SurveysRepo.getSurveyViews(surveyId)
-    const responses = await ResponsesRepo.getSurveyResponses(surveyId)
+    const userObjectId = this.convertToObjectId(userId);
+    const surveyObjectId = this.convertToObjectId(surveyId);
 
-    return await ResponsesRepo.getSurveySummary(surveyId)
+    await this.checkUserIdExist(userObjectId) // 유저 아이디 존재 검사
+    await this.checkSurveyIdExist(surveyObjectId) // 설문조사 유효성 검사
+    await this.checkSurveyOwnership(userObjectId, surveyObjectId) // 설문조사 소유권 검사
+    
+    const survey = await SurveysRepo.getSurveyViews(surveyObjectId)
+    const responses = await ResponsesRepo.getSurveyResponses(surveyObjectId)
+
+    return await ResponsesRepo.getSurveySummary(surveyObjectId)
   }
 
   //설문조사 질문별 요약 가져오기
   async getSurveyQuestions(userId, surveyId) {
-    await this.checkUserIdExist(userId) // 유저 아이디 존재 검사
-    await this.checkSurveyIdExist(surveyId) // 설문조사 유효성 검사
-    await this.checkSurveyOwnership(userId, surveyId) // 설문조사 소유권 검사
-    return await ResponsesRepo.getSurveyQuestions(surveyId)
+    const userObjectId = this.convertToObjectId(userId);
+    const surveyObjectId = this.convertToObjectId(surveyId);
+
+    await this.checkUserIdExist(userObjectId) // 유저 아이디 존재 검사
+    await this.checkSurveyIdExist(surveyObjectId) // 설문조사 유효성 검사
+    await this.checkSurveyOwnership(userObjectId, surveyObjectId) // 설문조사 소유권 검사
+    
+    return await ResponsesRepo.getSurveyQuestions(surveyObjectId)
   }
 }
 
