@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const mongodb = require('../utils/mongodb')
-const { ObjectId } = require('bson')
+const { ObjectId } = require('mongodb')
 
 class SurveysRepo {
   constructor() {
