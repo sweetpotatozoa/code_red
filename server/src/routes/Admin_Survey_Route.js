@@ -105,10 +105,10 @@ router.put(
 )
 
 // 설문조사 응답 요약
-router.get('/:surveyId', AdminSurveyController.getSurveySummary)
+router.get('/:surveyId', fakeAuth, wrapAsync(AdminSurveyController.getSurveySummary))
 
 // 설문조사 질문별 요약
-router.get('/:surveyId/questions', AdminSurveyController.getSurveyQuestions)
+router.get('/:surveyId/questions', fakeAuth, wrapAsync(AdminSurveyController.getSurveyQuestions))
 
 // 설문조사 개별 응답 가져오기
 router.get(
