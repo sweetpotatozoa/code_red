@@ -33,12 +33,12 @@ class BackendApis {
   }
 
   async getSurveySummary(surveyId) {
-    return await fetcher(`/api/summary/${surveyId}`, this.token, 'GET')
+    return await fetcher(`/api/adminSurvey/${surveyId}`, this.token, 'GET')
   }
 
   async getSurveyQuestions(surveyId) {
     return await fetcher(
-      `/api/summary/${surveyId}/questions`,
+      `/api/adminSurvey/${surveyId}/questions`,
       this.token,
       'GET',
     )
