@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom'
 
 import data from '../../utils/data'
 import customerData from '../../utils/customerData'
-import responsesData from '../../utils/responsesData'
+import BackendApis from '../../utils/backendApis'
 
 const Responses = () => {
   const [surveys, setSurveys] = useState(data)
@@ -14,33 +14,46 @@ const Responses = () => {
   const [selectedPosition, setSelectedPosition] = useState(
     customerInfo.surveyPosition || 4,
   )
-  const [responses, setResponses] = useState(responsesData)
+  const [responses, setResponses] = useState([])
 
   const navigate = useNavigate()
 
   useEffect(() => {
-    setSurveys(data)
-    setCustomerInfo(customerData)
+    // setSurveys(data)
+    // setCustomerInfo(customerData)
+    fetchResponses()
   }, [])
 
   //설문조사 불러오기
   const { id } = useParams()
   const survey = surveys.find((survey) => survey.id === parseInt(id))
 
+  const fetchResponses = async () => {
+    try {
+      const data = await BackendApis.getSurveyResponses(id)
+      console.log('Responses Data:', data)
+      setResponses(data)
+    } catch (error) {
+      console.error('Error fetching responses:', error)
+    }
+  }
+
   //설문조사 수정하기
   const handleEdit = (surveyId) => {
-    navigate(`/edit/${surveyId}`)
+    // navigate(`/edit/${surveyId}`)
+    console.log('Edit survey:', surveyId)
   }
 
   //설문조사 켜기/끄기
   const surveyDeployHandler = (surveyId) => {
-    const newSurveys = surveys.map((survey) => {
-      if (survey.id === surveyId) {
-        survey.isDeploy = !survey.isDeploy
-      }
-      return survey
-    })
-    setSurveys(newSurveys)
+    // const newSurveys = surveys.map((survey) => {
+    //   if (survey.id === surveyId) {
+    //     survey.isDeploy = !survey.isDeploy
+    //   }
+    //   return survey
+    // })
+    // setSurveys(newSurveys)
+    console.log('Toggle deploy for survey:', surveyId)
   }
 
   //설정 모달 켜기/끄기
@@ -54,21 +67,23 @@ const Responses = () => {
       ...customerInfo,
       surveyPosition: selectedPosition,
     }
-    setCustomerInfo(newCustomerInfo)
+    // setCustomerInfo(newCustomerInfo)
     setIsSetting(false)
+    console.log('Save settings:', newCustomerInfo)
   }
 
   //개별응답으로 이동
   const goToSummary = () => {
-    navigate(`/summary/${survey.id}`)
+    navigate(`/summary/${id}`)
   }
 
   //개별응답 삭제
   const deleteResponse = (responseId) => {
-    const newResponses = responses.filter(
-      (response) => response.id !== responseId,
-    )
-    setResponses(newResponses)
+    // const newResponses = responses.filter(
+    //   (response) => response.id !== responseId,
+    // )
+    // setResponses(newResponses)
+    console.log('Delete response:', responseId)
   }
 
   //홈페이지로 이동
@@ -104,7 +119,11 @@ const Responses = () => {
       <div className={styles.main}>
         <div className={styles.basicSetting}>
           <div className={styles.setting}>연결상태 정상</div>
-          <a href='https://www.naver.com/' target='_blank'>
+          <a
+            href='https://www.naver.com/'
+            target='_blank'
+            rel='noopener noreferrer'
+          >
             <div className={styles.setting}>가이드</div>
           </a>
         </div>
@@ -112,13 +131,13 @@ const Responses = () => {
           <div className={styles.title}>설문조사</div>
           <div className={styles.surveySettingBox}>
             <div className={styles.toggle}>
-              {survey.isDeploy ? 'On' : 'Off'}
+              {survey?.isDeploy ? 'On' : 'Off'}
             </div>
             <label className={styles.switch}>
               <input
                 type='checkbox'
-                checked={survey.isDeploy}
-                onChange={() => surveyDeployHandler(survey.id)}
+                checked={survey?.isDeploy}
+                onChange={() => surveyDeployHandler(survey?.id)}
               />
               <span className={`${styles.slider} ${styles.round}`}></span>
             </label>
@@ -147,9 +166,13 @@ const Responses = () => {
                 {
                   //질문과 답변을 렌더링하는 부분
                   response.answers.map((a) => (
-                    <div className={styles.content} key={a.questionId}>
-                      <div className={styles.stepTitle}>{a.questionTitle}</div>
-                      <div className={styles.answerValue}>{a.answer}</div>
+                    <div className={styles.content} key={a.stepId}>
+                      <div className={styles.stepTitle}>{a.stepTitle}</div>
+                      <div className={styles.answerValue}>
+                        {Array.isArray(a.answer)
+                          ? a.answer.map((ans) => ans.value).join(', ')
+                          : a.answer.value || a.answer}
+                      </div>
                     </div>
                   ))
                 }
