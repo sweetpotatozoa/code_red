@@ -12,7 +12,7 @@ const Responses = () => {
   const [responses, setResponses] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [survey, setSurvey] = useState(null)
+  const [survey, setSurvey] = useState({ isDeploy: false })
 
   const navigate = useNavigate()
   const { id } = useParams()
@@ -27,7 +27,7 @@ const Responses = () => {
           BackendApis.getResponse(id),
           BackendApis.getUserInfo(),
         ])
-        setSurvey(surveyData)
+        setSurvey(surveyData || { isDeploy: false })
         setResponses(responsesData || [])
         setUserInfo(userInfoData)
         setSelectedPosition(userInfoData.surveyPosition || 4)

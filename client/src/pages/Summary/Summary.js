@@ -3,7 +3,6 @@ import styles from './Summary.module.css'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
-import customerData from '../../utils/customerData'
 import BackendApis from '../../utils/backendApis'
 
 import SummaryFreeText from '../../components/Summaries/SummaryFreeText'
@@ -15,63 +14,87 @@ import SummaryInfo from '../../components/Summaries/SummaryInfo'
 import SummaryLink from '../../components/Summaries/SummaryLink'
 
 const Summary = () => {
-  const [customerInfo] = useState(customerData)
+  const [userInfo, setUserInfo] = useState('')
   const [isSetting, setIsSetting] = useState(false)
-  const [selectedPosition, setSelectedPosition] = useState(
-    customerInfo.surveyPosition || 4,
-  )
+  const [selectedPosition, setSelectedPosition] = useState(4)
   const [summaryData, setSummaryData] = useState(null)
   const [surveyQuestions, setSurveyQuestions] = useState([])
+  const [survey, setSurvey] = useState({ isDeploy: false })
 
   const navigate = useNavigate()
   const { id } = useParams()
 
   useEffect(() => {
-    fetchSummaryData()
-    fetchSurveyQuestions()
+    const fetchData = async () => {
+      try {
+        const [surveyData, summaryData, questionsData, userInfoData] =
+          await Promise.all([
+            BackendApis.getSurvey(id),
+            BackendApis.getSurveySummary(id),
+            BackendApis.getSurveyQuestions(id),
+            BackendApis.getUserInfo(),
+          ])
+        setSurvey(surveyData || { isDeploy: false })
+        setSummaryData(summaryData)
+        setSurveyQuestions(questionsData)
+        setUserInfo(userInfoData)
+        setSelectedPosition(userInfoData.surveyPosition || 4)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      }
+    }
+
+    if (id) {
+      fetchData()
+    }
   }, [id])
 
-  const fetchSummaryData = async () => {
+  const settingCancelHandler = () => {
+    setIsSetting(false)
+    setSelectedPosition(userInfo.surveyPosition || 4)
+  }
+
+  const surveyDeployHandler = async () => {
+    if (!survey) return
+
     try {
-      const data = await BackendApis.getSurveySummary(id)
-      console.log('Summary Data:', data) // Add console log
-      setSummaryData(data)
+      await BackendApis.toggleSurveyDeploy(survey._id)
+      setSurvey((prevSurvey) => ({
+        ...prevSurvey,
+        isDeploy: !prevSurvey.isDeploy,
+      }))
     } catch (error) {
-      console.error('Error fetching summary data:', error)
+      console.error('설문조사 배포상태 변경 실패', error)
+      alert('설문조사 배포상태 변경에 실패했습니다.')
     }
   }
 
-  const fetchSurveyQuestions = async () => {
-    try {
-      const data = await BackendApis.getSurveyQuestions(id)
-      console.log('Survey Questions:', data) // Add console log
-      setSurveyQuestions(data)
-    } catch (error) {
-      console.error('Error fetching survey questions:', error)
-    }
+  const handleEdit = (surveyId) => {
+    navigate(`/edit/${surveyId}`)
   }
 
-  //설정 모달 켜기/끄기
-  const settingModalHandler = () => {
-    setIsSetting(!isSetting)
-  }
-
-  //화면 설정 저장하기
-  const settingSaveHandler = () => {
-    const newCustomerInfo = {
-      ...customerInfo,
+  const settingSaveHandler = async () => {
+    const newUserInfo = {
+      ...userInfo,
       surveyPosition: selectedPosition,
     }
-    // setCustomerInfo(newCustomerInfo)  // 주석 처리: 백엔드 연동 전까지
-    setIsSetting(false)
+
+    try {
+      await BackendApis.editSurveyPosition('PUT', {
+        surveyPosition: selectedPosition,
+      })
+      setUserInfo(newUserInfo)
+      setIsSetting(false)
+    } catch (error) {
+      console.error('설정 저장 실패', error)
+      alert('설정 저장에 실패했습니다.')
+    }
   }
 
-  //개별응답으로 이동
   const goToResponses = () => {
     navigate(`/responses/${id}`)
   }
 
-  //홈으로 이동
   const goToHome = () => {
     navigate('/')
   }
@@ -83,7 +106,7 @@ const Summary = () => {
           src='/images/logo.png'
           className={styles.logo}
           onClick={goToHome}
-        ></img>
+        />
         <div className={styles.navBar}>
           <div className={styles.nav}>설문조사</div>
         </div>
@@ -91,7 +114,7 @@ const Summary = () => {
           <div className={styles.welcome}>
             안녕하세요,
             <br />
-            {customerInfo.customerName}님!
+            {userInfo.realName}님!
           </div>
           <div
             className={styles.environmentSetting}
@@ -114,27 +137,22 @@ const Summary = () => {
         </div>
         <div className={styles.titleBox}>
           <div className={styles.title}>설문조사</div>
-          {/* 주석 처리: 백엔드 연동 전까지
           <div className={styles.surveySettingBox}>
             <div className={styles.toggle}>
-              {survey.isDeploy ? 'On' : 'Off'}
+              {survey?.isDeploy ? 'On' : 'Off'}
             </div>
             <label className={styles.switch}>
               <input
                 type='checkbox'
-                checked={survey.isDeploy}
-                onChange={() => surveyDeployHandler(survey.id)}
+                checked={survey.isDeploy || false}
+                onChange={surveyDeployHandler}
               />
               <span className={`${styles.slider} ${styles.round}`}></span>
             </label>
-            <div
-              className={styles.button}
-              onClick={() => handleEdit(survey.id)}
-            >
+            <div className={styles.button} onClick={() => handleEdit(id)}>
               수정하기
             </div>
           </div>
-          */}
         </div>
         <div className={styles.smallNavs}>
           <div className={styles.selectedNavs}>전체 요약</div>
@@ -239,7 +257,7 @@ const Summary = () => {
               <option value='3'>우측 상단</option>
             </select>
             <div className={styles.bottom}>
-              <div className={styles.btnButton2} onClick={settingModalHandler}>
+              <div className={styles.btnButton2} onClick={settingCancelHandler}>
                 취소
               </div>
               <div className={styles.btnButton} onClick={settingSaveHandler}>
