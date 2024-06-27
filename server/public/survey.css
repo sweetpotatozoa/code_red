@@ -11,6 +11,27 @@
   z-index: 1000;
 }
 
+.survey-popup-position-1 {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+}
+.survey-popup-position-2 {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+}
+.survey-popup-position-3 {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+}
+.survey-popup-position-4 {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+}
+
 .survey-step {
   display: flex;
   flex-direction: column;

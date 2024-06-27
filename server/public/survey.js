@@ -59,6 +59,9 @@
       const data = await response.json()
       console.log('Surveys loaded:', data)
 
+      const user = data.user
+      window.surveyPosition = user.surveyPosition
+
       const validSurveys = data.data.filter(validateSurvey)
 
       return { status: data.status, data: validSurveys }
@@ -867,15 +870,30 @@
     link.href = `${API_URI}/survey.css`
     document.head.appendChild(link)
 
-    // CSS 파일이 로드된 후 설문조사를 표시
     link.onload = async () => {
       const surveyContainer = document.createElement('div')
       surveyContainer.id = 'survey-popup'
+
+      // 위치 클래스 적용
+      switch (window.surveyPosition) {
+        case 1:
+          surveyContainer.classList.add('survey-popup-position-1')
+          break
+        case 2:
+          surveyContainer.classList.add('survey-popup-position-2')
+          break
+        case 3:
+          surveyContainer.classList.add('survey-popup-position-3')
+          break
+        case 4:
+          surveyContainer.classList.add('survey-popup-position-4')
+          break
+        default:
+          surveyContainer.classList.add('survey-popup-position-4') // 기본값은 우측하단
+      }
+
       document.body.appendChild(surveyContainer)
-
-      // 노출 카운트 증가 함수 호출
       await incrementViews(survey._id)
-
       showStep(survey, currentStep)
       console.log('Survey container created and appended to body')
 
