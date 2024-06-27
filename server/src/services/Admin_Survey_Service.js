@@ -136,9 +136,6 @@ class AdminSurveyService {
 
   //설문조사 질문별 요약 가져오기
   async getSurveyQuestions(userId, surveyId) {
-    const userObjectId = this.convertToObjectId(userId)
-    const surveyObjectId = this.convertToObjectId(surveyId)
-
     await this.checkUserIdExist(userId)
     await this.checkSurveyIdExist(surveyId)
     await this.checkSurveyOwnership(userId, surveyId)
