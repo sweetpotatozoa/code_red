@@ -47,6 +47,12 @@ const Home = () => {
     setIsSetting(!isSetting)
   }
 
+  //설정 모달 취소하기
+  const settingCancelHandler = () => {
+    setIsSetting(false)
+    setSelectedPosition(customerInfo.surveyPosition || 4)
+  }
+
   //화면 설정 저장하기
   const settingSaveHandler = () => {
     const newCustomerInfo = {
@@ -160,7 +166,7 @@ const Home = () => {
               <option value='3'>우측 상단</option>
             </select>
             <div className={styles.bottom}>
-              <div className={styles.btnButton2} onClick={settingModalHandler}>
+              <div className={styles.btnButton2} onClick={settingCancelHandler}>
                 취소
               </div>
               <div className={styles.btnButton} onClick={settingSaveHandler}>
