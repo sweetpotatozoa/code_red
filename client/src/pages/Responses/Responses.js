@@ -15,78 +15,74 @@ const Responses = () => {
     customerInfo.surveyPosition || 4,
   )
   const [responses, setResponses] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   const navigate = useNavigate()
+  const { id } = useParams()
 
   useEffect(() => {
-    // setSurveys(data)
-    // setCustomerInfo(customerData)
     fetchResponses()
-  }, [])
-
-  //설문조사 불러오기
-  const { id } = useParams()
-  const survey = surveys.find((survey) => survey.id === parseInt(id))
+  }, [id])
 
   const fetchResponses = async () => {
+    setIsLoading(true)
+    setError(null)
     try {
-      const data = await BackendApis.getSurveyResponses(id)
+      const data = await BackendApis.getResponse(id)
       console.log('Responses Data:', data)
-      setResponses(data)
+      setResponses(data || [])
     } catch (error) {
       console.error('Error fetching responses:', error)
+      setError('응답을 불러오는 중 오류가 발생했습니다.')
+      setResponses([])
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  //설문조사 수정하기
+  const deleteResponse = async (responseId) => {
+    if (window.confirm('정말로 이 응답을 삭제하시겠습니까?')) {
+      try {
+        await BackendApis.deleteResponse(responseId)
+        setResponses(
+          responses.filter((response) => response._id !== responseId),
+        )
+        alert('응답이 성공적으로 삭제되었습니다.')
+      } catch (error) {
+        console.error('Error deleting response:', error)
+        alert('응답 삭제 중 오류가 발생했습니다.')
+      }
+    }
+  }
+
+  const survey = surveys.find((survey) => survey.id === parseInt(id))
+
   const handleEdit = (surveyId) => {
-    // navigate(`/edit/${surveyId}`)
     console.log('Edit survey:', surveyId)
   }
 
-  //설문조사 켜기/끄기
   const surveyDeployHandler = (surveyId) => {
-    // const newSurveys = surveys.map((survey) => {
-    //   if (survey.id === surveyId) {
-    //     survey.isDeploy = !survey.isDeploy
-    //   }
-    //   return survey
-    // })
-    // setSurveys(newSurveys)
     console.log('Toggle deploy for survey:', surveyId)
   }
 
-  //설정 모달 켜기/끄기
   const settingModalHandler = () => {
     setIsSetting(!isSetting)
   }
 
-  //화면 설정 저장하기
   const settingSaveHandler = () => {
     const newCustomerInfo = {
       ...customerInfo,
       surveyPosition: selectedPosition,
     }
-    // setCustomerInfo(newCustomerInfo)
     setIsSetting(false)
     console.log('Save settings:', newCustomerInfo)
   }
 
-  //개별응답으로 이동
   const goToSummary = () => {
     navigate(`/summary/${id}`)
   }
 
-  //개별응답 삭제
-  const deleteResponse = (responseId) => {
-    // const newResponses = responses.filter(
-    //   (response) => response.id !== responseId,
-    // )
-    // setResponses(newResponses)
-    console.log('Delete response:', responseId)
-  }
-
-  //홈페이지로 이동
   const goToHome = () => {
     navigate('/')
   }
@@ -98,7 +94,7 @@ const Responses = () => {
           src='/images/logo.png'
           className={styles.logo}
           onClick={goToHome}
-        ></img>
+        />
         <div className={styles.navBar}>
           <div className={styles.nav}>설문조사</div>
         </div>
@@ -159,23 +155,22 @@ const Responses = () => {
           <div className={styles.downloadButton}>CSV 다운로드</div>
         </div>
         <div className={styles.responses}>
+          {isLoading && <div>로딩 중...</div>}
+          {error && <div className={styles.error}>{error}</div>}
           {responses.map((response) => (
-            <div className={styles.response} key={response.id}>
+            <div className={styles.response} key={response._id}>
               <div className={styles.responseTitle}>{response.createAt}</div>
               <div className={styles.contents}>
-                {
-                  //질문과 답변을 렌더링하는 부분
-                  response.answers.map((a) => (
-                    <div className={styles.content} key={a.stepId}>
-                      <div className={styles.stepTitle}>{a.stepTitle}</div>
-                      <div className={styles.answerValue}>
-                        {Array.isArray(a.answer)
-                          ? a.answer.map((ans) => ans.value).join(', ')
-                          : a.answer.value || a.answer}
-                      </div>
+                {response.answers.map((a) => (
+                  <div className={styles.content} key={a.stepId}>
+                    <div className={styles.stepTitle}>{a.stepTitle}</div>
+                    <div className={styles.answerValue}>
+                      {Array.isArray(a.answer)
+                        ? a.answer.map((ans) => ans.value).join(', ')
+                        : a.answer.value || a.answer}
                     </div>
-                  ))
-                }
+                  </div>
+                ))}
               </div>
               <div className={styles.isComplete}>
                 {response.isComplete ? '제출완료' : '중도이탈'}
@@ -183,7 +178,7 @@ const Responses = () => {
               <div className={styles.bottom}>
                 <div
                   className={styles.btnButton}
-                  onClick={() => deleteResponse(response.id)}
+                  onClick={() => deleteResponse(response._id)}
                 >
                   삭제
                 </div>
@@ -220,4 +215,5 @@ const Responses = () => {
     </div>
   )
 }
+
 export default Responses

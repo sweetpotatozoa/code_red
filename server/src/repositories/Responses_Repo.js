@@ -14,7 +14,7 @@ class ResponsesRepo {
         { surveyId: new mongoose.Types.ObjectId(surveyId) },
         {
           projection: {
-            _id: 0,
+            _id: 1,
             createAt: 1,
             completeAt: 1,
             isComplete: 1,

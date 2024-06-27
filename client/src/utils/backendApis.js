@@ -129,14 +129,20 @@ class BackendApis {
     return result
   }
 
-  async getResponse(method = 'GET', params = {}) {
-    const result = await fetcher('/api/response', this.token, method, params)
-    return result
+  async getResponse(surveyId) {
+    return await fetcher(
+      `/api/adminSurvey/response/${surveyId}`,
+      this.token,
+      'GET',
+    )
   }
 
-  async deleteResponse(method = 'DELETE', params = {}) {
-    const result = await fetcher('/api/response', this.token, method, params)
-    return result
+  async deleteResponse(responseId) {
+    return await fetcher(
+      `/api/adminSurvey/response/${responseId}`,
+      this.token,
+      'DELETE',
+    )
   }
 
   async downloadResponses(method = 'GET', params = {}) {
