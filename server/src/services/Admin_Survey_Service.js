@@ -211,6 +211,35 @@ class AdminSurveyService {
       }
     })
   }
+
+  // 설문조사 개별 응답 가져오기
+  async getResponses(userId, surveyId) {
+    await this.checkUserIdExist(userId)
+    await this.checkSurveyIdExist(surveyId)
+    await this.checkSurveyOwnership(userId, surveyId)
+
+    const responses = await ResponsesRepo.getSurveyResponses(surveyId)
+
+    if (responses.length === 0) {
+      throw new Error('No responses found')
+    }
+
+    return responses
+  }
+
+  // 설문조사 응답 삭제
+  async deleteResponse(userId, responseId) {
+    await this.checkUserIdExist(userId)
+
+    const response = await ResponsesRepo.getResponseById(responseId)
+    if (!response) {
+      throw new Error('No response found')
+    }
+
+    await this.checkSurveyOwnership(userId, response.surveyId)
+
+    return ResponsesRepo.deleteResponse(responseId)
+  }
 }
 
 module.exports = new AdminSurveyService()

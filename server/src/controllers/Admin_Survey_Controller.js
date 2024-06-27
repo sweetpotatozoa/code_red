@@ -203,6 +203,47 @@ class AdminSurveyController {
       res.status(status).json({ message })
     }
   }
+  // 설문조사 개별 응답 가져오기
+  async getResponses(req, res) {
+    try {
+      const userId = req.user.id
+      const { id: surveyId } = req.params
+
+      if (!userId || !isObjectId(userId)) {
+        return res.status(400).json({ message: 'Invalid user id' })
+      }
+      if (!surveyId || !isObjectId(surveyId)) {
+        return res.status(400).json({ message: 'Invalid survey id' })
+      }
+
+      const result = await AdminSurveyService.getResponses(userId, surveyId)
+      res.status(200).json(result)
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'getResponses')
+      res.status(status).json({ message })
+    }
+  }
+
+  // 설문조사 응답 삭제
+  async deleteResponse(req, res) {
+    try {
+      const userId = req.user.id
+      const { id: responseId } = req.params
+
+      if (!userId || !isObjectId(userId)) {
+        return res.status(400).json({ message: 'Invalid user id' })
+      }
+      if (!responseId || !isObjectId(responseId)) {
+        return res.status(400).json({ message: 'Invalid response id' })
+      }
+
+      const result = await AdminSurveyService.deleteResponse(userId, responseId)
+      res.status(200).json(result)
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'deleteResponse')
+      res.status(status).json({ message })
+    }
+  }
 }
 
 module.exports = new AdminSurveyController()
