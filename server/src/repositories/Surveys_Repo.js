@@ -74,6 +74,15 @@ class SurveysRepo {
     )
     return survey
   }
+
+  // 설문조사 isDeploy 값만 가져오기
+  async getSurveyDeployStatus(surveyId) {
+    const survey = await this.collection.findOne(
+      { _id: new mongoose.Types.ObjectId(surveyId) },
+      { projection: { _id: 1, isDeploy: 1 } },
+    )
+    return survey
+  }
 }
 
 module.exports = new SurveysRepo()

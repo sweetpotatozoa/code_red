@@ -132,6 +132,13 @@ router.delete(
   wrapAsync(AdminSurveyController.deleteResponse),
 )
 
+// 설문조사 isDeploy 상태만 가져오기
+router.get(
+  '/getSurvey/:id',
+  fakeAuth,
+  wrapAsync(AdminSurveyController.getSurvey),
+)
+
 // 설문조사 응답 다운로드
 router.get(
   '/download/:id',

@@ -39,6 +39,15 @@ class BackendApis {
     return result
   }
 
+  // 설문조사 하나의 isDeploy 값만 가져오기
+  async getSurvey(surveyId) {
+    return await fetcher(
+      `/api/adminSurvey/getSurvey/${surveyId}`,
+      this.token,
+      'GET',
+    )
+  }
+
   //유저 정보 가져오기
   async getUserInfo(method = 'GET', params = {}) {
     const result = await fetcher(
