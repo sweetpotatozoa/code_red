@@ -162,40 +162,45 @@ class AdminSurveyController {
   // 설문조사 응답 요약 가져오기
   async getSurveySummary(req, res) {
     try {
-      const userId = req.user.id;
-      const { surveyId } = req.params;
-      
+      const userId = req.user.id
+      const { surveyId } = req.params
+
       if (!userId || !isObjectId(userId)) {
-        return res.status(400).json({ message: 'Invalid user id' });
+        return res.status(400).json({ message: 'Invalid user id' })
       }
       if (!surveyId || !isObjectId(surveyId)) {
-        return res.status(400).json({ message: 'Invalid survey id' });
+        return res.status(400).json({ message: 'Invalid survey id' })
       }
-      
-      const result = await AdminSurveyService.getSurveySummary(userId, surveyId);
-      res.status(200).json(result);
+
+      const result = await AdminSurveyService.getSurveySummary(userId, surveyId)
+      res.status(200).json(result)
     } catch (err) {
-      res.status(500).json({ message: 'Internal server error', error: err.message });
+      const { status, message } = errorHandler(err, 'getSurveySummary')
+      res.status(status).json({ message })
     }
   }
 
   // 설문조사 질문별 요약 가져오기
   async getSurveyQuestions(req, res) {
     try {
-      const userId = req.user.id;
-      const { surveyId } = req.params;
-      
+      const userId = req.user.id
+      const { surveyId } = req.params
+
       if (!userId || !isObjectId(userId)) {
-        return res.status(400).json({ message: 'Invalid user id' });
+        return res.status(400).json({ message: 'Invalid user id' })
       }
       if (!surveyId || !isObjectId(surveyId)) {
-        return res.status(400).json({ message: 'Invalid survey id' });
+        return res.status(400).json({ message: 'Invalid survey id' })
       }
-      
-      const result = await AdminSurveyService.getSurveyQuestions(userId, surveyId);
-      res.status(200).json(result);
+
+      const result = await AdminSurveyService.getSurveyQuestions(
+        userId,
+        surveyId,
+      )
+      res.status(200).json(result)
     } catch (err) {
-      res.status(500).json({ message: 'Internal server error', error: err.message });
+      const { status, message } = errorHandler(err, 'getSurveyQuestions')
+      res.status(status).json({ message })
     }
   }
 }

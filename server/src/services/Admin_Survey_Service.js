@@ -4,7 +4,6 @@ const templatesRepo = require('../repositories/Templates_Repo')
 const ResponsesRepo = require('../repositories/Responses_Repo')
 const { ObjectId } = require('mongodb')
 
-
 class AdminSurveyService {
   //헬퍼 함수
 
@@ -33,14 +32,6 @@ class AdminSurveyService {
     if (!isSurveyOwner) {
       throw new Error('You are not the owner of this survey')
     }
-  }
-
-  // ObjectId로 변환하는 헬퍼 함수 추가
-  convertToObjectId(id) {
-    if (!ObjectId.isValid(id)) {
-      throw new Error('Invalid id format');
-    }
-    return new ObjectId(id);
   }
 
   //실제 함수
@@ -103,15 +94,12 @@ class AdminSurveyService {
 
   //설문조사 응답 요약 가져오기
   async getSurveySummary(userId, surveyId) {
-    const userObjectId = this.convertToObjectId(userId);
-    const surveyObjectId = this.convertToObjectId(surveyId);
+    await this.checkUserIdExist(userId)
+    await this.checkSurveyIdExist(surveyId)
+    await this.checkSurveyOwnership(userId, surveyId)
 
-    await this.checkUserIdExist(userObjectId)
-    await this.checkSurveyIdExist(surveyObjectId)
-    await this.checkSurveyOwnership(userObjectId, surveyObjectId)
-    
-    const survey = await SurveysRepo.getSurveyViews(surveyObjectId)
-    const responses = await ResponsesRepo.getSurveyResponses(surveyObjectId)
+    const survey = await SurveysRepo.getSurveyViews(surveyId)
+    const responses = await ResponsesRepo.getSurveyResponses(surveyId)
 
     const startCount = responses.length
     const completedResponses = responses.filter((r) => r.isComplete)
@@ -148,15 +136,15 @@ class AdminSurveyService {
 
   //설문조사 질문별 요약 가져오기
   async getSurveyQuestions(userId, surveyId) {
-    const userObjectId = this.convertToObjectId(userId);
-    const surveyObjectId = this.convertToObjectId(surveyId);
+    const userObjectId = this.convertToObjectId(userId)
+    const surveyObjectId = this.convertToObjectId(surveyId)
 
-    await this.checkUserIdExist(userObjectId)
-    await this.checkSurveyIdExist(surveyObjectId)
-    await this.checkSurveyOwnership(userObjectId, surveyObjectId)
-    
-    const survey = await SurveysRepo.getSurveyViews(surveyObjectId)
-    const responses = await ResponsesRepo.getSurveyResponses(surveyObjectId)
+    await this.checkUserIdExist(userId)
+    await this.checkSurveyIdExist(surveyId)
+    await this.checkSurveyOwnership(userId, surveyId)
+
+    const survey = await SurveysRepo.getSurveyViews(surveyId)
+    const responses = await ResponsesRepo.getSurveyResponses(surveyId)
 
     return survey.steps.map((step) => {
       const stepResponses = responses.flatMap((r) =>
