@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const mongodb = require('../utils/mongodb')
-const { ObjectId } = require('bson')
+const { ObjectId } = require('mongodb')
 
 class SurveysRepo {
   constructor() {
@@ -64,13 +64,13 @@ class SurveysRepo {
     })
   }
 
-  // 설문조사 views 가져오기
+  // 설문조사 views 및 steps 가져오기
   async getSurveyViews(surveyId) {
     const survey = await this.collection.findOne(
       {
         _id: new mongoose.Types.ObjectId(surveyId),
       },
-      { projection: { views: 1, _id: 0 } },
+      { projection: { views: 1, steps: 1, _id: 0 } },
     )
     return survey
   }

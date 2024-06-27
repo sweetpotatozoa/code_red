@@ -2,6 +2,7 @@ const UsersRepo = require('../repositories/Users_Repo')
 const SurveysRepo = require('../repositories/Surveys_Repo')
 const templatesRepo = require('../repositories/Templates_Repo')
 const ResponsesRepo = require('../repositories/Responses_Repo')
+const { ObjectId } = require('mongodb')
 
 class AdminSurveyService {
   //헬퍼 함수
@@ -93,21 +94,105 @@ class AdminSurveyService {
 
   //설문조사 응답 요약 가져오기
   async getSurveySummary(userId, surveyId) {
-    await this.checkUserIdExist(userId) // 유저 아이디 존재 검사
-    await this.checkSurveyIdExist(surveyId) // 설문조사 유효성 검사
-    await this.checkSurveyOwnership(userId, surveyId) // 설문조사 소유권 검사
+    await this.checkUserIdExist(userId)
+    await this.checkSurveyIdExist(surveyId)
+    await this.checkSurveyOwnership(userId, surveyId)
+
     const survey = await SurveysRepo.getSurveyViews(surveyId)
     const responses = await ResponsesRepo.getSurveyResponses(surveyId)
 
-    return await ResponsesRepo.getSurveySummary(surveyId)
+    const startCount = responses.length
+    const completedResponses = responses.filter((r) => r.isComplete)
+    const completedCount = completedResponses.length
+    const dropoutCount = startCount - completedCount
+
+    let avgResponseTime = 0
+    if (completedResponses.length > 0) {
+      const totalTime = completedResponses.reduce((sum, r) => {
+        const createAt = new Date(r.createAt)
+        const completeAt = new Date(r.completeAt)
+        const timeDifference = completeAt - createAt
+        return sum + (timeDifference > 0 ? timeDifference : 0)
+      }, 0)
+      avgResponseTime = totalTime / completedResponses.length / 1000
+    }
+
+    const views = survey.views || 0
+
+    return {
+      views,
+      startCount,
+      completedCount,
+      dropoutCount,
+      avgResponseTime: avgResponseTime.toFixed(2),
+      exposureStartRatio:
+        views > 0 ? ((startCount / views) * 100).toFixed(2) : '0.00',
+      exposureCompletedRatio:
+        views > 0 ? ((completedCount / views) * 100).toFixed(2) : '0.00',
+      exposureDropoutRatio:
+        views > 0 ? ((dropoutCount / views) * 100).toFixed(2) : '0.00',
+    }
   }
 
   //설문조사 질문별 요약 가져오기
   async getSurveyQuestions(userId, surveyId) {
-    await this.checkUserIdExist(userId) // 유저 아이디 존재 검사
-    await this.checkSurveyIdExist(surveyId) // 설문조사 유효성 검사
-    await this.checkSurveyOwnership(userId, surveyId) // 설문조사 소유권 검사
-    return await ResponsesRepo.getSurveyQuestions(surveyId)
+    const userObjectId = this.convertToObjectId(userId)
+    const surveyObjectId = this.convertToObjectId(surveyId)
+
+    await this.checkUserIdExist(userId)
+    await this.checkSurveyIdExist(surveyId)
+    await this.checkSurveyOwnership(userId, surveyId)
+
+    const survey = await SurveysRepo.getSurveyViews(surveyId)
+    const responses = await ResponsesRepo.getSurveyResponses(surveyId)
+
+    return survey.steps.map((step) => {
+      const stepResponses = responses.flatMap((r) =>
+        r.answers.filter((a) => a.stepId === step.id),
+      )
+
+      switch (step.type) {
+        case 'welcome':
+          return {
+            ...step,
+            views: survey.views || 0,
+            responses: stepResponses.length,
+          }
+        case 'freeText':
+          return {
+            ...step,
+            responses: stepResponses.length,
+            contents: stepResponses.map((r) => r.answer),
+          }
+        case 'rating':
+        case 'singleChoice':
+        case 'multipleChoice':
+          const optionCounts = step.options.reduce((acc, option) => {
+            acc[option.id] = stepResponses.filter(
+              (r) =>
+                r.answer === option.id ||
+                (Array.isArray(r.answer) && r.answer.includes(option.id)),
+            ).length
+            return acc
+          }, {})
+          return {
+            ...step,
+            totalResponses: stepResponses.length,
+            options: step.options.map((option) => ({
+              ...option,
+              eachResponses: optionCounts[option.id] || 0,
+            })),
+          }
+        case 'info':
+        case 'link':
+          return {
+            ...step,
+            clicks: stepResponses.length,
+          }
+        default:
+          return step
+      }
+    })
   }
 }
 
