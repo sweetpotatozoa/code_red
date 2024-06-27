@@ -91,7 +91,7 @@ const Home = () => {
       setUserInfo(customerInfo)
     }
     initializeData()
-  }, [surveys])
+  }, [])
 
   return (
     <div className={styles.container}>
@@ -116,7 +116,9 @@ const Home = () => {
       </div>
       <div className={styles.main}>
         <div className={styles.basicSetting}>
-          <div className={styles.setting}>연결상태 정상</div>
+          <div className={styles.setting}>
+            연결상태 {userInfo.isConnect ? '정상' : '비정상'}
+          </div>
           <a href='https://www.naver.com/' target='_blank'>
             <div className={styles.setting}>가이드</div>
           </a>
@@ -138,7 +140,7 @@ const Home = () => {
             <div
               key={survey._id}
               className={styles.surveyBox}
-              // onClick={() => goToSummary(survey.id)}
+              onClick={() => goToSummary(survey._id)}
             >
               <div className={styles.surveyTitle}>{survey.title}</div>
               <div className={styles.surveyDate}>{survey.updateAt}</div>
@@ -146,24 +148,36 @@ const Home = () => {
                 <div className={styles.toggle}>
                   {survey.isDeploy ? 'On' : 'Off'}
                 </div>
-                <label className={styles.switch}>
+                <label
+                  className={styles.switch}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <input
                     type='checkbox'
                     checked={survey.isDeploy}
-                    onChange={() => surveyDeployHandler(survey._id)}
+                    onChange={(e) => {
+                      surveyDeployHandler(survey._id)
+                      e.stopPropagation()
+                    }}
                   />
                   <span className={`${styles.slider} ${styles.round}`}></span>
                 </label>
               </div>
               <div
                 className={styles.surveyEdit}
-                onClick={() => handleEdit(survey._id)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleEdit(survey._id)
+                }}
               >
                 수정
               </div>
               <div
                 className={styles.surveyDelete}
-                onClick={() => surveyDeleteHandler(survey._id)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  surveyDeleteHandler(survey._id)
+                }}
               >
                 삭제
               </div>
