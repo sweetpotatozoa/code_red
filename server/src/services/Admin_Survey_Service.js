@@ -4,7 +4,6 @@ const templatesRepo = require('../repositories/Templates_Repo')
 const ResponsesRepo = require('../repositories/Responses_Repo')
 const { ObjectId } = require('mongodb')
 
-
 class AdminSurveyService {
   //헬퍼 함수
 
@@ -38,9 +37,9 @@ class AdminSurveyService {
   // ObjectId로 변환하는 헬퍼 함수 추가
   convertToObjectId(id) {
     if (!ObjectId.isValid(id)) {
-      throw new Error('Invalid id format');
+      throw new Error('Invalid id format')
     }
-    return new ObjectId(id);
+    return new ObjectId(id)
   }
 
   //실제 함수
@@ -103,13 +102,13 @@ class AdminSurveyService {
 
   //설문조사 응답 요약 가져오기
   async getSurveySummary(userId, surveyId) {
-    const userObjectId = this.convertToObjectId(userId);
-    const surveyObjectId = this.convertToObjectId(surveyId);
+    const userObjectId = this.convertToObjectId(userId)
+    const surveyObjectId = this.convertToObjectId(surveyId)
 
     await this.checkUserIdExist(userObjectId)
     await this.checkSurveyIdExist(surveyObjectId)
     await this.checkSurveyOwnership(userObjectId, surveyObjectId)
-    
+
     const survey = await SurveysRepo.getSurveyViews(surveyObjectId)
     const responses = await ResponsesRepo.getSurveyResponses(surveyObjectId)
 
@@ -148,13 +147,13 @@ class AdminSurveyService {
 
   //설문조사 질문별 요약 가져오기
   async getSurveyQuestions(userId, surveyId) {
-    const userObjectId = this.convertToObjectId(userId);
-    const surveyObjectId = this.convertToObjectId(surveyId);
+    const userObjectId = this.convertToObjectId(userId)
+    const surveyObjectId = this.convertToObjectId(surveyId)
 
     await this.checkUserIdExist(userObjectId)
     await this.checkSurveyIdExist(surveyObjectId)
     await this.checkSurveyOwnership(userObjectId, surveyObjectId)
-    
+
     const survey = await SurveysRepo.getSurveyViews(surveyObjectId)
     const responses = await ResponsesRepo.getSurveyResponses(surveyObjectId)
 
@@ -180,11 +179,17 @@ class AdminSurveyService {
         case 'singleChoice':
         case 'multipleChoice':
           const optionCounts = step.options.reduce((acc, option) => {
-            acc[option.id] = stepResponses.filter(
-              (r) =>
-                r.answer === option.id ||
-                (Array.isArray(r.answer) && r.answer.includes(option.id)),
-            ).length
+            acc[option.id] = stepResponses.filter((r) => {
+              if (step.type === 'multipleChoice') {
+                return (
+                  Array.isArray(r.answer) &&
+                  r.answer.some((ans) => ans.id === option.id)
+                )
+              } else {
+                // singleChoice 또는 rating
+                return r.answer && r.answer.id === option.id
+              }
+            }).length
             return acc
           }, {})
           return {
