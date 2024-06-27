@@ -26,9 +26,60 @@ class BackendApis {
     this.token = null
   }
 
+  // 로그인
   async login(method = 'POST', params = {}) {
     const result = await fetcher('/api/auth/login', '', method, params)
     if (result?.status === 200) this.token = result.token
+    return result
+  }
+
+  //소유한 설문조사 목록 가져오기
+  async getSurveys(method = 'GET', params = {}) {
+    const result = await fetcher('/api/adminSurvey', this.token, method, params)
+    return result
+  }
+
+  //유저 정보 가져오기
+  async getUserInfo(method = 'GET', params = {}) {
+    const result = await fetcher(
+      '/api/adminSurvey/userInfo',
+      this.token,
+      method,
+      params,
+    )
+    return result
+  }
+
+  //화면 설정 저장하기
+  async editSurveyPosition(method = 'PUT', params = {}) {
+    const result = await fetcher(
+      '/api/adminSurvey/surveyPosition',
+      this.token,
+      method,
+      params,
+    )
+    return result
+  }
+
+  //설문조사 삭제하기
+  async deleteSurvey(surveyId, method = 'DELETE', params = {}) {
+    const result = await fetcher(
+      `/api/adminSurvey/deleteSurvey/${surveyId}`,
+      this.token,
+      method,
+      params,
+    )
+    return result
+  }
+
+  //설문조사 배포상태 변경하기
+  async toggleSurveyDeploy(surveyId, method = 'PUT', params = {}) {
+    const result = await fetcher(
+      `/api/adminSurvey/toggleSurveyDeploy/${surveyId}`,
+      this.token,
+      method,
+      params,
+    )
     return result
   }
 
@@ -49,34 +100,9 @@ class BackendApis {
     return result
   }
 
-  async getSurveys(method = 'GET', params = {}) {
-    const result = await fetcher('/api/surveys', this.token, method, params)
-    return result
-  }
-
   async isDeployToggle(method = 'PUT', params = {}) {
     const result = await fetcher(
       '/api/isDeployToggle',
-      this.token,
-      method,
-      params,
-    )
-    return result
-  }
-
-  async deleteSurvey(method = 'DELETE', params = {}) {
-    const result = await fetcher(
-      '/api/deleteSurvey',
-      this.token,
-      method,
-      params,
-    )
-    return result
-  }
-
-  async editSurveyPosition(method = 'PUT', params = {}) {
-    const result = await fetcher(
-      '/api/editSurveyPosition',
       this.token,
       method,
       params,
