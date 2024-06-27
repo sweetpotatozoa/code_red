@@ -13,6 +13,7 @@ class AppliedSurveyController {
         user: user,
       })
     } catch (error) {
+      console.error('Error in getAllSurveys:', error)
       res.status(500).json({ status: 500, message: error.message })
     }
   }
