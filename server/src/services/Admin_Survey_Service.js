@@ -165,14 +165,20 @@ class AdminSurveyService {
         case 'singleChoice':
         case 'multipleChoice':
           const optionCounts = step.options.reduce((acc, option) => {
-            acc[option.id] = stepResponses.filter(
-              (r) =>
-                r.answer === option.id ||
-                (Array.isArray(r.answer) && r.answer.includes(option.id)),
-            ).length
+            acc[option.id] = stepResponses.filter((r) => {
+              if (step.type === 'multipleChoice') {
+                return (
+                  Array.isArray(r.answer) &&
+                  r.answer.some((ans) => ans.id === option.id)
+                )
+              } else {
+                return r.answer && r.answer.id === option.id
+              }
+            }).length
             return acc
           }, {})
-          return {
+
+          const result = {
             ...step,
             totalResponses: stepResponses.length,
             options: step.options.map((option) => ({
@@ -180,6 +186,20 @@ class AdminSurveyService {
               eachResponses: optionCounts[option.id] || 0,
             })),
           }
+
+          if (step.type === 'rating') {
+            const totalScore = step.options.reduce(
+              (sum, option, index) =>
+                sum + (index + 1) * (optionCounts[option.id] || 0),
+              0,
+            )
+            result.averageScore =
+              result.totalResponses > 0
+                ? (totalScore / result.totalResponses).toFixed(2)
+                : 0
+          }
+
+          return result
         case 'info':
         case 'link':
           return {
