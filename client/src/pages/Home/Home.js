@@ -2,15 +2,14 @@ import { useNavigate } from 'react-router-dom'
 import styles from './Home.module.css'
 import { useEffect, useState } from 'react'
 
-import data from '../../utils/data'
-import customerData from '../../utils/customerData'
+import backendApis from '../../utils/backendApis'
 
 const Home = () => {
-  const [surveys, setSurveys] = useState(data)
-  const [customerInfo, setCustomerInfo] = useState(customerData)
+  const [surveys, setSurveys] = useState([])
+  const [userInfo, setUserInfo] = useState('')
   const [isSetting, setIsSetting] = useState(false)
   const [selectedPosition, setSelectedPosition] = useState(
-    customerInfo.surveyPosition || 4,
+    userInfo.surveyPosition || 4,
   )
 
   const navigate = useNavigate()
@@ -19,48 +18,64 @@ const Home = () => {
   const handleEdit = (surveyId) => {
     navigate(`/edit/${surveyId}`)
   }
-
+  //새 설문조사 만들기
   const newSurveyHandler = () => {
     navigate('/templates')
-  }
-
-  //설문조사 삭제하기
-  const surveyDeleteHandler = (surveyId) => {
-    if (!window.confirm('정말로 설문조사를 삭제하시겠습니까?')) return
-    const newSurveys = surveys.filter((survey) => survey.id !== surveyId)
-    setSurveys(newSurveys)
-  }
-
-  //설문조사 켜기/끄기
-  const surveyDeployHandler = (surveyId) => {
-    const newSurveys = surveys.map((survey) => {
-      if (survey.id === surveyId) {
-        survey.isDeploy = !survey.isDeploy
-      }
-      return survey
-    })
-    setSurveys(newSurveys)
-  }
-
-  //설정 모달 켜기/끄기
-  const settingModalHandler = () => {
-    setIsSetting(!isSetting)
   }
 
   //설정 모달 취소하기
   const settingCancelHandler = () => {
     setIsSetting(false)
-    setSelectedPosition(customerInfo.surveyPosition || 4)
+    setSelectedPosition(userInfo.surveyPosition || 4)
   }
 
   //화면 설정 저장하기
-  const settingSaveHandler = () => {
-    const newCustomerInfo = {
-      ...customerInfo,
+  const settingSaveHandler = async () => {
+    const newUserInfo = {
+      ...userInfo,
       surveyPosition: selectedPosition,
     }
-    setCustomerInfo(newCustomerInfo)
-    setIsSetting(false)
+
+    try {
+      await backendApis.editSurveyPosition('PUT', {
+        surveyPosition: selectedPosition,
+      })
+      setUserInfo(newUserInfo)
+      setIsSetting(false)
+    } catch (error) {
+      console.error('설정 저장 실패', error)
+      alert('설정 저장에 실패했습니다.')
+    }
+  }
+
+  //설문조사 삭제하기
+  const surveyDeleteHandler = async (surveyId) => {
+    if (!window.confirm('정말로 설문조사를 삭제하시겠습니까?')) return
+    try {
+      await backendApis.deleteSurvey(surveyId)
+      const newSurveys = surveys.filter((survey) => survey._id !== surveyId)
+      setSurveys(newSurveys)
+    } catch (error) {
+      console.error('설문조사 삭제 실패', error)
+      alert('설문조사 삭제에 실패했습니다.')
+    }
+  }
+
+  //설문조사 배포상태 변경하기
+  const surveyDeployHandler = async (surveyId) => {
+    try {
+      await backendApis.toggleSurveyDeploy(surveyId)
+      const newSurveys = surveys.map((survey) => {
+        if (survey._id === surveyId) {
+          survey.isDeploy = !survey.isDeploy
+        }
+        return survey
+      })
+      setSurveys(newSurveys)
+    } catch (error) {
+      console.error('설문조사 배포상태 변경 실패', error)
+      alert('설문조사 배포상태 변경에 실패했습니다.')
+    }
   }
 
   //요약 페이지로 가기
@@ -69,9 +84,14 @@ const Home = () => {
   }
 
   useEffect(() => {
-    setSurveys(data)
-    setCustomerInfo(customerData)
-  }, [])
+    const initializeData = async () => {
+      const result = await backendApis.getSurveys()
+      setSurveys(result)
+      const customerInfo = await backendApis.getUserInfo()
+      setUserInfo(customerInfo)
+    }
+    initializeData()
+  }, [surveys])
 
   return (
     <div className={styles.container}>
@@ -84,7 +104,7 @@ const Home = () => {
           <div className={styles.welcome}>
             안녕하세요,
             <br />
-            {customerInfo.customerName}님!
+            {userInfo.realName}님!
           </div>
           <div
             className={styles.environmentSetting}
@@ -116,12 +136,12 @@ const Home = () => {
 
           {surveys.map((survey) => (
             <div
-              key={survey.id}
+              key={survey._id}
               className={styles.surveyBox}
               // onClick={() => goToSummary(survey.id)}
             >
               <div className={styles.surveyTitle}>{survey.title}</div>
-              <div className={styles.surveyDate}>{survey.updatedAt}</div>
+              <div className={styles.surveyDate}>{survey.updateAt}</div>
               <div className={styles.surveyStatus}>
                 <div className={styles.toggle}>
                   {survey.isDeploy ? 'On' : 'Off'}
@@ -130,20 +150,20 @@ const Home = () => {
                   <input
                     type='checkbox'
                     checked={survey.isDeploy}
-                    onChange={() => surveyDeployHandler(survey.id)}
+                    onChange={() => surveyDeployHandler(survey._id)}
                   />
                   <span className={`${styles.slider} ${styles.round}`}></span>
                 </label>
               </div>
               <div
                 className={styles.surveyEdit}
-                onClick={() => handleEdit(survey.id)}
+                onClick={() => handleEdit(survey._id)}
               >
                 수정
               </div>
               <div
                 className={styles.surveyDelete}
-                onClick={() => surveyDeleteHandler(survey.id)}
+                onClick={() => surveyDeleteHandler(survey._id)}
               >
                 삭제
               </div>
