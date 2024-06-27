@@ -9,12 +9,12 @@ const fakeAuth = (req, res, next) => {
   next()
 }
 
-// userId를 이용하여 설문조사 목록을 가져옴. 테스트할 때 뒤에 아무것도 안 붙여야 함.
+// userId를 이용하여 설문조사 목록을 가져옴.
 router.get('/', fakeAuth, wrapAsync(AdminSurveyController.getSurveys))
 
 // 각 설문조사의 배포상태를 변경함
 router.put(
-  '/toggleDeploy/:id',
+  '/toggleSurveyDeploy/:id',
   fakeAuth,
   wrapAsync(AdminSurveyController.toggleDeploy),
 )
@@ -26,7 +26,7 @@ router.delete(
   wrapAsync(AdminSurveyController.deleteSurvey),
 )
 
-// 설문조사 뜨는 위치 가져오기
+// 유저정보 가져오기
 router.get('/userInfo', fakeAuth, wrapAsync(AdminSurveyController.getUserInfo))
 
 // 설문조사 뜨는 위치 변경
@@ -51,10 +51,18 @@ router.post(
 )
 
 // 설문조사 응답 요약
-router.get('/:surveyId', fakeAuth, wrapAsync(AdminSurveyController.getSurveySummary))
+router.get(
+  '/:surveyId',
+  fakeAuth,
+  wrapAsync(AdminSurveyController.getSurveySummary),
+)
 
 // 설문조사 질문별 요약
-router.get('/:surveyId/questions', fakeAuth, wrapAsync(AdminSurveyController.getSurveyQuestions))
+router.get(
+  '/:surveyId/questions',
+  fakeAuth,
+  wrapAsync(AdminSurveyController.getSurveyQuestions),
+)
 
 // 설문조사 생성
 router.post(

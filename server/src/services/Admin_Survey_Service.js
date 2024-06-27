@@ -34,6 +34,13 @@ class AdminSurveyService {
     }
   }
 
+  //날짜 형식 변환
+  formatDate(date) {
+    const d = new Date(date)
+    const pad = (n) => (n < 10 ? '0' + n : n)
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  }
+
   //실제 함수
 
   // 설문조사 목록 가져오기
@@ -43,7 +50,10 @@ class AdminSurveyService {
     if (surveys.length === 0) {
       throw new Error('No survey found')
     }
-    return surveys
+    return surveys.map((survey) => ({
+      ...survey,
+      updateAt: this.formatDate(survey.updateAt),
+    }))
   }
 
   // 설문조사 배포 상태 변경
@@ -77,13 +87,15 @@ class AdminSurveyService {
   async updateSurveyPosition(userId, surveyPosition) {
     await this.checkUserIdExist(userId) // 유저 아이디 존재 검사
 
+    const surveyPositionInt = parseInt(surveyPosition)
+
     // surveyPosition 범위 검증
     const validPositions = [1, 2, 3, 4]
-    if (!validPositions.includes(surveyPosition)) {
+    if (!validPositions.includes(surveyPositionInt)) {
       throw new Error('Invalid survey position')
     }
 
-    return await UsersRepo.updateSurveyPosition(userId, surveyPosition)
+    return await UsersRepo.updateSurveyPosition(userId, surveyPositionInt)
   }
 
   // 설문조사 템플릿 가져오기

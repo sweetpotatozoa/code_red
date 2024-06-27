@@ -4,7 +4,7 @@ const errorHandler = (
   customErrorHandlers = {},
 ) => {
   if (customErrorHandlers[err.message]) {
-    return customErrorHandlers[err.message](req, err)
+    return customErrorHandlers[err.message](err)
   } else if (err.message === 'No user found') {
     return { status: 404, message: 'No user found' }
   } else if (err.message === 'No survey found') {
