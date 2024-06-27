@@ -32,6 +32,10 @@ class AppliedSurveyService {
     const objectId = new ObjectId(surveyId)
     return await AppliedSurveyRepo.incrementViews(objectId)
   }
+
+  async getUserInfo(userId) {
+    return await UsersRepo.getUserInfo(userId)
+  }
 }
 
 module.exports = new AppliedSurveyService()
