@@ -74,6 +74,27 @@ class AdminSurveyController {
     }
   }
 
+  //// 설문조사 isDeploy 상태만 가져오기
+  async getSurvey(req, res) {
+    try {
+      const userId = req.user.id
+      const { id: surveyId } = req.params
+
+      if (!userId || !isObjectId(userId)) {
+        return res.status(400).json({ message: 'Invalid user id' })
+      }
+      if (!surveyId || !isObjectId(surveyId)) {
+        return res.status(400).json({ message: 'Invalid survey id' })
+      }
+
+      const result = await AdminSurveyService.getSurvey(userId, surveyId)
+      res.status(200).json(result)
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'getSurvey')
+      res.status(status).json({ message })
+    }
+  }
+
   // 유저정보 가져오기
   async getUserInfo(req, res) {
     const userId = req.user.id // userId saved in jwt added by auth middleware

@@ -252,6 +252,15 @@ class AdminSurveyService {
 
     return ResponsesRepo.deleteResponse(responseId)
   }
+
+  // 설문조사 isDeploy 값만 가져오기
+  async getSurvey(userId, surveyId) {
+    await this.checkUserIdExist(userId)
+    await this.checkSurveyIdExist(surveyId)
+    await this.checkSurveyOwnership(userId, surveyId)
+
+    return SurveysRepo.getSurveyDeployStatus(surveyId)
+  }
 }
 
 module.exports = new AdminSurveyService()
