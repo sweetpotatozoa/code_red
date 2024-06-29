@@ -3,10 +3,10 @@ import { useState } from 'react'
 
 import { v4 as uuidv4 } from 'uuid'
 
-const EditingSingleChoice = ({ question, onSave, onCancel, questions }) => {
-  const [title, setTitle] = useState(question.title)
-  const [description, setDescription] = useState(question.description)
-  const [options, setOptions] = useState(question.options)
+const EditingSingleChoice = ({ step, onSave, onCancel, steps }) => {
+  const [title, setTitle] = useState(step.title)
+  const [description, setDescription] = useState(step.description)
+  const [options, setOptions] = useState(step.options)
 
   //저장 핸들러
   const handleSave = () => {
@@ -25,7 +25,7 @@ const EditingSingleChoice = ({ question, onSave, onCancel, questions }) => {
       return
     }
 
-    onSave({ ...question, title, description, options })
+    onSave({ ...step, title, description, options })
   }
 
   //삭제 핸들러
@@ -35,9 +35,9 @@ const EditingSingleChoice = ({ question, onSave, onCancel, questions }) => {
   }
 
   //다음 질문 선택 핸들러
-  const nextQuestionHandler = (optionId, nextQuestionId) => {
+  const nextStepHandler = (optionId, nextStepId) => {
     const newOptions = options.map((option) =>
-      option.id === optionId ? { ...option, nextQuestionId } : option,
+      option.id === optionId ? { ...option, nextStepId } : option,
     )
     setOptions(newOptions)
   }
@@ -72,7 +72,7 @@ const EditingSingleChoice = ({ question, onSave, onCancel, questions }) => {
               )
               setOptions(newOptions)
             }}
-            placeholder='선택지를 입력하세요.'
+            placeholder='새 선택지'
           />
           <div
             className={styles.delete}
@@ -86,7 +86,7 @@ const EditingSingleChoice = ({ question, onSave, onCancel, questions }) => {
         onClick={() =>
           setOptions([
             ...options,
-            { id: uuidv4(), value: '', nextQuestionId: '' },
+            { id: uuidv4(), value: '새 선택지', nextStepId: '' },
           ])
         }
         className={styles.addOption}
@@ -99,12 +99,12 @@ const EditingSingleChoice = ({ question, onSave, onCancel, questions }) => {
         <div key={option.id} className={styles.optionAction}>
           <div className={styles.optionLabel}>{option.value}</div>
           <select
-            value={option.nextQuestionId || ''}
-            onChange={(e) => nextQuestionHandler(option.id, e.target.value)}
+            value={option.nextStepId || ''}
+            onChange={(e) => nextStepHandler(option.id, e.target.value)}
             className={styles.action}
           >
             <option value=''>다음 질문 선택</option>
-            {questions.map((q) => (
+            {steps.map((q) => (
               <option key={q.id} value={q.id}>
                 {q.title}
               </option>

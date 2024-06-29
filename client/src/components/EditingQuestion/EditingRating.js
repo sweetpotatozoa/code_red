@@ -1,10 +1,10 @@
 import styles from './EditingQuestion.module.css'
 import { useState } from 'react'
 
-const EditingRating = ({ question, onSave, onCancel, questions }) => {
-  const [title, setTitle] = useState(question.title)
-  const [description, setDescription] = useState(question.description)
-  const [options, setOptions] = useState(question.options || [])
+const EditingRating = ({ step, onSave, onCancel, steps }) => {
+  const [title, setTitle] = useState(step.title)
+  const [description, setDescription] = useState(step.description)
+  const [options, setOptions] = useState(step.options || [])
 
   //저장 핸들러
   const handleSave = () => {
@@ -12,13 +12,13 @@ const EditingRating = ({ question, onSave, onCancel, questions }) => {
       alert('제목을 입력해주세요.')
       return
     }
-    onSave({ ...question, title, description, options })
+    onSave({ ...step, title, description, options })
   }
 
   //다음 질문 선택 핸들러
-  const nextQuestionHandler = (optionId, nextQuestionId) => {
+  const nextStepHandler = (optionId, nextStepId) => {
     const newOptions = options.map((option) =>
-      option.id === optionId ? { ...option, nextQuestionId } : option,
+      option.id === optionId ? { ...option, nextStepId } : option,
     )
     setOptions(newOptions)
   }
@@ -49,11 +49,11 @@ const EditingRating = ({ question, onSave, onCancel, questions }) => {
           {index + 1}점
           <select
             className={styles.action}
-            value={option.nextQuestionId || ''}
-            onChange={(e) => nextQuestionHandler(option.id, e.target.value)}
+            value={option.nextStepId || ''}
+            onChange={(e) => nextStepHandler(option.id, e.target.value)}
           >
             <option value=''>다음 질문으로 이동</option>
-            {questions.map((q) => (
+            {steps.map((q) => (
               <option key={q.id}>{q.title}</option>
             ))}
           </select>

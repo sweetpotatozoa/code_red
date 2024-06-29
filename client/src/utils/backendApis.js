@@ -140,15 +140,25 @@ class BackendApis {
   }
 
   async editSurvey(surveyId) {
-    return await fetcher(`/api/edit/${surveyId}`, this.token, 'GET')
+    return await fetcher(`/api/adminSurvey/edit/${surveyId}`, this.token, 'GET')
   }
 
-  async updateSurvey(surveyId) {
-    return await fetcher(`/api/surveyUpdate/${surveyId}`, this.token, 'PUT')
+  async updateSurvey(surveyId, surveyData) {
+    return await fetcher(
+      `/api/adminSurvey/surveyUpdate/${surveyId}`,
+      this.token,
+      'PUT',
+      surveyData,
+    )
   }
 
-  async deploySurvey(surveyId) {
-    return await fetcher(`/api/surveyDeploy/${surveyId}`, this.token, 'PUT')
+  async deploySurvey(surveyId, surveyData) {
+    return await fetcher(
+      `/api/adminSurvey/surveyDeploy/${surveyId}`,
+      this.token,
+      'PUT',
+      surveyData,
+    )
   }
 
   async getResponse(surveyId) {

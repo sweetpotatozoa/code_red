@@ -32,31 +32,30 @@
 .surveyContents {
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  margin: 16px;
   justify-content: left;
   width: 502px;
   cursor: pointer;
 }
 
-.surveyQuestion {
+.surveyStep {
   font-size: 16px;
   font-weight: bold;
 }
 
-.questionType {
+.stepType {
   margin-top: 16px;
   font-size: 14px;
 }
 
-.questionToggle {
+.stepToggle {
   display: flex;
   align-items: center;
 }
 
 .label {
-  font-size: 16px;
-  font-weight: bold;
-  width: 30px;
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 .toggle {
@@ -72,10 +71,9 @@
   background-color: #11192c;
 }
 
-.questionDelete {
+.stepDelete {
   display: flex;
   align-items: center;
-  width: 70px;
   justify-content: center;
   padding: 16px;
   cursor: pointer;

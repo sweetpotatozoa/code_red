@@ -2,298 +2,73 @@ import styles from './Edit.module.css'
 import Surveys from '../../components/Surveys/Surveys'
 import Triggers from '../../components/Triggers/Triggers'
 import Delay from '../../components/Delay/Delay'
-import { useState } from 'react'
-import { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
-
-const surveys = [
-  {
-    id: '1',
-    title: '설문조사 제목',
-    createAt: '2021.10.10',
-    isDeploy: true,
-    questions: [
-      {
-        id: 1,
-        order: 0,
-        type: 'welcome',
-        title: '저희 서비스 이용이 처음이시군요!',
-        description: '설문조사에 참여해주실래요?',
-        isActive: true,
-      },
-      {
-        id: 2,
-        order: 1,
-        type: 'singleChoice',
-        title: '회사에서의 역할은 무엇입니까?',
-        description: '솔직하게 응답해주세요',
-        options: [
-          {
-            id: 1,
-            value: 'CEO',
-            nextQuestionId: 3,
-          },
-          {
-            id: 2,
-            value: 'CTO',
-            nextQuestionId: 3,
-          },
-          {
-            id: 3,
-            value: 'CFO',
-            nextQuestionId: 3,
-          },
-          {
-            id: 4,
-            value: 'CPO',
-            nextQuestionId: 3,
-          },
-        ],
-      },
-      {
-        id: 3,
-        order: 2,
-        type: 'link',
-        title: '세상에 대표님이시군요!',
-        description: '아래 링크를 눌러 제발 저희와 인터뷰 일정을 잡아주세요',
-        url: 'https://www.naver.com',
-      },
-      {
-        id: 4,
-        order: 3,
-        type: 'freeText',
-        title: '와! 개발자시군요!',
-        description: '저희 제품에 대한 피드백을 주세요.',
-        nextQuestionId: 5,
-      },
-      {
-        id: 5,
-        order: 4,
-        type: 'rating',
-        title: 'CFO라구요?',
-        description: '저희 제품의 가격에 대해 어떻게 생각하세요?',
-        options: [
-          {
-            id: 1,
-            nextQuestionId: 6,
-          },
-          {
-            id: 2,
-            nextQuestionId: 6,
-          },
-          {
-            id: 3,
-            nextQuestionId: 6,
-          },
-          {
-            id: 4,
-            nextQuestionId: 6,
-          },
-          {
-            id: 5,
-            nextQuestionId: 6,
-          },
-        ],
-      },
-      {
-        id: 6,
-        order: 5,
-        type: 'multipleChoice',
-        title: 'CPO라니!',
-        description: '저희 제품을 사용하시는 이유가 뭐죠?',
-        nextQuestionId: 7,
-        options: [
-          {
-            id: 1,
-            value: '기능',
-          },
-          {
-            id: 2,
-            value: '디자인',
-          },
-          {
-            id: 3,
-            value: '가격',
-          },
-          {
-            id: 4,
-            value: '편의성',
-          },
-        ],
-      },
-      {
-        id: 7,
-        order: 6,
-        type: 'thank',
-        title: '수고하셨습니다!',
-        description: '설문조사에 참여해주셔서 감사합니다.',
-        isActive: true,
-      },
-    ],
-    triggers: [
-      {
-        id: 1,
-        type: 'firstVisit',
-        title: '첫 방문',
-        description: '처음으로 방문했을 때',
-      },
-      {
-        id: 2,
-        type: 'click',
-        title: '클릭',
-        description: '클릭했을 때',
-      },
-      {
-        id: 3,
-        type: 'scroll',
-        title: '스크롤',
-        description: '스크롤했을 때',
-      },
-    ],
-    delay: {
-      type: 'immediately',
-      title: '즉시',
-      description: '바로 보여줌',
-    },
-  },
-  {
-    id: '2',
-    title: '설문조사 제목2',
-    createAt: '2021.10.10',
-    isDeploy: true,
-    questions: [
-      {
-        id: 1,
-        order: 0,
-        type: 'welcome',
-        title: '저희 서비스 이용이 처음이시군요!2',
-        description: '설문조사에 참여해주실래요?',
-        isActive: true,
-      },
-      {
-        id: 2,
-        order: 1,
-        type: 'singleChoice',
-        title: '회사에서의 역할은 무엇입니까?2',
-        description: '솔직하게 응답해주세요',
-        options: [
-          {
-            id: 1,
-            value: 'CEO',
-          },
-          {
-            id: 2,
-            value: 'CTO',
-          },
-          {
-            id: 3,
-            value: 'CFO',
-          },
-          {
-            id: 4,
-            value: 'CPO',
-          },
-        ],
-      },
-      {
-        id: 3,
-        order: 2,
-        type: 'link',
-        title: '세상에 대표님이시군요!2',
-        description: '아래 링크를 눌러 제발 저희와 인터뷰 일정을 잡아주세요',
-      },
-      {
-        id: 4,
-        order: 3,
-        type: 'freeText',
-        title: '와! 개발자시군요2!',
-        description: '저희 제품에 대한 피드백을 주세요.',
-      },
-      {
-        id: 5,
-        order: 4,
-        type: 'rating',
-        title: 'CFO라구요2?',
-        description: '저희 제품의 가격에 대해 어떻게 생각하세요?',
-      },
-      {
-        id: 6,
-        order: 5,
-        type: 'multipleChoice',
-        title: 'CPO라니2!',
-        description: '저희 제품을 사용하시는 이유가 뭐죠?',
-        options: ['기능', '디자인', '가격', '편의성'],
-      },
-      {
-        id: 7,
-        order: 6,
-        type: 'thank',
-        title: '수고하셨습니다2!',
-        description: '설문조사에 참여해주셔서 감사합니다.',
-        isActive: true,
-      },
-    ],
-    triggers: [
-      {
-        id: 1,
-        type: 'firstVisit',
-        title: '첫 방문',
-        description: '처음으로 방문했을 때',
-      },
-      {
-        id: 2,
-        type: 'click',
-        title: '클릭',
-        description: '클릭했을 때',
-      },
-      {
-        id: 3,
-        type: 'scroll',
-        title: '스크롤',
-        description: '스크롤했을 때',
-      },
-    ],
-    delay: {
-      type: 'immediately',
-      title: '즉시',
-      description: '바로 보여줌',
-    },
-  },
-]
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import BackendApis from '../../utils/backendApis'
 
 const Edit = () => {
   const { id } = useParams()
-
-  const [survey, setSurvey] = useState({})
+  const navigate = useNavigate()
+  const [survey, setSurvey] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (id) {
-      const selectedSurvey = surveys.find((survey) => survey.id === id)
-      if (selectedSurvey) {
-        setSurvey(selectedSurvey)
+    const fetchSurvey = async () => {
+      try {
+        const data = await BackendApis.editSurvey(id)
+        setSurvey(data)
+        setLoading(false)
+      } catch (err) {
+        setError('설문조사를 불러오는데 실패했습니다.')
+        setLoading(false)
       }
     }
+
+    fetchSurvey()
   }, [id])
 
-  const navigate = useNavigate()
+  const [mode, setMode] = useState('surveys')
 
   // 뒤로가기
   const goBack = () => {
     navigate(-1)
   }
 
-  const [mode, setMode] = useState('surveys')
+  // 저장하기
+  const handleSave = async () => {
+    try {
+      await BackendApis.updateSurvey(id, survey)
+      alert('설문조사가 성공적으로 저장되었습니다.')
+    } catch (err) {
+      alert('설문조사 저장에 실패했습니다.')
+    }
+  }
+
+  // 배포하기
+  const handleDeploy = async () => {
+    try {
+      await BackendApis.deploySurvey(id, survey)
+      alert('설문조사가 성공적으로 배포되었습니다.')
+    } catch (err) {
+      alert('설문조사 배포에 실패했습니다.')
+    }
+  }
 
   const renderMain = () => {
-    if (!survey) return null // survey가 없으면 아무것도 렌더링하지 않음
+    if (loading) return <div>로딩 중...</div>
+    if (error) return <div>{error}</div>
+    if (!survey) return <div>설문조사를 찾을 수 없습니다.</div>
 
-    if (mode === 'surveys') {
-      return <Surveys survey={survey} setSurvey={setSurvey} />
-    } else if (mode === 'triggers') {
-      return <Triggers survey={survey} setSurvey={setSurvey} />
-    } else if (mode === 'delays') {
-      return <Delay survey={survey} setSurvey={setSurvey} />
+    switch (mode) {
+      case 'surveys':
+        return <Surveys survey={survey} setSurvey={setSurvey} />
+      case 'triggers':
+        return <Triggers survey={survey} setSurvey={setSurvey} />
+      case 'delays':
+        return <Delay survey={survey} setSurvey={setSurvey} />
+      default:
+        return null
     }
   }
 
@@ -304,11 +79,17 @@ const Edit = () => {
           <div className={styles.bigButton} onClick={goBack}>
             ◀︎ 뒤로가기
           </div>
-          <div className={styles.title}>온보딩 세그먼트</div>
+          <div className={styles.title}>
+            {survey ? survey.title : '설문조사 제목'}
+          </div>
         </div>
         <div className={styles.headerPart}>
-          <div className={styles.bigButton}>저장하기</div>
-          <div className={styles.bigButtonBlack}>배포하기</div>
+          <div className={styles.bigButton} onClick={handleSave}>
+            저장하기
+          </div>
+          <div className={styles.bigButtonBlack} onClick={handleDeploy}>
+            배포하기
+          </div>
         </div>
       </div>
       <div className={styles.main}>
@@ -344,7 +125,11 @@ const Edit = () => {
         <div className={styles.display}>
           <div className={styles.website}>
             <div className={styles.top}>
-              <img src='/images/mac.png' className={styles.macButton}></img>
+              <img
+                src='/images/mac.png'
+                className={styles.macButton}
+                alt='Mac button'
+              />
               <div className={styles.yourWeb}>나의 서비스</div>
             </div>
           </div>

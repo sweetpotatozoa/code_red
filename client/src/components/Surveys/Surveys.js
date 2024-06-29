@@ -11,20 +11,27 @@ import EditingWelcome from '../EditingQuestion/EditingWelcome'
 import EditingThank from '../EditingQuestion/EditingThank'
 
 const Surveys = ({ survey, setSurvey }) => {
-  if (!survey || !survey.questions) return null // survey나 survey.questions가 없으면 아무것도 렌더링하지 않음
+  if (!survey || !survey.steps) return null // survey나 survey.steps가 없으면 아무것도 렌더링하지 않음
 
   // 새로운 질문 추가를 위한 모달 상태
-  const [isAddQuestion, setIsAddQuestion] = useState(false)
+  const [isAddStep, setIsAddStep] = useState(false)
+
+  // step.type에 따른 텍스트 매핑
+  const stepTypeText = {
+    welcome: '환영 인사',
+    singleChoice: '객관식(중복 불가)',
+    multipleChoice: '객관식(중복 가능)',
+    rating: '별점',
+    info: '안내',
+    link: '외부 링크',
+    thank: '감사 인사',
+    freeText: '주관식',
+  }
 
   // 질문 삭제 핸들러
   const deleteHandler = (id) => {
-    const questionToDelete = survey.questions.find(
-      (question) => question.id === id,
-    )
-    if (
-      questionToDelete.type === 'welcome' ||
-      questionToDelete.type === 'thank'
-    ) {
+    const stepToDelete = survey.steps.find((step) => step.id === id)
+    if (stepToDelete.type === 'welcome' || stepToDelete.type === 'thank') {
       alert('환영 및 감사 인사는 삭제할 수 없습니다.')
       return
     }
@@ -33,16 +40,14 @@ const Surveys = ({ survey, setSurvey }) => {
       return
     }
 
-    const updatedQuestions = survey.questions.filter(
-      (questions) => questions.id !== id,
-    )
+    const updatedSteps = survey.steps.filter((steps) => steps.id !== id)
 
-    setSurvey({ ...survey, questions: updatedQuestions })
+    setSurvey({ ...survey, steps: updatedSteps })
   }
 
   // 질문 추가 핸들러
-  const addQuestionHandler = (type) => {
-    const newQuestion = {
+  const addStepHandler = (type) => {
+    const newStep = {
       id: uuidv4(),
       title: '새 질문',
       description: '',
@@ -52,31 +57,29 @@ const Surveys = ({ survey, setSurvey }) => {
         : [],
     }
 
-    const updatedQuestions = [...survey.questions]
-    const thankQuestionIndex = updatedQuestions.findIndex(
-      (q) => q.type === 'thank',
-    )
+    const updatedSteps = [...survey.steps]
+    const thankStepIndex = updatedSteps.findIndex((q) => q.type === 'thank')
 
-    if (thankQuestionIndex !== -1) {
-      updatedQuestions.splice(thankQuestionIndex, 0, newQuestion)
+    if (thankStepIndex !== -1) {
+      updatedSteps.splice(thankStepIndex, 0, newStep)
     } else {
-      updatedQuestions.push(newQuestion)
+      updatedSteps.push(newStep)
     }
 
-    setSurvey({ ...survey, questions: updatedQuestions })
+    setSurvey({ ...survey, steps: updatedSteps })
 
-    setIsAddQuestion(false)
+    setIsAddStep(false)
   }
 
   // 질문 추가시 타입을 고르는 모달
-  const AddQuestionModal = () => {
-    if (!isAddQuestion) return null
-    const questionTypes = [
-      { value: 'singleChoice', label: '객관식(단수)' },
-      { value: 'multipleChoice', label: '객관식(복수)' },
+  const AddStepModal = () => {
+    if (!isAddStep) return null
+    const stepTypes = [
+      { value: 'singleChoice', label: '객관식(중복 불가)' },
+      { value: 'multipleChoice', label: '객관식(중복 가능)' },
       { value: 'freeText', label: '주관식' },
       { value: 'rating', label: '별점' },
-      { value: 'link', label: '링크' },
+      { value: 'link', label: '외부 링크' },
       { value: 'info', label: '안내' },
     ]
     return (
@@ -84,11 +87,11 @@ const Surveys = ({ survey, setSurvey }) => {
         <div className={styles.modalContent}>
           <div className={styles.modalTitle}>추가할 질문 유형 선택</div>
           <div className={styles.modalTypes}>
-            {questionTypes.map((type) => (
+            {stepTypes.map((type) => (
               <div
                 key={type.value}
                 className={styles.modalType}
-                onClick={() => addQuestionHandler(type.value)}
+                onClick={() => addStepHandler(type.value)}
               >
                 {type.label}
               </div>
@@ -97,7 +100,7 @@ const Surveys = ({ survey, setSurvey }) => {
           <div className={styles.modalBottom}>
             <div
               className={styles.modalClose}
-              onClick={() => setIsAddQuestion(false)}
+              onClick={() => setIsAddStep(false)}
             >
               취소
             </div>
@@ -108,48 +111,43 @@ const Surveys = ({ survey, setSurvey }) => {
   }
 
   // welcome, thank on/off 토글
-
   const toggleHandler = (id) => {
-    const updatedQuestions = survey.questions.map((question) =>
-      question.id === id
-        ? { ...question, isActive: !question.isActive }
-        : question,
+    const updatedSteps = survey.steps.map((step) =>
+      step.id === id ? { ...step, isActive: !step.isActive } : step,
     )
-    setSurvey({ ...survey, questions: updatedQuestions })
+    setSurvey({ ...survey, steps: updatedSteps })
   }
 
   // 질문 수정 상태
-  const [editingQuestionId, setEditingQuestionId] = useState(null)
+  const [editingStepId, setEditingStepId] = useState(null)
 
   // 질문 수정 토글
-  const toggleEditMode = (questionId) => {
-    if (editingQuestionId && editingQuestionId !== questionId) {
+  const toggleEditMode = (stepId) => {
+    if (editingStepId && editingStepId !== stepId) {
       // 다른 질문을 편집하려고 할 때, 현재 편집 중인 질문의 변경사항을 취소합니다.
-      const originalQuestion = survey.questions.find(
-        (q) => q.id === editingQuestionId,
-      )
-      saveQuestion(originalQuestion)
+      const originalStep = survey.steps.find((q) => q.id === editingStepId)
+      saveStep(originalStep)
     }
-    setEditingQuestionId(editingQuestionId === questionId ? null : questionId)
+    setEditingStepId(editingStepId === stepId ? null : stepId)
   }
 
   //질문 수정 함수
-  const saveQuestion = (updatedQuestion) => {
-    const updatedQuestions = survey.questions.map((question) =>
-      question.id === updatedQuestion.id ? updatedQuestion : question,
+  const saveStep = (updatedStep) => {
+    const updatedSteps = survey.steps.map((step) =>
+      step.id === updatedStep.id ? updatedStep : step,
     )
-    setSurvey({ ...survey, questions: updatedQuestions })
-    setEditingQuestionId(null)
+    setSurvey({ ...survey, steps: updatedSteps })
+    setEditingStepId(null)
   }
 
   //질문 수정 취소
   const cancelEdit = () => {
-    setEditingQuestionId(null)
+    setEditingStepId(null)
   }
 
   return (
     <div className={styles.surveys}>
-      {survey.questions
+      {survey.steps
         .sort((a, b) => {
           if (a.type === 'welcome') return -1
           if (b.type === 'welcome') return 1
@@ -157,132 +155,132 @@ const Surveys = ({ survey, setSurvey }) => {
           if (b.type === 'thank') return -1
           return 0
         })
-        .map((question, index) => (
+        .map((step, index) => (
           <div
             className={`${styles.survey} ${
-              editingQuestionId === question.id ? styles.editing : ''
+              editingStepId === step.id ? styles.editing : ''
             }`}
-            key={question.id}
+            key={step.id}
           >
             <div className={styles.surveyNum}>
-              {question.type === 'welcome'
-                ? 'hi'
-                : question.type === 'thank'
-                  ? 'bye'
+              {step.type === 'welcome'
+                ? 'Hi'
+                : step.type === 'thank'
+                  ? 'Bye'
                   : index}
             </div>
-            {editingQuestionId === question.id ? (
+            {editingStepId === step.id ? (
               <div className={styles.surveyContents}>
-                {question.type === 'freeText' && (
+                {step.type === 'freeText' && (
                   <EditingFreeText
-                    question={question}
-                    onSave={(updatedQuestion) => {
-                      saveQuestion(updatedQuestion)
+                    step={step}
+                    onSave={(updatedStep) => {
+                      saveStep(updatedStep)
                     }}
                     onCancel={cancelEdit}
-                    questions={survey.questions}
+                    steps={survey.steps}
                   ></EditingFreeText>
                 )}
-                {question.type === 'singleChoice' && (
+                {step.type === 'singleChoice' && (
                   <EditingSingleChoice
-                    question={question}
-                    onSave={(updatedQuestion) => {
-                      saveQuestion(updatedQuestion)
+                    step={step}
+                    onSave={(updatedStep) => {
+                      saveStep(updatedStep)
                     }}
                     onCancel={cancelEdit}
-                    questions={survey.questions}
+                    steps={survey.steps}
                   ></EditingSingleChoice>
                 )}
-                {question.type === 'multipleChoice' && (
+                {step.type === 'multipleChoice' && (
                   <EditingMultipleChoice
-                    question={question}
-                    onSave={(updatedQuestion) => {
-                      saveQuestion(updatedQuestion)
+                    step={step}
+                    onSave={(updatedStep) => {
+                      saveStep(updatedStep)
                     }}
                     onCancel={cancelEdit}
-                    questions={survey.questions}
+                    steps={survey.steps}
                   ></EditingMultipleChoice>
                 )}
-                {question.type === 'rating' && (
+                {step.type === 'rating' && (
                   <EditingRating
-                    question={question}
-                    onSave={(updatedQuestion) => {
-                      saveQuestion(updatedQuestion)
+                    step={step}
+                    onSave={(updatedStep) => {
+                      saveStep(updatedStep)
                     }}
                     onCancel={cancelEdit}
-                    questions={survey.questions}
+                    steps={survey.steps}
                   ></EditingRating>
                 )}
-                {question.type === 'link' && (
+                {step.type === 'link' && (
                   <EditingLink
-                    question={question}
-                    onSave={(updatedQuestion) => {
-                      saveQuestion(updatedQuestion)
+                    step={step}
+                    onSave={(updatedStep) => {
+                      saveStep(updatedStep)
                     }}
                     onCancel={cancelEdit}
-                    questions={survey.questions}
+                    steps={survey.steps}
                   ></EditingLink>
                 )}
-                {question.type === 'info' && (
+                {step.type === 'info' && (
                   <EditingInfo
-                    question={question}
-                    onSave={(updatedQuestion) => {
-                      saveQuestion(updatedQuestion)
+                    step={step}
+                    onSave={(updatedStep) => {
+                      saveStep(updatedStep)
                     }}
                     onCancel={cancelEdit}
-                    questions={survey.questions}
+                    steps={survey.steps}
                   ></EditingInfo>
                 )}
-                {question.type === 'welcome' && (
+                {step.type === 'welcome' && (
                   <EditingWelcome
-                    question={question}
-                    onSave={(updatedQuestion) => {
-                      saveQuestion(updatedQuestion)
+                    step={step}
+                    onSave={(updatedStep) => {
+                      saveStep(updatedStep)
                     }}
                     onCancel={cancelEdit}
-                    questions={survey.questions}
+                    steps={survey.steps}
                   ></EditingWelcome>
                 )}
-                {question.type === 'thank' && (
+                {step.type === 'thank' && (
                   <EditingThank
-                    question={question}
-                    onSave={(updatedQuestion) => {
-                      saveQuestion(updatedQuestion)
+                    step={step}
+                    onSave={(updatedStep) => {
+                      saveStep(updatedStep)
                     }}
                     onCancel={cancelEdit}
-                    questions={survey.questions}
+                    steps={survey.steps}
                   ></EditingThank>
                 )}
               </div>
             ) : (
               <div
                 className={styles.surveyContents}
-                onClick={() => toggleEditMode(question.id)}
+                onClick={() => toggleEditMode(step.id)}
               >
-                <div className={styles.surveyQuestion}>{question.title}</div>
-                <div className={styles.questionType}>{question.type}</div>
+                <div className={styles.surveyStep}>{step.title}</div>
+                <div className={styles.stepType}>{stepTypeText[step.type]}</div>
               </div>
             )}
 
-            {question.type === 'welcome' || question.type === 'thank' ? (
-              <div className={styles.questionToggle}>
+            {step.type === 'welcome' || step.type === 'thank' ? (
+              <div className={styles.stepToggle}>
                 <div className={styles.label}>
-                  {question.isActive ? 'On' : 'Off'}
+                  {step.isActive ? 'On' : 'Off'}
                 </div>
                 <label className={styles.switch}>
                   <input
                     type='checkbox'
-                    checked={question.isActive}
-                    onChange={() => toggleHandler(question.id)}
+                    checked={step.isActive}
+                    onChange={() => toggleHandler(step.id)}
                   />
                   <span className={`${styles.slider} ${styles.round}`}></span>
                 </label>
               </div>
             ) : (
-              <div className={styles.questionDelete}>
+              <div className={styles.stepDelete}>
                 <div
                   className={styles.label}
-                  onClick={() => deleteHandler(question.id)}
+                  onClick={() => deleteHandler(step.id)}
                 >
                   삭제
                 </div>
@@ -293,12 +291,12 @@ const Surveys = ({ survey, setSurvey }) => {
       <div className={styles.addSurvey}>
         <div
           className={styles.addSurveyButton}
-          onClick={() => setIsAddQuestion(true)}
+          onClick={() => setIsAddStep(true)}
         >
           새 질문 추가 +
         </div>
       </div>
-      {AddQuestionModal()}
+      {AddStepModal()}
     </div>
   )
 }

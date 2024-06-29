@@ -1,14 +1,12 @@
 import styles from './EditingQuestion.module.css'
 import { useState } from 'react'
 
-const EditingLink = ({ question, onSave, onCancel, questions }) => {
-  const [title, setTitle] = useState(question.title)
-  const [description, setDescription] = useState(question.description || '')
-  const [url, setUrl] = useState(question.url || '')
-  const [buttonText, setButtonText] = useState(question.buttonText || '')
-  const [nextQuestionId, setNextQuestionId] = useState(
-    question.nextQuestionId || '',
-  )
+const EditingLink = ({ step, onSave, onCancel, steps }) => {
+  const [title, setTitle] = useState(step.title)
+  const [description, setDescription] = useState(step.description || '')
+  const [url, setUrl] = useState(step.url || '')
+  const [buttonText, setButtonText] = useState(step.buttonText || '')
+  const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
 
   const handleSave = () => {
     if (title.trim() === '') {
@@ -25,7 +23,7 @@ const EditingLink = ({ question, onSave, onCancel, questions }) => {
       alert('버튼 텍스트를 입력해주세요.')
       return
     }
-    onSave({ ...question, title, description, url, nextQuestionId, buttonText })
+    onSave({ ...step, title, description, url, nextStepId, buttonText })
   }
 
   return (
@@ -61,11 +59,11 @@ const EditingLink = ({ question, onSave, onCancel, questions }) => {
       <div className={styles.title}>응답에 따른 대응</div>
       <select
         className={styles.action}
-        value={nextQuestionId}
-        onChange={(e) => setNextQuestionId(e.target.value)}
+        value={nextStepId}
+        onChange={(e) => setNextStepId(e.target.value)}
       >
         <option value=''>다음 질문으로 이동</option>
-        {questions.map((q) => (
+        {steps.map((q) => (
           <option key={q.id}>{q.title}</option>
         ))}
       </select>

@@ -18,7 +18,7 @@ class SurveysRepo {
   //설문조사 아이디 존재 검사
   async checkSurveyIdExist(surveyId) {
     const survey = await this.collection.findOne({
-      _id: new mongoose.Types.ObjectId(surveyId),
+      _id: new ObjectId(surveyId),
     })
     return survey !== null //유효한 설문조사라면 true 반환
   }
@@ -26,8 +26,8 @@ class SurveysRepo {
   // 설문조사 소유권 검사
   async checkSurveyOwnership(userId, surveyId) {
     const survey = await this.collection.findOne({
-      _id: new mongoose.Types.ObjectId(surveyId),
-      userId: new mongoose.Types.ObjectId(userId),
+      _id: new ObjectId(surveyId),
+      userId: new ObjectId(userId),
     })
     return survey !== null // 유저에게 설문조사의 소유권이 있다면 true 반환
   }
@@ -38,7 +38,7 @@ class SurveysRepo {
   async getSurveys(userId) {
     const surveys = await this.collection
       .find(
-        { userId: new mongoose.Types.ObjectId(userId) },
+        { userId: new ObjectId(userId) },
         { projection: { _id: 1, title: 1, updateAt: 1, isDeploy: 1 } }, // 홈화면에서 필요한 필드만 가져오기
       )
       .sort({ updateAt: -1 }) // 수정 날짜 기준 내림차순 정렬
@@ -50,7 +50,7 @@ class SurveysRepo {
   // 설문조사 배포 상태 변경
   async toggleDeploy(surveyId) {
     const updatedStatus = await this.collection.findOneAndUpdate(
-      { _id: new mongoose.Types.ObjectId(surveyId) },
+      { _id: new ObjectId(surveyId) },
       [{ $set: { isDeploy: { $not: '$isDeploy' } } }],
       { returnDocument: 'after', projection: { isDeploy: 1, _id: 0 } },
     )
@@ -60,7 +60,7 @@ class SurveysRepo {
   // 설문조사 삭제
   async deleteSurvey(surveyId) {
     await this.collection.deleteOne({
-      _id: new mongoose.Types.ObjectId(surveyId),
+      _id: new ObjectId(surveyId),
     })
   }
 
@@ -68,7 +68,7 @@ class SurveysRepo {
   async getSurveyViews(surveyId) {
     const survey = await this.collection.findOne(
       {
-        _id: new mongoose.Types.ObjectId(surveyId),
+        _id: new ObjectId(surveyId),
       },
       { projection: { views: 1, steps: 1, _id: 0 } },
     )
@@ -78,7 +78,7 @@ class SurveysRepo {
   // 설문조사 isDeploy 값만 가져오기
   async getSurveyDeployStatus(surveyId) {
     const survey = await this.collection.findOne(
-      { _id: new mongoose.Types.ObjectId(surveyId) },
+      { _id: new ObjectId(surveyId) },
       { projection: { _id: 1, isDeploy: 1 } },
     )
     return survey
@@ -105,9 +105,10 @@ class SurveysRepo {
   // 설문조사 업데이트
   async updateSurvey(surveyId, surveyData) {
     const currentDate = new Date().toISOString()
+    const { _id, ...updateData } = surveyData // _id 필드 제거
     const result = await this.collection.findOneAndUpdate(
       { _id: new ObjectId(surveyId) },
-      { $set: { ...surveyData, updateAt: currentDate } },
+      { $set: { ...updateData, updateAt: currentDate } },
       { returnDocument: 'after' },
     )
     return result.value
