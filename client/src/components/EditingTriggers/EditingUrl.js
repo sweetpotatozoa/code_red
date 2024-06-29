@@ -47,6 +47,7 @@ const EditingUrl = ({
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder='질문을 입력하세요.'
+        className={styles.input}
       />
       <div className={styles.title}>설명</div>
       <input
@@ -54,6 +55,7 @@ const EditingUrl = ({
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder='설명 (선택사항)'
+        className={styles.input}
       />
       <div className={styles.title}>페이지 지정하기</div>
       <div className={styles.types}>
@@ -82,6 +84,7 @@ const EditingUrl = ({
             value={pageValue}
             onChange={(e) => setPageValue(e.target.value)}
             placeholder='특정 페이지 URL을 입력하세요.'
+            className={styles.input}
           />
         </>
       )}

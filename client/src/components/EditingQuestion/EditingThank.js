@@ -17,6 +17,7 @@ const EditingThank = ({ question, onSave, onCancel }) => {
     <div>
       <div className={styles.title}>제목</div>
       <input
+        className={styles.input}
         type='text'
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -24,6 +25,7 @@ const EditingThank = ({ question, onSave, onCancel }) => {
       />
       <div className={styles.title}>설명</div>
       <input
+        className={styles.input}
         type='text'
         value={description}
         onChange={(e) => setDescription(e.target.value)}

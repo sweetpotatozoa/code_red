@@ -12,7 +12,6 @@ class TemplatesRepo {
       .aggregate([
         { $unwind: '$templates' },
         { $replaceRoot: { newRoot: '$templates' } },
-        { $project: { id: 1, title: 1, description: 1 } }, // 원하는 필드만 선택
       ])
       .toArray()
   }

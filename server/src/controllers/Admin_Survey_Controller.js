@@ -116,7 +116,6 @@ class AdminSurveyController {
   async updateSurveyPosition(req, res) {
     const userId = req.user.id // userId saved in jwt added by auth middleware
     const surveyPosition = req.body.surveyPosition // surveyPosition 정보
-    console.log(isInteger(surveyPosition))
 
     if (!userId || !isObjectId(userId)) {
       res.status(400).json({ message: 'Invalid user id' })

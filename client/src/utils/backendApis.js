@@ -92,6 +92,17 @@ class BackendApis {
     return result
   }
 
+  //설문조사 템플릿 가져오기
+  async getTemplates(method = 'GET', params = {}) {
+    const result = await fetcher(
+      '/api/adminSurvey/templates',
+      this.token,
+      method,
+      params,
+    )
+    return result
+  }
+
   async getSurveySummary(surveyId) {
     return await fetcher(`/api/adminSurvey/${surveyId}`, this.token, 'GET')
   }
@@ -126,11 +137,6 @@ class BackendApis {
       method,
       params,
     )
-    return result
-  }
-
-  async getTemplates(method = 'GET', params = {}) {
-    const result = await fetcher('/api/templates', this.token, method, params)
     return result
   }
 
