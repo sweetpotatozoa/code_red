@@ -80,42 +80,22 @@ router.post(
 // 수정할 설문조사 정보 가져오기
 router.get(
   '/edit/:id',
-  auth,
-  wrapAsync(async (req, res) => {
-    const result = await AdminSurveyController.getSurvey(
-      req.params.id,
-      req.user.id,
-    ) //각 설문조사 아이디, userId saved in jwt added by auth middleware
-    return res.status(result.status).send(result)
-  }),
+  fakeAuth,
+  wrapAsync(AdminSurveyController.getSurveyForEdit),
 )
 
 // 설문조사 업데이트
 router.put(
   '/surveyUpdate/:id',
-  auth,
-  wrapAsync(async (req, res) => {
-    const result = await AdminSurveyController.updateSurvey(
-      req.params.id,
-      req.user.id,
-      req.body,
-    ) //각 설문조사 아이디, userId saved in jwt added by auth middleware
-    return res.status(result.status).send(result)
-  }),
+  fakeAuth,
+  wrapAsync(AdminSurveyController.updateSurvey),
 )
 
 // 설문조사 업데이트하고 배포하기
 router.put(
   '/surveyDeploy/:id',
-  auth,
-  wrapAsync(async (req, res) => {
-    const result = await AdminSurveyController.updateSurveyAndDeploy(
-      req.params.id,
-      req.user.id,
-      req.body,
-    ) //각 설문조사 아이디, userId saved in jwt added by auth middleware
-    return res.status(result.status).send(result)
-  }),
+  fakeAuth,
+  wrapAsync(AdminSurveyController.updateSurveyAndDeploy),
 )
 
 // 설문조사 개별 응답 가져오기

@@ -83,6 +83,35 @@ class SurveysRepo {
     )
     return survey
   }
+
+  // 수정할 설문조사 정보 가져오기
+  async getSurveyForEdit(surveyId) {
+    const survey = await this.collection.findOne(
+      { _id: new ObjectId(surveyId) },
+      {
+        projection: {
+          _id: 1,
+          title: 1,
+          steps: 1,
+          triggers: 1,
+          delay: 1,
+          isDeploy: 1,
+        },
+      },
+    )
+    return survey
+  }
+
+  // 설문조사 업데이트
+  async updateSurvey(surveyId, surveyData) {
+    const currentDate = new Date().toISOString()
+    const result = await this.collection.findOneAndUpdate(
+      { _id: new ObjectId(surveyId) },
+      { $set: { ...surveyData, updateAt: currentDate } },
+      { returnDocument: 'after' },
+    )
+    return result.value
+  }
 }
 
 module.exports = new SurveysRepo()

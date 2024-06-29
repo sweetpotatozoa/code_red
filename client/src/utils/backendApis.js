@@ -139,29 +139,16 @@ class BackendApis {
     return result
   }
 
-  async editSurvey(method = 'GET', params = {}) {
-    const result = await fetcher('/api/edit', this.token, method, params)
-    return result
+  async editSurvey(surveyId) {
+    return await fetcher(`/api/edit/${surveyId}`, this.token, 'GET')
   }
 
-  async updateSurvey(method = 'PUT', params = {}) {
-    const result = await fetcher(
-      '/api/surveyUpdate',
-      this.token,
-      method,
-      params,
-    )
-    return result
+  async updateSurvey(surveyId) {
+    return await fetcher(`/api/surveyUpdate/${surveyId}`, this.token, 'PUT')
   }
 
-  async deploySurvey(method = 'PUT', params = {}) {
-    const result = await fetcher(
-      '/api/surveyDeploy',
-      this.token,
-      method,
-      params,
-    )
-    return result
+  async deploySurvey(surveyId) {
+    return await fetcher(`/api/surveyDeploy/${surveyId}`, this.token, 'PUT')
   }
 
   async getResponse(surveyId) {
