@@ -36,6 +36,7 @@ const EditingLink = ({ question, onSave, onCancel, questions }) => {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder='질문을 입력하세요.'
+        className={styles.input}
       />
       <div className={styles.title}>설명</div>
       <input
@@ -43,6 +44,7 @@ const EditingLink = ({ question, onSave, onCancel, questions }) => {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder='설명 (선택사항)'
+        className={styles.input}
       />
       <div className={styles.title}>URL</div>
       <input
@@ -50,6 +52,7 @@ const EditingLink = ({ question, onSave, onCancel, questions }) => {
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         placeholder='URL을 입력하세요.'
+        className={styles.input}
       />
       <div className={styles.title}>버튼 텍스트</div>
       <input
@@ -57,6 +60,7 @@ const EditingLink = ({ question, onSave, onCancel, questions }) => {
         value={buttonText}
         onChange={(e) => setButtonText(e.target.value)}
         placeholder='버튼의 텍스트를 입력하세요.'
+        className={styles.input}
       />
       <div className={styles.title}>응답에 따른 대응</div>
       <select

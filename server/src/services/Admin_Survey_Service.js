@@ -2,7 +2,6 @@ const UsersRepo = require('../repositories/Users_Repo')
 const SurveysRepo = require('../repositories/Surveys_Repo')
 const templatesRepo = require('../repositories/Templates_Repo')
 const ResponsesRepo = require('../repositories/Responses_Repo')
-const { ObjectId } = require('mongodb')
 
 class AdminSurveyService {
   //헬퍼 함수

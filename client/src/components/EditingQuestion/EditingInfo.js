@@ -24,9 +24,11 @@ const EditingInfo = ({ question, onSave, onCancel, questions }) => {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder='질문을 입력하세요.'
+        className={styles.input}
       />
       <div className={styles.title}>설명</div>
       <input
+        className={styles.input}
         type='text'
         value={description}
         onChange={(e) => setDescription(e.target.value)}

@@ -26,6 +26,7 @@ const EditingFreeText = ({ question, onSave, onCancel, questions }) => {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder='질문을 입력하세요.'
+        className={styles.input}
       />
       <div className={styles.title}>설명</div>
       <input
@@ -33,6 +34,7 @@ const EditingFreeText = ({ question, onSave, onCancel, questions }) => {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder='설명 (선택사항)'
+        className={styles.input}
       />
       <div className={styles.title}>응답에 따른 대응</div>
       <select
