@@ -344,13 +344,16 @@
           const selectedOption = step.options.find(
             (option) => option.id === selectedOptionId,
           )
+          console.log('Selected Option:', selectedOption)
           nextStepId = selectedOption ? selectedOption.nextStepId : ''
+          console.log('Next Step ID:', nextStepId)
         }
 
         if (nextStepId && nextStepId !== '') {
           const nextStepIndex = survey.steps.findIndex(
             (s) => s.id === nextStepId,
           )
+          console.log('Next Step Index:', nextStepIndex)
           if (nextStepIndex !== -1) {
             stepIndex = nextStepIndex
             showStep(survey, stepIndex)
