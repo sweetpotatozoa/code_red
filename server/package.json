@@ -21,7 +21,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.3",
     "node-fetch": "^2.6.1",
-    "nunjucks": "^3.2.4"
+    "nunjucks": "^3.2.4",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.3"

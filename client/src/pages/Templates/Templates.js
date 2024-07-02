@@ -24,9 +24,15 @@ const Templates = () => {
   }
 
   // 템플릿 고르고 선택하기 버튼 눌러서 실제로 설문조사 생성하면서 edit페이지로 이동
-  const createSurvey = () => {
+  const createSurvey = async () => {
     if (selectedTemplate) {
-      navigate('/edit/1')
+      try {
+        const surveyId = await backendApis.createSurvey(selectedTemplate.id)
+        navigate(`/edit/${surveyId}`)
+      } catch (error) {
+        console.error('설문조사 생성 실패', error)
+        alert('설문조사 생성에 실패했습니다.')
+      }
     }
   }
 

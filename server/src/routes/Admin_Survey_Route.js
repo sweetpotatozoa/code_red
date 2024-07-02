@@ -45,7 +45,7 @@ router.get(
 
 // 설문조사 생성
 router.post(
-  '/templates',
+  '/templates/:templateId',
   fakeAuth,
   wrapAsync(AdminSurveyController.createSurvey),
 )
@@ -62,19 +62,6 @@ router.get(
   '/:surveyId/questions',
   fakeAuth,
   wrapAsync(AdminSurveyController.getSurveyQuestions),
-)
-
-// 설문조사 생성
-router.post(
-  '/templates',
-  auth,
-  wrapAsync(async (req, res) => {
-    const result = await AdminSurveyController.createSurvey(
-      req.body,
-      req.user.id,
-    ) // userId saved in jwt added by auth middleware
-    return res.status(result.status).send(result)
-  }),
 )
 
 // 수정할 설문조사 정보 가져오기

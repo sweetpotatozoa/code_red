@@ -217,6 +217,13 @@ const TemplatePreview = ({
             <div className={styles.description}>{step.description}</div>
           </>
         )
+      case 'info':
+        return (
+          <>
+            <div className={styles.title}>{step.title}</div>
+            <div className={styles.description}>{step.description}</div>
+          </>
+        )
       default:
         return (
           <>
