@@ -293,8 +293,8 @@ class AdminSurveyService {
 
     // 새로 생성된 survey를 데이터베이스에 저장하고 반환합니다.
     return SurveysRepo.createSurvey(survey)
+  }
 
-    
   // 설문조사 개별 응답 가져오기
   async getResponses(userId, surveyId) {
     await this.checkUserIdExist(userId)
