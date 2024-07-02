@@ -3,6 +3,7 @@ const SurveysRepo = require('../repositories/Surveys_Repo')
 const templatesRepo = require('../repositories/Templates_Repo')
 const ResponsesRepo = require('../repositories/Responses_Repo')
 const { v4: uuidv4 } = require('uuid')
+const mongoose = require('mongoose')
 
 class AdminSurveyService {
   //헬퍼 함수
@@ -248,7 +249,10 @@ class AdminSurveyService {
 
     const survey = {
       ...template, // 템플릿의 모든 속성을 복사합니다.
-      userId: userId, // userId를 설정합니다.
+      userId: new mongoose.Types.ObjectId(userId), // userId를 설정합니다.
+      createAt: new Date(), // 현재 날짜를 설정합니다.
+      updateAt: new Date(), // 현재 날짜를 설정합니다.
+      views: 0, // views를 0으로 설정합니다.
       steps: template.steps.map((step) => {
         const newStepId = uuidv4() // 새로운 UUID를 생성합니다.
         idMapping[step.id] = newStepId // 기존 id와 새 UUID를 매핑합니다.
