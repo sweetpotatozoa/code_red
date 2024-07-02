@@ -79,8 +79,8 @@ class SurveysRepo {
   async createSurvey(survey) {
     const result = await this.collection.insertOne(survey)
     return result.insertedId
-    
-    
+  }
+
   // 설문조사 isDeploy 값만 가져오기
   async getSurveyDeployStatus(surveyId) {
     const survey = await this.collection.findOne(
