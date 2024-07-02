@@ -3,78 +3,115 @@ import styles from './Responses.module.css'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
-import data from '../../utils/data'
-import customerData from '../../utils/customerData'
-import responsesData from '../../utils/responsesData'
+import BackendApis from '../../utils/backendApis'
 
 const Responses = () => {
-  const [surveys, setSurveys] = useState(data)
-  const [customerInfo, setCustomerInfo] = useState(customerData)
+  const [userInfo, setUserInfo] = useState('')
   const [isSetting, setIsSetting] = useState(false)
-  const [selectedPosition, setSelectedPosition] = useState(
-    customerInfo.surveyPosition || 4,
-  )
-  const [responses, setResponses] = useState(responsesData)
+  const [selectedPosition, setSelectedPosition] = useState(4)
+  const [responses, setResponses] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [survey, setSurvey] = useState({ isDeploy: false })
 
   const navigate = useNavigate()
+  const { id } = useParams()
 
   useEffect(() => {
-    setSurveys(data)
-    setCustomerInfo(customerData)
-  }, [])
+    const fetchData = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const [surveyData, responsesData, userInfoData] = await Promise.all([
+          BackendApis.getSurvey(id),
+          BackendApis.getResponse(id),
+          BackendApis.getUserInfo(),
+        ])
+        setSurvey(surveyData || { isDeploy: false })
+        setResponses(responsesData || [])
+        setUserInfo(userInfoData)
+        setSelectedPosition(userInfoData.surveyPosition || 4)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+        setError('데이터를 불러오는 중 오류가 발생했습니다.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
-  //설문조사 불러오기
-  const { id } = useParams()
-  const survey = surveys.find((survey) => survey.id === parseInt(id))
+    if (id) {
+      fetchData()
+    }
+  }, [id])
 
-  //설문조사 수정하기
+  const deleteResponse = async (responseId) => {
+    if (window.confirm('정말로 이 응답을 삭제하시겠습니까?')) {
+      try {
+        await BackendApis.deleteResponse(responseId)
+        setResponses(
+          responses.filter((response) => response._id !== responseId),
+        )
+        alert('응답이 성공적으로 삭제되었습니다.')
+      } catch (error) {
+        console.error('Error deleting response:', error)
+        alert('응답 삭제 중 오류가 발생했습니다.')
+      }
+    }
+  }
+
+  const surveyDeployHandler = async () => {
+    if (!survey) return
+
+    try {
+      await BackendApis.toggleSurveyDeploy(survey._id)
+      setSurvey((prevSurvey) => ({
+        ...prevSurvey,
+        isDeploy: !prevSurvey.isDeploy,
+      }))
+    } catch (error) {
+      console.error('설문조사 배포상태 변경 실패', error)
+      alert('설문조사 배포상태 변경에 실패했습니다.')
+    }
+  }
+
   const handleEdit = (surveyId) => {
     navigate(`/edit/${surveyId}`)
   }
 
-  //설문조사 켜기/끄기
-  const surveyDeployHandler = (surveyId) => {
-    const newSurveys = surveys.map((survey) => {
-      if (survey.id === surveyId) {
-        survey.isDeploy = !survey.isDeploy
-      }
-      return survey
-    })
-    setSurveys(newSurveys)
+  const settingCancelHandler = () => {
+    setIsSetting(false)
+    setSelectedPosition(userInfo.surveyPosition || 4)
   }
 
-  //설정 모달 켜기/끄기
-  const settingModalHandler = () => {
-    setIsSetting(!isSetting)
-  }
-
-  //화면 설정 저장하기
-  const settingSaveHandler = () => {
-    const newCustomerInfo = {
-      ...customerInfo,
+  const settingSaveHandler = async () => {
+    const newUserInfo = {
+      ...userInfo,
       surveyPosition: selectedPosition,
     }
-    setCustomerInfo(newCustomerInfo)
-    setIsSetting(false)
+
+    try {
+      await BackendApis.editSurveyPosition('PUT', {
+        surveyPosition: selectedPosition,
+      })
+      setUserInfo(newUserInfo)
+      setIsSetting(false)
+    } catch (error) {
+      console.error('설정 저장 실패', error)
+      alert('설정 저장에 실패했습니다.')
+    }
   }
 
-  //개별응답으로 이동
   const goToSummary = () => {
-    navigate(`/summary/${survey.id}`)
+    navigate(`/summary/${id}`)
   }
 
-  //개별응답 삭제
-  const deleteResponse = (responseId) => {
-    const newResponses = responses.filter(
-      (response) => response.id !== responseId,
-    )
-    setResponses(newResponses)
-  }
-
-  //홈페이지로 이동
   const goToHome = () => {
     navigate('/')
   }
+
+  if (isLoading) return <div>로딩 중...</div>
+  if (error) return <div>{error}</div>
+  if (!survey) return <div>설문조사를 찾을 수 없습니다.</div>
 
   return (
     <div className={styles.container}>
@@ -83,7 +120,7 @@ const Responses = () => {
           src='/images/logo.png'
           className={styles.logo}
           onClick={goToHome}
-        ></img>
+        />
         <div className={styles.navBar}>
           <div className={styles.nav}>설문조사</div>
         </div>
@@ -91,7 +128,7 @@ const Responses = () => {
           <div className={styles.welcome}>
             안녕하세요,
             <br />
-            {customerInfo.customerName}님!
+            {userInfo.realName}님!
           </div>
           <div
             className={styles.environmentSetting}
@@ -104,7 +141,11 @@ const Responses = () => {
       <div className={styles.main}>
         <div className={styles.basicSetting}>
           <div className={styles.setting}>연결상태 정상</div>
-          <a href='https://www.naver.com/' target='_blank'>
+          <a
+            href='https://www.naver.com/'
+            target='_blank'
+            rel='noopener noreferrer'
+          >
             <div className={styles.setting}>가이드</div>
           </a>
         </div>
@@ -112,20 +153,17 @@ const Responses = () => {
           <div className={styles.title}>설문조사</div>
           <div className={styles.surveySettingBox}>
             <div className={styles.toggle}>
-              {survey.isDeploy ? 'On' : 'Off'}
+              {survey?.isDeploy ? 'On' : 'Off'}
             </div>
             <label className={styles.switch}>
               <input
                 type='checkbox'
-                checked={survey.isDeploy}
-                onChange={() => surveyDeployHandler(survey.id)}
+                checked={survey?.isDeploy}
+                onChange={surveyDeployHandler}
               />
               <span className={`${styles.slider} ${styles.round}`}></span>
             </label>
-            <div
-              className={styles.button}
-              onClick={() => handleEdit(parseInt(id))}
-            >
+            <div className={styles.button} onClick={() => handleEdit(id)}>
               수정하기
             </div>
           </div>
@@ -140,19 +178,22 @@ const Responses = () => {
           <div className={styles.downloadButton}>CSV 다운로드</div>
         </div>
         <div className={styles.responses}>
+          {isLoading && <div>로딩 중...</div>}
+          {error && <div className={styles.error}>{error}</div>}
           {responses.map((response) => (
-            <div className={styles.response} key={response.id}>
+            <div className={styles.response} key={response._id}>
               <div className={styles.responseTitle}>{response.createAt}</div>
               <div className={styles.contents}>
-                {
-                  //질문과 답변을 렌더링하는 부분
-                  response.answers.map((a) => (
-                    <div className={styles.content} key={a.questionId}>
-                      <div className={styles.stepTitle}>{a.questionTitle}</div>
-                      <div className={styles.answerValue}>{a.answer}</div>
+                {response.answers.map((a) => (
+                  <div className={styles.content} key={a.stepId}>
+                    <div className={styles.stepTitle}>{a.stepTitle}</div>
+                    <div className={styles.answerValue}>
+                      {Array.isArray(a.answer)
+                        ? a.answer.map((ans) => ans.value).join(', ')
+                        : a.answer.value || a.answer}
                     </div>
-                  ))
-                }
+                  </div>
+                ))}
               </div>
               <div className={styles.isComplete}>
                 {response.isComplete ? '제출완료' : '중도이탈'}
@@ -160,7 +201,7 @@ const Responses = () => {
               <div className={styles.bottom}>
                 <div
                   className={styles.btnButton}
-                  onClick={() => deleteResponse(response.id)}
+                  onClick={() => deleteResponse(response._id)}
                 >
                   삭제
                 </div>
@@ -184,7 +225,7 @@ const Responses = () => {
               <option value='3'>우측 상단</option>
             </select>
             <div className={styles.bottom}>
-              <div className={styles.btnButton2} onClick={settingModalHandler}>
+              <div className={styles.btnButton2} onClick={settingCancelHandler}>
                 취소
               </div>
               <div className={styles.btnButton} onClick={settingSaveHandler}>
@@ -197,4 +238,5 @@ const Responses = () => {
     </div>
   )
 }
+
 export default Responses

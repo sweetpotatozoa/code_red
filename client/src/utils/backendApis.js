@@ -39,6 +39,15 @@ class BackendApis {
     return result
   }
 
+  // 설문조사 하나의 isDeploy 값만 가져오기
+  async getSurvey(surveyId) {
+    return await fetcher(
+      `/api/adminSurvey/getSurvey/${surveyId}`,
+      this.token,
+      'GET',
+    )
+  }
+
   //유저 정보 가져오기
   async getUserInfo(method = 'GET', params = {}) {
     const result = await fetcher(
@@ -167,14 +176,20 @@ class BackendApis {
     return result
   }
 
-  async getResponse(method = 'GET', params = {}) {
-    const result = await fetcher('/api/response', this.token, method, params)
-    return result
+  async getResponse(surveyId) {
+    return await fetcher(
+      `/api/adminSurvey/response/${surveyId}`,
+      this.token,
+      'GET',
+    )
   }
 
-  async deleteResponse(method = 'DELETE', params = {}) {
-    const result = await fetcher('/api/response', this.token, method, params)
-    return result
+  async deleteResponse(responseId) {
+    return await fetcher(
+      `/api/adminSurvey/response/${responseId}`,
+      this.token,
+      'DELETE',
+    )
   }
 
   async downloadResponses(method = 'GET', params = {}) {

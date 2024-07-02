@@ -177,14 +177,20 @@ class AdminSurveyService {
         case 'singleChoice':
         case 'multipleChoice':
           const optionCounts = step.options.reduce((acc, option) => {
-            acc[option.id] = stepResponses.filter(
-              (r) =>
-                r.answer === option.id ||
-                (Array.isArray(r.answer) && r.answer.includes(option.id)),
-            ).length
+            acc[option.id] = stepResponses.filter((r) => {
+              if (step.type === 'multipleChoice') {
+                return (
+                  Array.isArray(r.answer) &&
+                  r.answer.some((ans) => ans.id === option.id)
+                )
+              } else {
+                return r.answer && r.answer.id === option.id
+              }
+            }).length
             return acc
           }, {})
-          return {
+
+          const result = {
             ...step,
             totalResponses: stepResponses.length,
             options: step.options.map((option) => ({
@@ -192,6 +198,20 @@ class AdminSurveyService {
               eachResponses: optionCounts[option.id] || 0,
             })),
           }
+
+          if (step.type === 'rating') {
+            const totalScore = step.options.reduce(
+              (sum, option, index) =>
+                sum + (index + 1) * (optionCounts[option.id] || 0),
+              0,
+            )
+            result.averageScore =
+              result.totalResponses > 0
+                ? (totalScore / result.totalResponses).toFixed(2)
+                : 0
+          }
+
+          return result
         case 'info':
         case 'link':
           return {
@@ -273,6 +293,44 @@ class AdminSurveyService {
 
     // 새로 생성된 survey를 데이터베이스에 저장하고 반환합니다.
     return SurveysRepo.createSurvey(survey)
+
+    
+  // 설문조사 개별 응답 가져오기
+  async getResponses(userId, surveyId) {
+    await this.checkUserIdExist(userId)
+    await this.checkSurveyIdExist(surveyId)
+    await this.checkSurveyOwnership(userId, surveyId)
+
+    const responses = await ResponsesRepo.getSurveyResponses(surveyId)
+
+    if (responses.length === 0) {
+      throw new Error('No responses found')
+    }
+
+    return responses
+  }
+
+  // 설문조사 응답 삭제
+  async deleteResponse(userId, responseId) {
+    await this.checkUserIdExist(userId)
+
+    const response = await ResponsesRepo.getResponseById(responseId)
+    if (!response) {
+      throw new Error('No response found')
+    }
+
+    await this.checkSurveyOwnership(userId, response.surveyId)
+
+    return ResponsesRepo.deleteResponse(responseId)
+  }
+
+  // 설문조사 isDeploy 값만 가져오기
+  async getSurvey(userId, surveyId) {
+    await this.checkUserIdExist(userId)
+    await this.checkSurveyIdExist(surveyId)
+    await this.checkSurveyOwnership(userId, surveyId)
+
+    return SurveysRepo.getSurveyDeployStatus(surveyId)
   }
 }
 

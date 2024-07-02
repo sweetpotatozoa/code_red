@@ -108,27 +108,22 @@ router.put(
 // 설문조사 개별 응답 가져오기
 router.get(
   '/response/:id',
-  auth,
-  wrapAsync(async (req, res) => {
-    const result = await AdminSurveyController.getResponses(
-      req.params.id,
-      req.user.id,
-    ) //각 설문조사 아이디, userId saved in jwt added by auth middleware
-    return res.status(result.status).send(result)
-  }),
+  fakeAuth,
+  wrapAsync(AdminSurveyController.getResponses),
 )
 
 // 설문조사 응답 삭제
 router.delete(
   '/response/:id',
-  auth,
-  wrapAsync(async (req, res) => {
-    const result = await AdminSurveyController.deleteResponse(
-      req.params.id,
-      req.user.id,
-    ) //각 설문조사 응답 아이디, userId saved in jwt added by auth middleware
-    return res.status(result.status).send(result)
-  }),
+  fakeAuth,
+  wrapAsync(AdminSurveyController.deleteResponse),
+)
+
+// 설문조사 isDeploy 상태만 가져오기
+router.get(
+  '/getSurvey/:id',
+  fakeAuth,
+  wrapAsync(AdminSurveyController.getSurvey),
 )
 
 // 설문조사 응답 다운로드
