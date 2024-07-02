@@ -18,4 +18,9 @@ const isInteger = (value) => {
   return false
 }
 
-module.exports = { isObjectId, isInteger }
+// str인지 확인하는 함수
+const isString = (value) => {
+  return typeof value === 'string'
+}
+
+module.exports = { isObjectId, isInteger, isString }

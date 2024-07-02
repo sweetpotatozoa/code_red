@@ -94,6 +94,17 @@ class BackendApis {
     return result
   }
 
+  //설문조사 템플릿으로 설문조사 생성하기
+  async createSurvey(templateId, method = 'POST', params = {}) {
+    const result = await fetcher(
+      `/api/adminSurvey/templates/${templateId}`,
+      this.token,
+      method,
+      params,
+    )
+    return result
+  }
+
   async getSurveySummary(surveyId) {
     return await fetcher(`/api/adminSurvey/${surveyId}`, this.token, 'GET')
   }
@@ -128,11 +139,6 @@ class BackendApis {
       method,
       params,
     )
-    return result
-  }
-
-  async createSurvey(method = 'POST', params = {}) {
-    const result = await fetcher('/api/templates', this.token, method, params)
     return result
   }
 

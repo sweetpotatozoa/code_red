@@ -15,6 +15,19 @@ class TemplatesRepo {
       ])
       .toArray()
   }
+
+  async getTemplate(templateId) {
+    const result = await this.collection.findOne(
+      { templates: { $elemMatch: { id: templateId } } },
+      { projection: { 'templates.$': 1 } },
+    )
+
+    if (result && result.templates && result.templates.length > 0) {
+      return result.templates[0]
+    } else {
+      return null
+    }
+  }
 }
 
 module.exports = new TemplatesRepo()
