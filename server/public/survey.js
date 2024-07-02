@@ -226,7 +226,11 @@
             return false
           }
           for (let option of step.options) {
-            if (!option.id || !option.value || !option.nextStepId) {
+            if (
+              !option.id ||
+              !option.value ||
+              option.nextStepId === undefined
+            ) {
               console.error(`Invalid option structure in survey ${survey._id}`)
               return false
             }
