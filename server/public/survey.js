@@ -296,19 +296,15 @@
       return
     }
 
-    const isLastStep = stepIndex === activeSteps.length - 1
-    const isSecondToLastStep =
-      stepIndex === activeSteps.length - 2 &&
-      activeSteps[activeSteps.length - 1].type === 'thank'
+    const isVisiblyLastStep = isVisibleLastStep(survey, stepIndex)
+    const isThankStep = step.type === 'thank'
 
-    const buttonText = getButtonText(step, isLastStep, isSecondToLastStep)
+    const buttonText = getButtonText(step, isVisiblyLastStep, isThankStep)
 
     surveyContainer.innerHTML = generateStepHTML(step, buttonText)
 
-    // 여기에서 'closeSurvey' 이벤트 리스너를 설정
     document.getElementById('closeSurvey').onclick = () => {
-      const isThankStep = step.type === 'thank'
-      closeSurvey(survey._id, isThankStep)
+      closeSurvey(survey._id, isThankStep || isVisiblyLastStep)
     }
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
@@ -322,8 +318,8 @@
       saveResponse(step, stepAnswer)
 
       try {
+        const isComplete = isVisiblyLastStep && !isThankStep
         if (surveyResponseId) {
-          const isComplete = isLastStep && step.type !== 'thank'
           await updateResponse(surveyResponseId, surveyResponses, isComplete)
         } else {
           surveyResponseId = await createResponse(survey.userId, survey._id, {
@@ -338,29 +334,30 @@
           )
         }
 
-        let nextStepId
+        let nextStepId = step.nextStepId
         if (step.type === 'singleChoice' || step.type === 'rating') {
           const selectedOptionId = stepAnswer.id
           const selectedOption = step.options.find(
             (option) => option.id === selectedOptionId,
           )
-          nextStepId = selectedOption ? selectedOption.nextStepId : null
-        } else {
-          nextStepId = step.nextStepId
+          nextStepId = selectedOption ? selectedOption.nextStepId : ''
         }
 
-        if (nextStepId) {
+        if (nextStepId && nextStepId !== '') {
           const nextStepIndex = survey.steps.findIndex(
             (s) => s.id === nextStepId,
           )
           if (nextStepIndex !== -1) {
-            currentStep = nextStepIndex
-            showStep(survey, currentStep)
+            stepIndex = nextStepIndex
+            showStep(survey, stepIndex)
           } else {
             closeSurvey(survey._id, true)
           }
-        } else {
+        } else if (isVisiblyLastStep) {
           closeSurvey(survey._id, true)
+        } else {
+          stepIndex++
+          showStep(survey, stepIndex)
         }
       } catch (error) {
         console.error('Error while submitting survey:', error)
@@ -370,6 +367,16 @@
     if (step.type !== 'thank') {
       updateProgressBar(stepIndex, activeSteps.length - 1)
     }
+  }
+
+  function isVisibleLastStep(survey, currentStepIndex) {
+    const currentStep = survey.steps[currentStepIndex]
+    const nextStepId = currentStep.nextStepId
+    if (!nextStepId || nextStepId === '') {
+      return true
+    }
+    const nextStep = survey.steps.find((step) => step.id === nextStepId)
+    return !nextStep || nextStep.type === 'thank'
   }
 
   function generateStepHTML(step, buttonText) {
@@ -417,7 +424,7 @@
   }
 
   // 설문조사 단계별 버튼 텍스트 설정
-  function getButtonText(step, isLastStep, isSecondToLastStep) {
+  function getButtonText(step, isVisiblyLastStep, isThankStep) {
     switch (step.type) {
       case 'welcome':
         return '참여하기'
@@ -426,11 +433,12 @@
       case 'thank':
         return ''
       default:
-        return isLastStep || isSecondToLastStep ? '제출하기' : '다음'
+        return isVisiblyLastStep && !isThankStep ? '제출하기' : '다음'
     }
   }
 
   // 설문조사 닫기
+
   function closeSurvey(surveyId, completed = false) {
     const surveyPopup = document.getElementById('survey-popup')
     if (surveyPopup) {
@@ -442,9 +450,8 @@
       lastShownTime: new Date().toISOString(),
       completed,
     })
-    window.dispatchEvent(new Event('surveyCompleted')) // 설문조사 완료 이벤트 발생
+    window.dispatchEvent(new Event('surveyCompleted'))
 
-    // isComplete 값 업데이트
     if (completed && surveyResponseId) {
       updateResponse(surveyResponseId, surveyResponses, true)
     }
@@ -453,38 +460,46 @@
   // 다음 스텝으로 이동
   function nextStep(survey, stepIndex, selectedOptionId = null) {
     const currentStep = survey.steps[stepIndex]
-
     let nextStepId
+
     if (currentStep.type === 'singleChoice' || currentStep.type === 'rating') {
       const selectedOption = currentStep.options.find(
         (option) => option.id === selectedOptionId,
       )
-      nextStepId = selectedOption ? selectedOption.nextStepId : null
+      nextStepId = selectedOption ? selectedOption.nextStepId : ''
     } else {
       nextStepId = currentStep.nextStepId
     }
 
-    const nextStepIndex = survey.steps.findIndex(
-      (step) => step.id === nextStepId,
-    )
+    // 다음 스텝 인덱스 결정
+    let nextStepIndex = stepIndex + 1 // 기본적으로 다음 질문으로
 
-    if (nextStepIndex !== -1) {
+    // nextStepId가 유효한 경우에만 해당 스텝을 찾음
+    if (nextStepId && nextStepId !== '') {
+      const foundIndex = survey.steps.findIndex(
+        (step) => step.id === nextStepId,
+      )
+      if (foundIndex !== -1) {
+        nextStepIndex = foundIndex
+      }
+      // 유효하지 않은 ID인 경우 기본값(다음 질문)을 사용
+    }
+
+    // 다음 스텝이 존재하는지 확인
+    if (nextStepIndex < survey.steps.length) {
       currentStep = nextStepIndex
       showStep(survey, currentStep)
     } else {
-      // "thank" 스텝이 활성화되어 있는 경우
+      // 다음 스텝이 없는 경우 (마지막 질문)
       const thankStep = survey.steps.find(
         (step) => step.type === 'thank' && step.isActive,
       )
       if (thankStep) {
         currentStep = survey.steps.findIndex((step) => step.id === thankStep.id)
         showStep(survey, currentStep)
-        closeSurvey(survey._id, true) // 완료된 것으로 설정
-        console.log('Survey submitted successfully')
-      } else {
-        closeSurvey(survey._id, true)
-        console.log('Survey closed')
       }
+      closeSurvey(survey._id, true)
+      console.log('Survey completed')
     }
   }
 

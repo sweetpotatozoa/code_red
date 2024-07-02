@@ -1,12 +1,31 @@
 import styles from './EditingQuestion.module.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 
 const EditingRating = ({ step, onSave, onCancel, steps }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
-  const [options, setOptions] = useState(step.options || [])
+  const [options, setOptions] = useState(() => {
+    return Array.from({ length: 5 }, (_, index) => ({
+      id: uuidv4(),
+      value: index + 1,
+      nextStepId:
+        step.options && step.options[index]
+          ? step.options[index].nextStepId
+          : '',
+    }))
+  })
 
-  //저장 핸들러
+  useEffect(() => {
+    const newOptions = options.map((option) => {
+      if (option.nextStepId && !steps.some((s) => s.id === option.nextStepId)) {
+        return { ...option, nextStepId: '' }
+      }
+      return option
+    })
+    setOptions(newOptions)
+  }, [steps])
+
   const handleSave = () => {
     if (title.trim() === '') {
       alert('제목을 입력해주세요.')
@@ -15,7 +34,6 @@ const EditingRating = ({ step, onSave, onCancel, steps }) => {
     onSave({ ...step, title, description, options })
   }
 
-  //다음 질문 선택 핸들러
   const nextStepHandler = (optionId, nextStepId) => {
     const newOptions = options.map((option) =>
       option.id === optionId ? { ...option, nextStepId } : option,
@@ -43,18 +61,20 @@ const EditingRating = ({ step, onSave, onCancel, steps }) => {
         *별점의 경우 5점 기준 '매우 동의함', 1점 기준 '전혀 동의하지 않음'으로
         평가 됩니다.
       </div>
-      <div className={styles.title}>선택지에 따른 대응</div>
-      {options.map((option, index) => (
-        <div key={option.id} className={styles.option}>
-          {index + 1}점
+      <div className={styles.title}>선택지별 액션</div>
+      {options.map((option) => (
+        <div key={option.id} className={styles.optionAction}>
+          <div className={styles.optionLabel}>{option.value}점</div>
           <select
             className={styles.action}
             value={option.nextStepId || ''}
             onChange={(e) => nextStepHandler(option.id, e.target.value)}
           >
-            <option value=''>다음 질문으로 이동</option>
+            <option value=''>다음 질문 선택</option>
             {steps.map((q) => (
-              <option key={q.id}>{q.title}</option>
+              <option key={q.id} value={q.id}>
+                {q.title}
+              </option>
             ))}
           </select>
         </div>

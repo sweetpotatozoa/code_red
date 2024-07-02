@@ -1,14 +1,32 @@
 import styles from './EditingQuestion.module.css'
-import { useState } from 'react'
-
+import { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 const EditingSingleChoice = ({ step, onSave, onCancel, steps }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
-  const [options, setOptions] = useState(step.options)
+  const [options, setOptions] = useState(() => {
+    return (step.options || []).map((option) => {
+      // 기존 옵션 객체에서 필요한 속성만 추출
+      const { id, value, nextStepId } = option
+      return {
+        id: id || uuidv4(),
+        value: value || '',
+        nextStepId: nextStepId || '',
+      }
+    })
+  })
 
-  //저장 핸들러
+  useEffect(() => {
+    const newOptions = options.map((option) => {
+      if (option.nextStepId && !steps.some((s) => s.id === option.nextStepId)) {
+        return { ...option, nextStepId: '' }
+      }
+      return option
+    })
+    setOptions(newOptions)
+  }, [steps])
+
   const handleSave = () => {
     if (title.trim() === '') {
       alert('제목을 입력해주세요.')
@@ -20,21 +38,19 @@ const EditingSingleChoice = ({ step, onSave, onCancel, steps }) => {
       return
     }
 
-    if (options.some((option) => option.value.trim() === '')) {
-      alert('선택지을 모두 채워주세요.')
+    if (options.some((option) => !option.value || option.value.trim() === '')) {
+      alert('선택지를 모두 채워주세요.')
       return
     }
 
     onSave({ ...step, title, description, options })
   }
 
-  //삭제 핸들러
   const deleteOptionHandler = (id) => {
     const newOptions = options.filter((option) => option.id !== id)
     setOptions(newOptions)
   }
 
-  //다음 질문 선택 핸들러
   const nextStepHandler = (optionId, nextStepId) => {
     const newOptions = options.map((option) =>
       option.id === optionId ? { ...option, nextStepId } : option,
@@ -61,9 +77,8 @@ const EditingSingleChoice = ({ step, onSave, onCancel, steps }) => {
 
       <div className={styles.title}>선택지</div>
       {options.map((option) => (
-        <div className={styles.optionBox}>
+        <div className={styles.optionBox} key={option.id}>
           <input
-            key={option.id}
             type='text'
             value={option.value}
             onChange={(e) => {

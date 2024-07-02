@@ -1,10 +1,16 @@
 import styles from './EditingQuestion.module.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const EditingInfo = ({ step, onSave, onCancel, steps }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
   const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
+
+  useEffect(() => {
+    if (nextStepId && !steps.some((s) => s.id === nextStepId)) {
+      setNextStepId('')
+    }
+  }, [nextStepId, steps])
 
   const handleSave = () => {
     if (title.trim() === '') {
@@ -38,7 +44,9 @@ const EditingInfo = ({ step, onSave, onCancel, steps }) => {
       >
         <option value=''>다음 질문으로 이동</option>
         {steps.map((q) => (
-          <option key={q.id}>{q.title}</option>
+          <option key={q.id} value={q.id}>
+            {q.title}
+          </option>
         ))}
       </select>
 

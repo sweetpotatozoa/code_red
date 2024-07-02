@@ -10,7 +10,7 @@
 
 .survey {
   display: flex;
-  justify-content: space-between;
+  justify-content: default;
   align-items: center;
   border: 1px solid #e2e8f0;
   background-color: #ffffff;
@@ -34,7 +34,7 @@
   flex-direction: column;
   margin: 16px;
   justify-content: left;
-  width: 502px;
+  width: 100%;
   cursor: pointer;
 }
 
@@ -79,6 +79,7 @@
   cursor: pointer;
   height: 100%;
   border-left: 2px solid #e2e8f0;
+  white-space: nowrap;
 }
 
 .addSurvey {

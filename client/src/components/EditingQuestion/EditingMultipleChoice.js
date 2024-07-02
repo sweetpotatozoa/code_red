@@ -1,14 +1,25 @@
 import styles from './EditingQuestion.module.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 const EditingMultipleChoice = ({ step, onSave, onCancel, steps }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
-  const [options, setOptions] = useState(step.options)
+  const [options, setOptions] = useState(() => {
+    return (step.options || []).map((option) => ({
+      id: option.id || uuidv4(),
+      value: option.value || '',
+      nextStepId: option.nextStepId || '',
+    }))
+  })
   const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
 
-  //저장 핸들러
+  useEffect(() => {
+    if (nextStepId && !steps.some((s) => s.id === nextStepId)) {
+      setNextStepId('')
+    }
+  }, [steps, nextStepId])
+
   const handleSave = () => {
     if (title.trim() === '') {
       alert('제목을 입력해주세요.')
@@ -18,15 +29,13 @@ const EditingMultipleChoice = ({ step, onSave, onCancel, steps }) => {
       alert('선택지를 2개 이상 입력해주세요.')
       return
     }
-
-    if (options.some((option) => option.value.trim() === '')) {
-      alert('선택지을 모두 채워주세요.')
+    if (options.some((option) => !option.value || option.value.trim() === '')) {
+      alert('선택지를 모두 채워주세요.')
       return
     }
     onSave({ ...step, title, description, options, nextStepId })
   }
 
-  //삭제 핸들러
   const deleteOptionHandler = (id) => {
     const newOptions = options.filter((option) => option.id !== id)
     setOptions(newOptions)
@@ -50,9 +59,8 @@ const EditingMultipleChoice = ({ step, onSave, onCancel, steps }) => {
       />
       <div className={styles.title}>선택지</div>
       {options.map((option) => (
-        <div className={styles.optionBox}>
+        <div className={styles.optionBox} key={option.id}>
           <input
-            key={option.id}
             type='text'
             value={option.value}
             onChange={(e) => {
@@ -72,7 +80,9 @@ const EditingMultipleChoice = ({ step, onSave, onCancel, steps }) => {
         </div>
       ))}
       <div
-        onClick={() => setOptions([...options, { id: uuidv4(), value: '' }])}
+        onClick={() =>
+          setOptions([...options, { id: uuidv4(), value: '', nextStepId: '' }])
+        }
         className={styles.addOption}
       >
         선택지 추가
@@ -85,7 +95,9 @@ const EditingMultipleChoice = ({ step, onSave, onCancel, steps }) => {
       >
         <option value=''>다음 질문으로 이동</option>
         {steps.map((q) => (
-          <option key={q.id}>{q.title}</option>
+          <option key={q.id} value={q.id}>
+            {q.title}
+          </option>
         ))}
       </select>
       <div className={styles.bottom}>

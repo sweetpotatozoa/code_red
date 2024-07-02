@@ -1,11 +1,17 @@
 import styles from './EditingQuestion.module.css'
-
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const EditingFreeText = ({ step, onSave, onCancel, steps }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
   const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
+
+  // nextStepId가 유효한지 확인하고, 유효하지 않으면 초기화
+  useEffect(() => {
+    if (nextStepId && !steps.some((s) => s.id === nextStepId)) {
+      setNextStepId('')
+    }
+  }, [nextStepId, steps])
 
   //저장 핸들러
   const handleSave = () => {
@@ -40,7 +46,9 @@ const EditingFreeText = ({ step, onSave, onCancel, steps }) => {
       >
         <option value=''>다음 질문으로 이동</option>
         {steps.map((q) => (
-          <option key={q.id}>{q.title}</option>
+          <option key={q.id} value={q.id}>
+            {q.title}
+          </option>
         ))}
       </select>
       <div className={styles.bottom}>
