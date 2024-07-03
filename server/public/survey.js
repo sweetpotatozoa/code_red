@@ -565,12 +565,16 @@
         const selectedOption = document.querySelector(
           'input[name="choice"]:checked',
         )
-        return selectedOption
-          ? {
-              id: selectedOption.id.split('-')[1],
-              value: selectedOption.value,
-            }
-          : null
+        console.log('Selected radio button:', selectedOption) // 디버깅을 위한 로그
+        if (selectedOption) {
+          const id = selectedOption.id.split('-').slice(1).join('-')
+          console.log('Parsed ID:', id) // 디버깅을 위한 로그
+          return {
+            id: id,
+            value: selectedOption.value,
+          }
+        }
+        return null
       }
       case 'multipleChoice': {
         const selectedOptions = Array.from(
