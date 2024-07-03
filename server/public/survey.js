@@ -569,7 +569,7 @@
         )
         const response = selectedOption
           ? {
-              id: selectedOption.id,
+              id: selectedOption.id.replace('choice-', ''), // 'choice-' 접두사 제거
               value: selectedOption.value,
             }
           : null
@@ -580,7 +580,7 @@
         const selectedOptions = Array.from(
           document.querySelectorAll('input[name="multipleChoice"]:checked'),
         ).map((checkbox) => ({
-          id: checkbox.id,
+          id: checkbox.id.replace('multipleChoice-', ''), // 'multipleChoice-' 접두사 제거
           value: checkbox.value,
         }))
         console.log('MultipleChoice responses:', selectedOptions)
