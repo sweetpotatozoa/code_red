@@ -116,6 +116,16 @@
       if (!result.ok) {
         throw new Error(`HTTP error! status: ${result.status}`)
       }
+
+      // updateResponse 호출 시 로컬 스토리지의 completed 값을 true로 변경
+      const surveyData = JSON.parse(
+        localStorage.getItem(`survey-${window.activeSurveyId}`),
+      )
+      if (surveyData) {
+        surveyData.completed = true
+        saveSurveyData(window.activeSurveyId, surveyData)
+      }
+
       return result.json()
     } catch (error) {
       console.error('Error in updateResponse:', error)
@@ -316,8 +326,10 @@
       saveResponse(step, stepAnswer)
 
       try {
+        let isCompleted = false
+
         if (surveyResponseId) {
-          await updateResponse(surveyResponseId, surveyResponses, false) // isComplete 항상 false로 설정
+          await updateResponse(surveyResponseId, surveyResponses, false)
         } else {
           surveyResponseId = await createResponse(survey.userId, survey._id, {
             ...surveyResponses[0],
@@ -335,17 +347,14 @@
         // 다음 스텝 인덱스 결정 로직
         let nextStepId
         if (step.type === 'singleChoice' || step.type === 'rating') {
-          const selectedOptionId = stepAnswer.id.replace('choice-', '') // 'choice-' 접두사 제거
+          const selectedOptionId = stepAnswer.id.replace('choice-', '')
           const selectedOption = step.options.find(
             (option) => option.id === selectedOptionId,
           )
           nextStepId = selectedOption ? selectedOption.nextStepId : null
-          console.log('Selected option:', selectedOption)
         } else {
           nextStepId = step.nextStepId
         }
-
-        console.log('Next step ID:', nextStepId)
 
         let nextStepIndex
         if (!nextStepId || nextStepId === '') {
@@ -357,10 +366,16 @@
           }
         }
 
-        console.log('Next step index:', nextStepIndex)
-
         // 다음 스텝으로 이동 또는 설문조사 완료 처리
         if (nextStepIndex < survey.steps.length) {
+          const nextStep = survey.steps[nextStepIndex]
+
+          // thank 스텝으로 넘어갈 때 isComplete를 true로 설정
+          if (nextStep.type === 'thank' && nextStep.isActive && !isCompleted) {
+            await updateResponse(surveyResponseId, surveyResponses, true)
+            isCompleted = true
+          }
+
           currentStep = nextStepIndex
           showStep(survey, currentStep)
         } else {
@@ -371,8 +386,17 @@
             currentStep = survey.steps.findIndex(
               (step) => step.id === thankStep.id,
             )
+            if (!isCompleted) {
+              await updateResponse(surveyResponseId, surveyResponses, true)
+              isCompleted = true
+            }
             showStep(survey, currentStep)
           } else {
+            // thank 스텝이 없거나 active가 아닐 때 isComplete를 true로 설정
+            if (!isCompleted) {
+              await updateResponse(surveyResponseId, surveyResponses, true)
+              isCompleted = true
+            }
             closeSurvey(survey._id, true)
             console.log('Survey closed without thank step')
           }
@@ -453,12 +477,6 @@
     }
     window.activeSurveyId = null
     console.log('Survey closed')
-
-    // 로컬 스토리지 업데이트
-    saveSurveyData(surveyId, {
-      lastShownTime: new Date().toISOString(),
-      completed: isThankStep, // thank 스텝에서 종료된 경우에만 completed를 true로 설정
-    })
 
     window.dispatchEvent(new Event('surveyCompleted'))
 
@@ -873,6 +891,7 @@
       showStep(survey, currentStep)
       console.log('Survey container created and appended to body')
 
+      // 설문조사 시작 시 completed 값을 false로 설정
       saveSurveyData(survey._id, {
         lastShownTime: new Date().toISOString(),
         completed: false,
