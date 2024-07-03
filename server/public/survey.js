@@ -564,7 +564,7 @@
         )
         return selectedOption
           ? {
-              id: selectedOption.id.split('-')[1],
+              id: selectedOption.id,
               value: selectedOption.value,
             }
           : null
@@ -573,7 +573,7 @@
         const selectedOptions = Array.from(
           document.querySelectorAll('input[name="multipleChoice"]:checked'),
         ).map((checkbox) => ({
-          id: checkbox.id.split('-')[1],
+          id: checkbox.id,
           value: checkbox.value,
         }))
         return selectedOptions.length > 0 ? selectedOptions : null
