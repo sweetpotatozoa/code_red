@@ -338,8 +338,48 @@
           )
         }
 
-        // 여기서 nextStep 함수를 호출합니다
-        nextStep(survey, stepIndex, stepAnswer.id)
+        let nextStepId
+        if (step.type === 'singleChoice' || step.type === 'rating') {
+          const selectedOptionId = stepAnswer.id
+          const selectedOption = step.options.find(
+            (option) => option.id === selectedOptionId,
+          )
+          nextStepId = selectedOption ? selectedOption.nextStepId : null
+        } else {
+          nextStepId = step.nextStepId
+        }
+
+        let nextStepIndex
+        if (!nextStepId || nextStepId === '') {
+          // nextStepId가 없거나 빈 문자열인 경우 다음 스텝으로 이동
+          nextStepIndex = stepIndex + 1
+        } else {
+          nextStepIndex = survey.steps.findIndex((s) => s.id === nextStepId)
+          if (nextStepIndex === -1) {
+            // 유효하지 않은 nextStepId인 경우 다음 스텝으로 이동
+            nextStepIndex = stepIndex + 1
+          }
+        }
+
+        if (nextStepIndex < survey.steps.length) {
+          currentStep = nextStepIndex
+          showStep(survey, currentStep)
+        } else {
+          const thankStep = survey.steps.find(
+            (step) => step.type === 'thank' && step.isActive,
+          )
+          if (thankStep) {
+            currentStep = survey.steps.findIndex(
+              (step) => step.id === thankStep.id,
+            )
+            showStep(survey, currentStep)
+            closeSurvey(survey._id, true) // 완료된 것으로 설정
+            console.log('Survey submitted successfully')
+          } else {
+            closeSurvey(survey._id, true)
+            console.log('Survey closed')
+          }
+        }
       } catch (error) {
         console.error('Error while submitting survey:', error)
       }
@@ -428,52 +468,43 @@
     }
   }
 
-  // 다음 스텝으로 이동
-  function nextStep(survey, stepIndex, selectedOptionId = null) {
-    const currentStep = survey.steps[stepIndex]
-    let nextStepId
+  // // 다음 스텝으로 이동
+  // function nextStep(survey, stepIndex, selectedOptionId = null) {
+  //   const currentStep = survey.steps[stepIndex]
 
-    if (currentStep.type === 'singleChoice' || currentStep.type === 'rating') {
-      const selectedOption = currentStep.options.find(
-        (option) => option.id === selectedOptionId,
-      )
-      nextStepId = selectedOption ? selectedOption.nextStepId : null
-    } else {
-      nextStepId = currentStep.nextStepId
-    }
+  //   let nextStepId
+  //   if (currentStep.type === 'singleChoice' || currentStep.type === 'rating') {
+  //     const selectedOption = currentStep.options.find(
+  //       (option) => option.id === selectedOptionId,
+  //     )
+  //     nextStepId = selectedOption ? selectedOption.nextStepId : null
+  //   } else {
+  //     nextStepId = currentStep.nextStepId
+  //   }
 
-    let nextStepIndex
+  //   const nextStepIndex = survey.steps.findIndex(
+  //     (step) => step.id === nextStepId,
+  //   )
 
-    if (!nextStepId || nextStepId === '') {
-      // nextStepId가 없거나 빈 문자열인 경우 다음 스텝으로 이동
-      nextStepIndex = stepIndex + 1
-    } else {
-      nextStepIndex = survey.steps.findIndex((step) => step.id === nextStepId)
-      if (nextStepIndex === -1) {
-        // 유효하지 않은 nextStepId인 경우 다음 스텝으로 이동
-        nextStepIndex = stepIndex + 1
-      }
-    }
-
-    if (nextStepIndex < survey.steps.length) {
-      currentStep = nextStepIndex
-      showStep(survey, currentStep)
-    } else {
-      // 마지막 스텝인 경우
-      const thankStep = survey.steps.find(
-        (step) => step.type === 'thank' && step.isActive,
-      )
-      if (thankStep) {
-        currentStep = survey.steps.findIndex((step) => step.id === thankStep.id)
-        showStep(survey, currentStep)
-        closeSurvey(survey._id, true) // 완료된 것으로 설정
-        console.log('Survey submitted successfully')
-      } else {
-        closeSurvey(survey._id, true)
-        console.log('Survey closed')
-      }
-    }
-  }
+  //   if (nextStepIndex !== -1) {
+  //     currentStep = nextStepIndex
+  //     showStep(survey, currentStep)
+  //   } else {
+  //     // "thank" 스텝이 활성화되어 있는 경우
+  //     const thankStep = survey.steps.find(
+  //       (step) => step.type === 'thank' && step.isActive,
+  //     )
+  //     if (thankStep) {
+  //       currentStep = survey.steps.findIndex((step) => step.id === thankStep.id)
+  //       showStep(survey, currentStep)
+  //       closeSurvey(survey._id, true) // 완료된 것으로 설정
+  //       console.log('Survey submitted successfully')
+  //     } else {
+  //       closeSurvey(survey._id, true)
+  //       console.log('Survey closed')
+  //     }
+  //   }
+  // }
 
   // 설문조사 스텝 콘텐츠 생성
   function generateStepContent(step) {
