@@ -26,13 +26,6 @@ class BackendApis {
     this.token = null
   }
 
-  // 로그인
-  async login(method = 'POST', params = {}) {
-    const result = await fetcher('/api/auth/login', '', method, params)
-    if (result?.status === 200) this.token = result.token
-    return result
-  }
-
   //소유한 설문조사 목록 가져오기
   async getSurveys(method = 'GET', params = {}) {
     const result = await fetcher('/api/adminSurvey', this.token, method, params)
@@ -114,6 +107,20 @@ class BackendApis {
     return result
   }
 
+  //회원가입
+  async register(method = 'POST', params = {}) {
+    const result = await fetcher('/api/auth/register', '', method, params)
+    console.log(result)
+    return result
+  }
+
+  //로그인
+  async login(method = 'POST', params = {}) {
+    const result = await fetcher('/api/auth/login', '', method, params)
+    if (result.token) this.token = result.token
+    return result
+  }
+
   async getSurveySummary(surveyId) {
     return await fetcher(`/api/adminSurvey/${surveyId}`, this.token, 'GET')
   }
@@ -124,11 +131,6 @@ class BackendApis {
       this.token,
       'GET',
     )
-  }
-
-  async register(method = 'POST', params = {}) {
-    const result = await fetcher('/api/auth/register', '', method, params)
-    return result
   }
 
   async isDeployToggle(method = 'PUT', params = {}) {

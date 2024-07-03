@@ -9,5 +9,6 @@ const router = express.Router()
 
 router.use('/adminSurvey', AdminSurveyRouter)
 router.use('/appliedSurvey', AppliedSurveyRouter)
+router.use('/auth', AuthRouter)
 
 module.exports = router
