@@ -297,10 +297,15 @@
       return
     }
 
-    const isLastStep = stepIndex === activeSteps.length - 1
-    const isSecondToLastStep =
-      stepIndex === activeSteps.length - 2 &&
-      activeSteps[activeSteps.length - 1].type === 'thank'
+    // 다음 실제로 유저에게 보이는 스텝을 찾아서 isLastStep와 isSecondToLastStep를 결정
+    const nextActiveStepIndex = findNextActiveStepIndex(survey, stepIndex)
+    const afterNextActiveStepIndex = findNextActiveStepIndex(
+      survey,
+      nextActiveStepIndex,
+    )
+
+    const isLastStep = nextActiveStepIndex === -1
+    const isSecondToLastStep = afterNextActiveStepIndex === -1
 
     const buttonText = getButtonText(step, isLastStep, isSecondToLastStep)
 
@@ -342,7 +347,7 @@
         // 다음 스텝 인덱스 결정 로직
         let nextStepId
         if (step.type === 'singleChoice' || step.type === 'rating') {
-          const selectedOptionId = stepAnswer.id
+          const selectedOptionId = stepAnswer.id.replace('choice-', '') // 'choice-' 접두사 제거
           const selectedOption = step.options.find(
             (option) => option.id === selectedOptionId,
           )
@@ -356,11 +361,11 @@
 
         let nextStepIndex
         if (!nextStepId || nextStepId === '') {
-          nextStepIndex = stepIndex + 1
+          nextStepIndex = findNextActiveStepIndex(survey, stepIndex)
         } else {
           nextStepIndex = survey.steps.findIndex((s) => s.id === nextStepId)
           if (nextStepIndex === -1) {
-            nextStepIndex = stepIndex + 1
+            nextStepIndex = findNextActiveStepIndex(survey, stepIndex)
           }
         }
 
@@ -394,6 +399,21 @@
     if (step.type !== 'thank') {
       updateProgressBar(stepIndex, activeSteps.length - 1)
     }
+  }
+
+  // 다음 유효한 스텝 인덱스를 찾는 함수
+  function findNextActiveStepIndex(survey, currentStepIndex) {
+    let nextStepId = survey.steps[currentStepIndex].nextStepId
+    while (nextStepId) {
+      const nextStepIndex = survey.steps.findIndex(
+        (step) => step.id === nextStepId,
+      )
+      if (nextStepIndex !== -1 && survey.steps[nextStepIndex].isActive) {
+        return nextStepIndex
+      }
+      nextStepId = survey.steps[nextStepIndex]?.nextStepId
+    }
+    return -1
   }
 
   function generateStepHTML(step, buttonText) {
