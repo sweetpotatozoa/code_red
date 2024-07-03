@@ -291,10 +291,22 @@
     const surveyContainer = document.getElementById('survey-popup')
 
     if (!step) {
-      document.getElementById('survey-popup').remove()
-      window.activeSurveyId = null
+      closeSurvey(survey._id, false) // 설문 완료 시 isFirstStep = false
       console.log('Survey finished')
       return
+    }
+
+    // thank 카드로 이동했을 때 isComplete를 true로 설정
+    if (step.type === 'thank') {
+      if (surveyResponseId) {
+        updateResponse(surveyResponseId, surveyResponses, true)
+      }
+      // thank 카드가 비활성화된 경우 설문 종료
+      if (!step.isActive) {
+        closeSurvey(survey._id, false)
+        console.log('Survey finished with inactive thank card')
+        return
+      }
     }
 
     const buttonText = getButtonText(step)
@@ -322,7 +334,11 @@
 
       try {
         if (surveyResponseId) {
-          await updateResponse(surveyResponseId, surveyResponses, false) // 항상 false로 설정
+          await updateResponse(
+            surveyResponseId,
+            surveyResponses,
+            step.type === 'thank',
+          )
         } else {
           surveyResponseId = await createResponse(survey.userId, survey._id, {
             ...surveyResponses[0],
