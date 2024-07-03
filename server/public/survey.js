@@ -347,9 +347,12 @@
             (option) => option.id === selectedOptionId,
           )
           nextStepId = selectedOption ? selectedOption.nextStepId : null
+          console.log('Selected option:', selectedOption)
         } else {
           nextStepId = step.nextStepId
         }
+
+        console.log('Next step ID:', nextStepId)
 
         let nextStepIndex
         if (!nextStepId || nextStepId === '') {
@@ -360,6 +363,8 @@
             nextStepIndex = stepIndex + 1
           }
         }
+
+        console.log('Next step index:', nextStepIndex)
 
         // 다음 스텝으로 이동 또는 설문조사 완료 처리
         if (nextStepIndex < survey.steps.length) {
@@ -562,12 +567,14 @@
         const selectedOption = document.querySelector(
           'input[name="choice"]:checked',
         )
-        return selectedOption
+        const response = selectedOption
           ? {
               id: selectedOption.id,
               value: selectedOption.value,
             }
           : null
+        console.log('SingleChoice response:', response)
+        return response
       }
       case 'multipleChoice': {
         const selectedOptions = Array.from(
@@ -576,6 +583,7 @@
           id: checkbox.id,
           value: checkbox.value,
         }))
+        console.log('MultipleChoice responses:', selectedOptions)
         return selectedOptions.length > 0 ? selectedOptions : null
       }
       case 'rating': {
@@ -586,20 +594,28 @@
           ? parseInt(selectedRating.value)
           : null
         const ratingOption = step.options[ratingValue - 1]
-        return ratingOption
+        const response = ratingOption
           ? {
               id: ratingOption.id,
               value: ratingValue,
             }
           : null
+        console.log('Rating response:', response)
+        return response
       }
       case 'freeText': {
         const textResponse = document.getElementById('response')
+        console.log(
+          'FreeText response:',
+          textResponse ? textResponse.value : '',
+        )
         return textResponse ? textResponse.value : ''
       }
       case 'link':
+        console.log('Link clicked')
         return 'clicked'
       case 'info':
+        console.log('Info clicked')
         return 'clicked'
       default:
         return ''
