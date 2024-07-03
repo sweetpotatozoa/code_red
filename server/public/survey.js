@@ -301,12 +301,17 @@
       if (surveyResponseId) {
         updateResponse(surveyResponseId, surveyResponses, true)
       }
-      // thank 카드가 비활성화된 경우 설문 종료
+      // thank 카드가 비활성화된 경우 설문 즉시 종료
       if (!step.isActive) {
         closeSurvey(survey._id, false)
         console.log('Survey finished with inactive thank card')
         return
       }
+      // thank 카드가 활성화된 경우, isComplete를 true로 설정하고 카드 표시
+      saveSurveyData(survey._id, {
+        lastShownTime: new Date().toISOString(),
+        completed: true,
+      })
     }
 
     const buttonText = getButtonText(step)
@@ -473,9 +478,9 @@
     })
     window.dispatchEvent(new Event('surveyCompleted'))
 
-    // isComplete 값 업데이트
+    // isComplete 값 업데이트 (response 문서의 isComplete는 변경하지 않음)
     if (isComplete && surveyResponseId) {
-      updateResponse(surveyResponseId, surveyResponses, true)
+      updateResponse(surveyResponseId, surveyResponses, false)
     }
   }
 
