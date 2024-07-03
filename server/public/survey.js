@@ -302,8 +302,12 @@
     surveyContainer.innerHTML = generateStepHTML(step, buttonText)
 
     document.getElementById('closeSurvey').onclick = () => {
-      const isThankStep = step.type === 'thank'
-      closeSurvey(survey._id, isThankStep)
+      const isFirstStep =
+        stepIndex === 0 ||
+        (stepIndex === 1 &&
+          survey.steps[0].type === 'welcome' &&
+          !survey.steps[0].isActive)
+      closeSurvey(survey._id, isFirstStep)
     }
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
@@ -318,8 +322,7 @@
 
       try {
         if (surveyResponseId) {
-          const isComplete = isLastStep && step.type !== 'thank'
-          await updateResponse(surveyResponseId, surveyResponses, isComplete)
+          await updateResponse(surveyResponseId, surveyResponses, false) // 항상 false로 설정
         } else {
           surveyResponseId = await createResponse(survey.userId, survey._id, {
             ...surveyResponses[0],
@@ -366,20 +369,8 @@
           currentStep = nextStepIndex
           showStep(survey, currentStep)
         } else {
-          const thankStep = survey.steps.find(
-            (step) => step.type === 'thank' && step.isActive,
-          )
-          if (thankStep) {
-            currentStep = survey.steps.findIndex(
-              (step) => step.id === thankStep.id,
-            )
-            showStep(survey, currentStep)
-            closeSurvey(survey._id, true)
-            console.log('Survey submitted successfully')
-          } else {
-            closeSurvey(survey._id, true)
-            console.log('Survey closed')
-          }
+          closeSurvey(survey._id, false) // 설문 완료 시 isFirstStep = false
+          console.log('Survey submitted successfully')
         }
       } catch (error) {
         console.error('Error while submitting survey:', error)
@@ -450,21 +441,24 @@
   }
 
   // 설문조사 닫기
-  function closeSurvey(surveyId, completed = false) {
+  function closeSurvey(surveyId, isFirstStep = false) {
     const surveyPopup = document.getElementById('survey-popup')
     if (surveyPopup) {
       surveyPopup.remove()
     }
     window.activeSurveyId = null
     console.log('Survey closed')
+
+    const isComplete = !isFirstStep // 첫 번째 스텝이 아닐 때만 true
+
     saveSurveyData(surveyId, {
       lastShownTime: new Date().toISOString(),
-      completed,
+      completed: isComplete,
     })
-    window.dispatchEvent(new Event('surveyCompleted')) // 설문조사 완료 이벤트 발생
+    window.dispatchEvent(new Event('surveyCompleted'))
 
     // isComplete 값 업데이트
-    if (completed && surveyResponseId) {
+    if (isComplete && surveyResponseId) {
       updateResponse(surveyResponseId, surveyResponses, true)
     }
   }
