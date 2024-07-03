@@ -454,8 +454,8 @@
   // 다음 스텝으로 이동
   function nextStep(survey, stepIndex, selectedOptionId = null) {
     const currentStep = survey.steps[stepIndex]
-
     let nextStepId
+
     if (currentStep.type === 'singleChoice' || currentStep.type === 'rating') {
       const selectedOption = currentStep.options.find(
         (option) => option.id === selectedOptionId,
@@ -465,15 +465,24 @@
       nextStepId = currentStep.nextStepId
     }
 
-    const nextStepIndex = survey.steps.findIndex(
-      (step) => step.id === nextStepId,
-    )
+    let nextStepIndex
 
-    if (nextStepIndex !== -1) {
+    if (!nextStepId || nextStepId === '') {
+      // nextStepId가 없거나 빈 문자열인 경우 다음 스텝으로 이동
+      nextStepIndex = stepIndex + 1
+    } else {
+      nextStepIndex = survey.steps.findIndex((step) => step.id === nextStepId)
+      if (nextStepIndex === -1) {
+        // 유효하지 않은 nextStepId인 경우 다음 스텝으로 이동
+        nextStepIndex = stepIndex + 1
+      }
+    }
+
+    if (nextStepIndex < survey.steps.length) {
       currentStep = nextStepIndex
       showStep(survey, currentStep)
     } else {
-      // "thank" 스텝이 활성화되어 있는 경우
+      // 마지막 스텝인 경우
       const thankStep = survey.steps.find(
         (step) => step.type === 'thank' && step.isActive,
       )
