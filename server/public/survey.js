@@ -331,6 +331,7 @@
           })
         }
 
+        // 링크 스텝 처리
         if (step.type === 'link') {
           window.open(
             step.url.startsWith('http') ? step.url : `https://${step.url}`,
@@ -338,6 +339,7 @@
           )
         }
 
+        // 다음 스텝 인덱스 결정 로직
         let nextStepId
         if (step.type === 'singleChoice' || step.type === 'rating') {
           const selectedOptionId = stepAnswer.id
@@ -351,16 +353,15 @@
 
         let nextStepIndex
         if (!nextStepId || nextStepId === '') {
-          // nextStepId가 없거나 빈 문자열인 경우 다음 스텝으로 이동
           nextStepIndex = stepIndex + 1
         } else {
           nextStepIndex = survey.steps.findIndex((s) => s.id === nextStepId)
           if (nextStepIndex === -1) {
-            // 유효하지 않은 nextStepId인 경우 다음 스텝으로 이동
             nextStepIndex = stepIndex + 1
           }
         }
 
+        // 다음 스텝으로 이동 또는 설문조사 완료 처리
         if (nextStepIndex < survey.steps.length) {
           currentStep = nextStepIndex
           showStep(survey, currentStep)
@@ -373,7 +374,7 @@
               (step) => step.id === thankStep.id,
             )
             showStep(survey, currentStep)
-            closeSurvey(survey._id, true) // 완료된 것으로 설정
+            closeSurvey(survey._id, true)
             console.log('Survey submitted successfully')
           } else {
             closeSurvey(survey._id, true)
