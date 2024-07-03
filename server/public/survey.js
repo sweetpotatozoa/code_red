@@ -294,27 +294,26 @@
     const surveyContainer = document.getElementById('survey-popup')
 
     if (!step) {
-      document.getElementById('survey-popup').remove()
-      window.activeSurveyId = null
+      closeSurvey(survey._id, true)
       console.log('Survey finished')
       return
     }
 
-    const isVisiblyLastStep = isVisibleLastStep(survey, stepIndex)
+    const isEffectiveLastStep = isEffectiveLastStep(survey, stepIndex)
     const isThankStep = step.type === 'thank'
 
-    const buttonText = getButtonText(step, isVisiblyLastStep, isThankStep)
+    const buttonText = getButtonText(step, isEffectiveLastStep, isThankStep)
 
     surveyContainer.innerHTML = generateStepHTML(step, buttonText)
 
     document.getElementById('closeSurvey').onclick = () => {
-      closeSurvey(survey._id, isThankStep || isVisiblyLastStep)
+      closeSurvey(survey._id, isEffectiveLastStep || isThankStep)
     }
 
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
       const stepAnswer = getResponse(step)
-      console.log('Step Answer:', stepAnswer) // 디버깅을 위한 로그
+      console.log('Step Answer:', stepAnswer)
 
       if (stepAnswer === null) {
         console.log('No answer selected')
@@ -324,9 +323,12 @@
       saveResponse(step, stepAnswer)
 
       try {
-        const isComplete = isVisiblyLastStep && !isThankStep
         if (surveyResponseId) {
-          await updateResponse(surveyResponseId, surveyResponses, isComplete)
+          await updateResponse(
+            surveyResponseId,
+            surveyResponses,
+            isEffectiveLastStep,
+          )
         } else {
           surveyResponseId = await createResponse(survey.userId, survey._id, {
             ...surveyResponses[0],
@@ -343,7 +345,7 @@
         let nextStepId = step.nextStepId
         if (step.type === 'singleChoice' || step.type === 'rating') {
           const selectedOptionId = stepAnswer.id
-          console.log('Selected Option ID:', selectedOptionId) // 디버깅을 위한 로그
+          console.log('Selected Option ID:', selectedOptionId)
           const selectedOption = step.options.find(
             (option) => option.id === selectedOptionId,
           )
@@ -352,20 +354,22 @@
         }
         console.log('Next Step ID:', nextStepId)
 
+        let nextStepIndex
         if (nextStepId && nextStepId !== '') {
-          const nextStepIndex = survey.steps.findIndex(
-            (s) => s.id === nextStepId,
-          )
-          console.log('Next Step Index:', nextStepIndex)
-          if (nextStepIndex !== -1) {
-            showStep(survey, nextStepIndex)
-          } else {
-            closeSurvey(survey._id, true)
+          nextStepIndex = activeSteps.findIndex((s) => s.id === nextStepId)
+          if (nextStepIndex === -1) {
+            // nextStepId가 유효하지 않은 경우
+            nextStepIndex = stepIndex + 1
           }
-        } else if (isVisiblyLastStep) {
-          closeSurvey(survey._id, true)
         } else {
-          showStep(survey, stepIndex + 1)
+          // nextStepId가 빈 문자열인 경우
+          nextStepIndex = stepIndex + 1
+        }
+
+        if (nextStepIndex < activeSteps.length) {
+          showStep(survey, nextStepIndex)
+        } else {
+          closeSurvey(survey._id, true)
         }
       } catch (error) {
         console.error('Error while submitting survey:', error)
@@ -377,7 +381,7 @@
     }
   }
 
-  function isVisibleLastStep(survey, currentStepIndex) {
+  function isEffectiveLastStep(survey, currentStepIndex) {
     const currentStep = survey.steps[currentStepIndex]
     const nextStepId = currentStep.nextStepId
     if (!nextStepId || nextStepId === '') {
@@ -432,7 +436,7 @@
   }
 
   // 설문조사 단계별 버튼 텍스트 설정
-  function getButtonText(step, isVisiblyLastStep, isThankStep) {
+  function getButtonText(step, isEffectiveLastStep, isThankStep) {
     switch (step.type) {
       case 'welcome':
         return '참여하기'
@@ -441,7 +445,7 @@
       case 'thank':
         return ''
       default:
-        return isVisiblyLastStep && !isThankStep ? '제출하기' : '다음'
+        return isEffectiveLastStep && !isThankStep ? '제출하기' : '다음'
     }
   }
 
