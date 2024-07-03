@@ -314,6 +314,7 @@
     document.getElementById('surveyForm').onsubmit = async function (event) {
       event.preventDefault()
       const stepAnswer = getResponse(step)
+      console.log('Step Answer:', stepAnswer) // 디버깅을 위한 로그
 
       if (stepAnswer === null) {
         console.log('No answer selected')
@@ -342,6 +343,7 @@
         let nextStepId = step.nextStepId
         if (step.type === 'singleChoice' || step.type === 'rating') {
           const selectedOptionId = stepAnswer.id
+          console.log('Selected Option ID:', selectedOptionId) // 디버깅을 위한 로그
           const selectedOption = step.options.find(
             (option) => option.id === selectedOptionId,
           )
@@ -515,7 +517,6 @@
       case 'welcome':
         return ''
       case 'singleChoice':
-        // 단일 선택 질문의 선택지를 라디오 버튼으로 렌더링
         return step.options
           .map(
             (option, index) =>
