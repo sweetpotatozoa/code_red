@@ -291,8 +291,7 @@
     const surveyContainer = document.getElementById('survey-popup')
 
     if (!step) {
-      document.getElementById('survey-popup').remove()
-      window.activeSurveyId = null
+      closeSurvey(survey._id, false)
       console.log('Survey finished')
       return
     }
@@ -318,8 +317,7 @@
 
       try {
         if (surveyResponseId) {
-          const isComplete = step.type === 'thank'
-          await updateResponse(surveyResponseId, surveyResponses, isComplete)
+          await updateResponse(surveyResponseId, surveyResponses, false) // isComplete 항상 false로 설정
         } else {
           surveyResponseId = await createResponse(survey.userId, survey._id, {
             ...surveyResponses[0],
@@ -374,11 +372,9 @@
               (step) => step.id === thankStep.id,
             )
             showStep(survey, currentStep)
-            closeSurvey(survey._id, true)
-            console.log('Survey submitted successfully')
           } else {
             closeSurvey(survey._id, true)
-            console.log('Survey closed')
+            console.log('Survey closed without thank step')
           }
         }
       } catch (error) {
@@ -450,22 +446,25 @@
   }
 
   // 설문조사 닫기
-  function closeSurvey(surveyId, completed = false) {
+  function closeSurvey(surveyId, isThankStep = false) {
     const surveyPopup = document.getElementById('survey-popup')
     if (surveyPopup) {
       surveyPopup.remove()
     }
     window.activeSurveyId = null
     console.log('Survey closed')
+
+    // 로컬 스토리지 업데이트
     saveSurveyData(surveyId, {
       lastShownTime: new Date().toISOString(),
-      completed,
+      completed: isThankStep, // thank 스텝에서 종료된 경우에만 completed를 true로 설정
     })
-    window.dispatchEvent(new Event('surveyCompleted')) // 설문조사 완료 이벤트 발생
 
-    // isComplete 값 업데이트
-    if (completed && surveyResponseId) {
-      updateResponse(surveyResponseId, surveyResponses, true)
+    window.dispatchEvent(new Event('surveyCompleted'))
+
+    // 서버 응답 업데이트 (isComplete 값은 변경하지 않음)
+    if (surveyResponseId) {
+      updateResponse(surveyResponseId, surveyResponses, false)
     }
   }
 
