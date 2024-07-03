@@ -297,12 +297,7 @@
       return
     }
 
-    const isLastStep = stepIndex === activeSteps.length - 1
-    const isSecondToLastStep =
-      stepIndex === activeSteps.length - 2 &&
-      activeSteps[activeSteps.length - 1].type === 'thank'
-
-    const buttonText = getButtonText(step, isLastStep, isSecondToLastStep)
+    const buttonText = getButtonText(step)
 
     surveyContainer.innerHTML = generateStepHTML(step, buttonText)
 
@@ -441,7 +436,7 @@
   }
 
   // 설문조사 단계별 버튼 텍스트 설정
-  function getButtonText(step, isLastStep, isSecondToLastStep) {
+  function getButtonText(step) {
     switch (step.type) {
       case 'welcome':
         return '참여하기'
@@ -450,7 +445,7 @@
       case 'thank':
         return ''
       default:
-        return isLastStep || isSecondToLastStep ? '제출하기' : '다음'
+        return '다음'
     }
   }
 
@@ -473,44 +468,6 @@
       updateResponse(surveyResponseId, surveyResponses, true)
     }
   }
-
-  // // 다음 스텝으로 이동
-  // function nextStep(survey, stepIndex, selectedOptionId = null) {
-  //   const currentStep = survey.steps[stepIndex]
-
-  //   let nextStepId
-  //   if (currentStep.type === 'singleChoice' || currentStep.type === 'rating') {
-  //     const selectedOption = currentStep.options.find(
-  //       (option) => option.id === selectedOptionId,
-  //     )
-  //     nextStepId = selectedOption ? selectedOption.nextStepId : null
-  //   } else {
-  //     nextStepId = currentStep.nextStepId
-  //   }
-
-  //   const nextStepIndex = survey.steps.findIndex(
-  //     (step) => step.id === nextStepId,
-  //   )
-
-  //   if (nextStepIndex !== -1) {
-  //     currentStep = nextStepIndex
-  //     showStep(survey, currentStep)
-  //   } else {
-  //     // "thank" 스텝이 활성화되어 있는 경우
-  //     const thankStep = survey.steps.find(
-  //       (step) => step.type === 'thank' && step.isActive,
-  //     )
-  //     if (thankStep) {
-  //       currentStep = survey.steps.findIndex((step) => step.id === thankStep.id)
-  //       showStep(survey, currentStep)
-  //       closeSurvey(survey._id, true) // 완료된 것으로 설정
-  //       console.log('Survey submitted successfully')
-  //     } else {
-  //       closeSurvey(survey._id, true)
-  //       console.log('Survey closed')
-  //     }
-  //   }
-  // }
 
   // 설문조사 스텝 콘텐츠 생성
   function generateStepContent(step) {
