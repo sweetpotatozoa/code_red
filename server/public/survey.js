@@ -297,15 +297,10 @@
       return
     }
 
-    // 다음 실제로 유저에게 보이는 스텝을 찾아서 isLastStep와 isSecondToLastStep를 결정
-    const nextActiveStepIndex = findNextActiveStepIndex(survey, stepIndex)
-    const afterNextActiveStepIndex = findNextActiveStepIndex(
-      survey,
-      nextActiveStepIndex,
-    )
-
-    const isLastStep = nextActiveStepIndex === -1
-    const isSecondToLastStep = afterNextActiveStepIndex === -1
+    const isLastStep = stepIndex === activeSteps.length - 1
+    const isSecondToLastStep =
+      stepIndex === activeSteps.length - 2 &&
+      activeSteps[activeSteps.length - 1].type === 'thank'
 
     const buttonText = getButtonText(step, isLastStep, isSecondToLastStep)
 
@@ -361,11 +356,11 @@
 
         let nextStepIndex
         if (!nextStepId || nextStepId === '') {
-          nextStepIndex = findNextActiveStepIndex(survey, stepIndex)
+          nextStepIndex = stepIndex + 1
         } else {
           nextStepIndex = survey.steps.findIndex((s) => s.id === nextStepId)
           if (nextStepIndex === -1) {
-            nextStepIndex = findNextActiveStepIndex(survey, stepIndex)
+            nextStepIndex = stepIndex + 1
           }
         }
 
@@ -399,21 +394,6 @@
     if (step.type !== 'thank') {
       updateProgressBar(stepIndex, activeSteps.length - 1)
     }
-  }
-
-  // 다음 유효한 스텝 인덱스를 찾는 함수
-  function findNextActiveStepIndex(survey, currentStepIndex) {
-    let nextStepId = survey.steps[currentStepIndex].nextStepId
-    while (nextStepId) {
-      const nextStepIndex = survey.steps.findIndex(
-        (step) => step.id === nextStepId,
-      )
-      if (nextStepIndex !== -1 && survey.steps[nextStepIndex].isActive) {
-        return nextStepIndex
-      }
-      nextStepId = survey.steps[nextStepIndex]?.nextStepId
-    }
-    return -1
   }
 
   function generateStepHTML(step, buttonText) {
