@@ -23,6 +23,14 @@ class UsersRepo {
     return user !== null
   }
 
+  //userName 존재 검사
+  async checkUserNameExist(userName) {
+    const user = await this.collection.findOne({
+      userName: userName,
+    })
+    return user !== null
+  }
+
   //실제 함수
 
   // 유저 정보 가져오기
@@ -43,6 +51,22 @@ class UsersRepo {
     )
     return updatedStatus
   }
+
+  // 유저 생성
+  async createUser(newUser) {
+    await this.collection.insertOne(newUser)
+  }
+
+  // 유저 정보 가져오기
+  async getUserByUserName(userName) {
+    const userPassword = await this.collection.findOne(
+      { userName: userName },
+      { projection: { password: 1, _id: 1 } },
+    )
+    return userPassword
+  }
+
+  //
 }
 
 module.exports = new UsersRepo()
