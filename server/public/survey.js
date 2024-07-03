@@ -316,6 +316,7 @@
       const stepAnswer = getResponse(step)
 
       if (stepAnswer === null) {
+        console.log('No answer selected')
         return
       }
 
@@ -346,8 +347,8 @@
           )
           console.log('Selected Option:', selectedOption)
           nextStepId = selectedOption ? selectedOption.nextStepId : ''
-          console.log('Next Step ID:', nextStepId)
         }
+        console.log('Next Step ID:', nextStepId)
 
         if (nextStepId && nextStepId !== '') {
           const nextStepIndex = survey.steps.findIndex(
@@ -355,16 +356,14 @@
           )
           console.log('Next Step Index:', nextStepIndex)
           if (nextStepIndex !== -1) {
-            stepIndex = nextStepIndex
-            showStep(survey, stepIndex)
+            showStep(survey, nextStepIndex)
           } else {
             closeSurvey(survey._id, true)
           }
         } else if (isVisiblyLastStep) {
           closeSurvey(survey._id, true)
         } else {
-          stepIndex++
-          showStep(survey, stepIndex)
+          showStep(survey, stepIndex + 1)
         }
       } catch (error) {
         console.error('Error while submitting survey:', error)
