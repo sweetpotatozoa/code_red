@@ -306,7 +306,6 @@
 
     surveyContainer.innerHTML = generateStepHTML(step, buttonText)
 
-    // 여기에서 'closeSurvey' 이벤트 리스너를 설정
     document.getElementById('closeSurvey').onclick = () => {
       const isThankStep = step.type === 'thank'
       closeSurvey(survey._id, isThankStep)
@@ -339,30 +338,8 @@
           )
         }
 
-        let nextStepId
-        if (step.type === 'singleChoice' || step.type === 'rating') {
-          const selectedOptionId = stepAnswer.id
-          const selectedOption = step.options.find(
-            (option) => option.id === selectedOptionId,
-          )
-          nextStepId = selectedOption ? selectedOption.nextStepId : null
-        } else {
-          nextStepId = step.nextStepId
-        }
-
-        if (nextStepId) {
-          const nextStepIndex = survey.steps.findIndex(
-            (s) => s.id === nextStepId,
-          )
-          if (nextStepIndex !== -1) {
-            currentStep = nextStepIndex
-            showStep(survey, currentStep)
-          } else {
-            closeSurvey(survey._id, true)
-          }
-        } else {
-          closeSurvey(survey._id, true)
-        }
+        // 여기서 nextStep 함수를 호출합니다
+        nextStep(survey, stepIndex, stepAnswer.id)
       } catch (error) {
         console.error('Error while submitting survey:', error)
       }
