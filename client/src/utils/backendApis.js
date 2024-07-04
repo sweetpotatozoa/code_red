@@ -153,9 +153,9 @@ class BackendApis {
     return result
   }
 
-
   async editSurvey(surveyId) {
     return await fetcher(`/api/adminSurvey/edit/${surveyId}`, this.token, 'GET')
+  }
 
   async updateSurvey(surveyId, surveyData) {
     return await fetcher(
