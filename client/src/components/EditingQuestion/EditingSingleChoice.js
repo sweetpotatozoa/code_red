@@ -1,14 +1,32 @@
 import styles from './EditingQuestion.module.css'
-import { useState } from 'react'
-
+import { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-const EditingSingleChoice = ({ question, onSave, onCancel, questions }) => {
-  const [title, setTitle] = useState(question.title)
-  const [description, setDescription] = useState(question.description)
-  const [options, setOptions] = useState(question.options)
+const EditingSingleChoice = ({ step, onSave, onCancel, steps }) => {
+  const [title, setTitle] = useState(step.title)
+  const [description, setDescription] = useState(step.description)
+  const [options, setOptions] = useState(() => {
+    return (step.options || []).map((option) => {
+      // 기존 옵션 객체에서 필요한 속성만 추출
+      const { id, value, nextStepId } = option
+      return {
+        id: id || uuidv4(),
+        value: value || '',
+        nextStepId: nextStepId || '',
+      }
+    })
+  })
 
-  //저장 핸들러
+  useEffect(() => {
+    const newOptions = options.map((option) => {
+      if (option.nextStepId && !steps.some((s) => s.id === option.nextStepId)) {
+        return { ...option, nextStepId: '' }
+      }
+      return option
+    })
+    setOptions(newOptions)
+  }, [steps])
+
   const handleSave = () => {
     if (title.trim() === '') {
       alert('제목을 입력해주세요.')
@@ -20,24 +38,22 @@ const EditingSingleChoice = ({ question, onSave, onCancel, questions }) => {
       return
     }
 
-    if (options.some((option) => option.value.trim() === '')) {
-      alert('선택지을 모두 채워주세요.')
+    if (options.some((option) => !option.value || option.value.trim() === '')) {
+      alert('선택지를 모두 채워주세요.')
       return
     }
 
-    onSave({ ...question, title, description, options })
+    onSave({ ...step, title, description, options })
   }
 
-  //삭제 핸들러
   const deleteOptionHandler = (id) => {
     const newOptions = options.filter((option) => option.id !== id)
     setOptions(newOptions)
   }
 
-  //다음 질문 선택 핸들러
-  const nextQuestionHandler = (optionId, nextQuestionId) => {
+  const nextStepHandler = (optionId, nextStepId) => {
     const newOptions = options.map((option) =>
-      option.id === optionId ? { ...option, nextQuestionId } : option,
+      option.id === optionId ? { ...option, nextStepId } : option,
     )
     setOptions(newOptions)
   }
@@ -63,7 +79,7 @@ const EditingSingleChoice = ({ question, onSave, onCancel, questions }) => {
 
       <div className={styles.title}>선택지</div>
       {options.map((option) => (
-        <div className={styles.optionBox}>
+        <div className={styles.optionBox} key={option.id}>
           <input
             className={styles.input}
             key={option.id}
@@ -75,7 +91,7 @@ const EditingSingleChoice = ({ question, onSave, onCancel, questions }) => {
               )
               setOptions(newOptions)
             }}
-            placeholder='선택지를 입력하세요.'
+            placeholder='새 선택지'
           />
           <div
             className={styles.delete}
@@ -89,7 +105,7 @@ const EditingSingleChoice = ({ question, onSave, onCancel, questions }) => {
         onClick={() =>
           setOptions([
             ...options,
-            { id: uuidv4(), value: '', nextQuestionId: '' },
+            { id: uuidv4(), value: '새 선택지', nextStepId: '' },
           ])
         }
         className={styles.addOption}
@@ -102,12 +118,12 @@ const EditingSingleChoice = ({ question, onSave, onCancel, questions }) => {
         <div key={option.id} className={styles.optionAction}>
           <div className={styles.optionLabel}>{option.value}</div>
           <select
-            value={option.nextQuestionId || ''}
-            onChange={(e) => nextQuestionHandler(option.id, e.target.value)}
+            value={option.nextStepId || ''}
+            onChange={(e) => nextStepHandler(option.id, e.target.value)}
             className={styles.action}
           >
             <option value=''>다음 질문 선택</option>
-            {questions.map((q) => (
+            {steps.map((q) => (
               <option key={q.id} value={q.id}>
                 {q.title}
               </option>

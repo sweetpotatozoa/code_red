@@ -5,8 +5,15 @@ class AppliedSurveyController {
     try {
       const { userId, isDeploy } = req.query
       const surveys = await AppliedSurveyService.getAllSurveys(userId, isDeploy)
-      res.status(200).json({ status: 200, data: surveys })
+      const user = await AppliedSurveyService.getUserInfo(userId)
+
+      res.status(200).json({
+        status: 200,
+        data: surveys,
+        user: user,
+      })
     } catch (error) {
+      console.error('Error in getAllSurveys:', error)
       res.status(500).json({ status: 500, message: error.message })
     }
   }

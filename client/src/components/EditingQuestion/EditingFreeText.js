@@ -1,13 +1,17 @@
 import styles from './EditingQuestion.module.css'
+import React, { useState, useEffect } from 'react'
 
-import React, { useState } from 'react'
+const EditingFreeText = ({ step, onSave, onCancel, steps }) => {
+  const [title, setTitle] = useState(step.title)
+  const [description, setDescription] = useState(step.description)
+  const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
 
-const EditingFreeText = ({ question, onSave, onCancel, questions }) => {
-  const [title, setTitle] = useState(question.title)
-  const [description, setDescription] = useState(question.description)
-  const [nextQuestionId, setNextQuestionId] = useState(
-    question.nextQuestionId || '',
-  )
+  // nextStepId가 유효한지 확인하고, 유효하지 않으면 초기화
+  useEffect(() => {
+    if (nextStepId && !steps.some((s) => s.id === nextStepId)) {
+      setNextStepId('')
+    }
+  }, [nextStepId, steps])
 
   //저장 핸들러
   const handleSave = () => {
@@ -15,7 +19,7 @@ const EditingFreeText = ({ question, onSave, onCancel, questions }) => {
       alert('제목을 입력해주세요.')
       return
     }
-    onSave({ ...question, title, description, nextQuestionId })
+    onSave({ ...step, title, description, nextStepId })
   }
 
   return (
@@ -39,12 +43,14 @@ const EditingFreeText = ({ question, onSave, onCancel, questions }) => {
       <div className={styles.title}>응답에 따른 대응</div>
       <select
         className={styles.action}
-        value={nextQuestionId}
-        onChange={(e) => setNextQuestionId(e.target.value)}
+        value={nextStepId}
+        onChange={(e) => setNextStepId(e.target.value)}
       >
         <option value=''>다음 질문으로 이동</option>
-        {questions.map((q) => (
-          <option key={q.id}>{q.title}</option>
+        {steps.map((q) => (
+          <option key={q.id} value={q.id}>
+            {q.title}
+          </option>
         ))}
       </select>
       <div className={styles.bottom}>

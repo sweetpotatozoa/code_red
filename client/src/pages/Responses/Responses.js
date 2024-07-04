@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import styles from './Responses.module.css'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { toZonedTime, format } from 'date-fns-tz'
 
 import BackendApis from '../../utils/backendApis'
 
@@ -109,6 +110,11 @@ const Responses = () => {
     navigate('/')
   }
 
+  const formatKoreanTime = (utcTime) => {
+    const kstDate = toZonedTime(utcTime, 'Asia/Seoul')
+    return format(kstDate, 'yyyy-MM-dd HH:mm:ss', { timeZone: 'Asia/Seoul' })
+  }
+
   if (isLoading) return <div>로딩 중...</div>
   if (error) return <div>{error}</div>
   if (!survey) return <div>설문조사를 찾을 수 없습니다.</div>
@@ -182,7 +188,9 @@ const Responses = () => {
           {error && <div className={styles.error}>{error}</div>}
           {responses.map((response) => (
             <div className={styles.response} key={response._id}>
-              <div className={styles.responseTitle}>{response.createAt}</div>
+              <div className={styles.responseTitle}>
+                {formatKoreanTime(response.createAt)}
+              </div>
               <div className={styles.contents}>
                 {response.answers.map((a) => (
                   <div className={styles.content} key={a.stepId}>

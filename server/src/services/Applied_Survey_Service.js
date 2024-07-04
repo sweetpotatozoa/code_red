@@ -1,4 +1,5 @@
 const AppliedSurveyRepo = require('../repositories/Applied_Survey_Repo')
+const UsersRepo = require('../repositories/Users_Repo')
 const { ObjectId } = require('mongodb')
 
 class AppliedSurveyService {
@@ -31,6 +32,10 @@ class AppliedSurveyService {
   async incrementViews(surveyId) {
     const objectId = new ObjectId(surveyId)
     return await AppliedSurveyRepo.incrementViews(objectId)
+  }
+
+  async getUserInfo(userId) {
+    return await UsersRepo.getUserInfo(userId)
   }
 }
 

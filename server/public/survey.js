@@ -116,6 +116,16 @@
       if (!result.ok) {
         throw new Error(`HTTP error! status: ${result.status}`)
       }
+
+      // updateResponse 호출 시 로컬 스토리지의 completed 값을 true로 변경
+      const surveyData = JSON.parse(
+        localStorage.getItem(`survey-${window.activeSurveyId}`),
+      )
+      if (surveyData) {
+        surveyData.completed = true
+        saveSurveyData(window.activeSurveyId, surveyData)
+      }
+
       return result.json()
     } catch (error) {
       console.error('Error in updateResponse:', error)
@@ -223,7 +233,11 @@
             return false
           }
           for (let option of step.options) {
-            if (!option.id || !option.value || !option.nextStepId) {
+            if (
+              !option.id ||
+              !option.value ||
+              option.nextStepId === undefined
+            ) {
               console.error(`Invalid option structure in survey ${survey._id}`)
               return false
             }
@@ -237,7 +251,7 @@
             return false
           }
           for (let option of step.options) {
-            if (!option.id || !option.nextStepId) {
+            if (!option.id || option.nextStepId === undefined) {
               console.error(`Invalid option structure in survey ${survey._id}`)
               return false
             }
@@ -287,22 +301,15 @@
     const surveyContainer = document.getElementById('survey-popup')
 
     if (!step) {
-      document.getElementById('survey-popup').remove()
-      window.activeSurveyId = null
+      closeSurvey(survey._id, false)
       console.log('Survey finished')
       return
     }
 
-    const isLastStep = stepIndex === activeSteps.length - 1
-    const isSecondToLastStep =
-      stepIndex === activeSteps.length - 2 &&
-      activeSteps[activeSteps.length - 1].type === 'thank'
-
-    const buttonText = getButtonText(step, isLastStep, isSecondToLastStep)
+    const buttonText = getButtonText(step)
 
     surveyContainer.innerHTML = generateStepHTML(step, buttonText)
 
-    // 여기에서 'closeSurvey' 이벤트 리스너를 설정
     document.getElementById('closeSurvey').onclick = () => {
       const isThankStep = step.type === 'thank'
       closeSurvey(survey._id, isThankStep)
@@ -319,15 +326,17 @@
       saveResponse(step, stepAnswer)
 
       try {
+        let isCompleted = false
+
         if (surveyResponseId) {
-          const isComplete = isLastStep && step.type !== 'thank'
-          await updateResponse(surveyResponseId, surveyResponses, isComplete)
+          await updateResponse(surveyResponseId, surveyResponses, false)
         } else {
           surveyResponseId = await createResponse(survey.userId, survey._id, {
             ...surveyResponses[0],
           })
         }
 
+        // 링크 스텝 처리
         if (step.type === 'link') {
           window.open(
             step.url.startsWith('http') ? step.url : `https://${step.url}`,
@@ -335,9 +344,10 @@
           )
         }
 
+        // 다음 스텝 인덱스 결정 로직
         let nextStepId
         if (step.type === 'singleChoice' || step.type === 'rating') {
-          const selectedOptionId = stepAnswer.id
+          const selectedOptionId = stepAnswer.id.replace('choice-', '')
           const selectedOption = step.options.find(
             (option) => option.id === selectedOptionId,
           )
@@ -346,18 +356,50 @@
           nextStepId = step.nextStepId
         }
 
-        if (nextStepId) {
-          const nextStepIndex = survey.steps.findIndex(
-            (s) => s.id === nextStepId,
+        let nextStepIndex
+        if (!nextStepId || nextStepId === '') {
+          nextStepIndex = stepIndex + 1
+        } else {
+          nextStepIndex = survey.steps.findIndex((s) => s.id === nextStepId)
+          if (nextStepIndex === -1) {
+            nextStepIndex = stepIndex + 1
+          }
+        }
+
+        // 다음 스텝으로 이동 또는 설문조사 완료 처리
+        if (nextStepIndex < survey.steps.length) {
+          const nextStep = survey.steps[nextStepIndex]
+
+          // thank 스텝으로 넘어갈 때 isComplete를 true로 설정
+          if (nextStep.type === 'thank' && nextStep.isActive && !isCompleted) {
+            await updateResponse(surveyResponseId, surveyResponses, true)
+            isCompleted = true
+          }
+
+          currentStep = nextStepIndex
+          showStep(survey, currentStep)
+        } else {
+          const thankStep = survey.steps.find(
+            (step) => step.type === 'thank' && step.isActive,
           )
-          if (nextStepIndex !== -1) {
-            currentStep = nextStepIndex
+          if (thankStep) {
+            currentStep = survey.steps.findIndex(
+              (step) => step.id === thankStep.id,
+            )
+            if (!isCompleted) {
+              await updateResponse(surveyResponseId, surveyResponses, true)
+              isCompleted = true
+            }
             showStep(survey, currentStep)
           } else {
+            // thank 스텝이 없거나 active가 아닐 때 isComplete를 true로 설정
+            if (!isCompleted) {
+              await updateResponse(surveyResponseId, surveyResponses, true)
+              isCompleted = true
+            }
             closeSurvey(survey._id, true)
+            console.log('Survey closed without thank step')
           }
-        } else {
-          closeSurvey(survey._id, true)
         }
       } catch (error) {
         console.error('Error while submitting survey:', error)
@@ -414,7 +456,7 @@
   }
 
   // 설문조사 단계별 버튼 텍스트 설정
-  function getButtonText(step, isLastStep, isSecondToLastStep) {
+  function getButtonText(step) {
     switch (step.type) {
       case 'welcome':
         return '참여하기'
@@ -423,65 +465,24 @@
       case 'thank':
         return ''
       default:
-        return isLastStep || isSecondToLastStep ? '제출하기' : '다음'
+        return '다음'
     }
   }
 
   // 설문조사 닫기
-  function closeSurvey(surveyId, completed = false) {
+  function closeSurvey(surveyId, isThankStep = false) {
     const surveyPopup = document.getElementById('survey-popup')
     if (surveyPopup) {
       surveyPopup.remove()
     }
     window.activeSurveyId = null
     console.log('Survey closed')
-    saveSurveyData(surveyId, {
-      lastShownTime: new Date().toISOString(),
-      completed,
-    })
-    window.dispatchEvent(new Event('surveyCompleted')) // 설문조사 완료 이벤트 발생
 
-    // isComplete 값 업데이트
-    if (completed && surveyResponseId) {
-      updateResponse(surveyResponseId, surveyResponses, true)
-    }
-  }
+    window.dispatchEvent(new Event('surveyCompleted'))
 
-  // 다음 스텝으로 이동
-  function nextStep(survey, stepIndex, selectedOptionId = null) {
-    const currentStep = survey.steps[stepIndex]
-
-    let nextStepId
-    if (currentStep.type === 'singleChoice' || currentStep.type === 'rating') {
-      const selectedOption = currentStep.options.find(
-        (option) => option.id === selectedOptionId,
-      )
-      nextStepId = selectedOption ? selectedOption.nextStepId : null
-    } else {
-      nextStepId = currentStep.nextStepId
-    }
-
-    const nextStepIndex = survey.steps.findIndex(
-      (step) => step.id === nextStepId,
-    )
-
-    if (nextStepIndex !== -1) {
-      currentStep = nextStepIndex
-      showStep(survey, currentStep)
-    } else {
-      // "thank" 스텝이 활성화되어 있는 경우
-      const thankStep = survey.steps.find(
-        (step) => step.type === 'thank' && step.isActive,
-      )
-      if (thankStep) {
-        currentStep = survey.steps.findIndex((step) => step.id === thankStep.id)
-        showStep(survey, currentStep)
-        closeSurvey(survey._id, true) // 완료된 것으로 설정
-        console.log('Survey submitted successfully')
-      } else {
-        closeSurvey(survey._id, true)
-        console.log('Survey closed')
-      }
+    // 서버 응답 업데이트 (isComplete 값은 변경하지 않음)
+    if (surveyResponseId) {
+      updateResponse(surveyResponseId, surveyResponses, false)
     }
   }
 
@@ -540,20 +541,23 @@
         const selectedOption = document.querySelector(
           'input[name="choice"]:checked',
         )
-        return selectedOption
+        const response = selectedOption
           ? {
-              id: selectedOption.id.split('-')[1],
+              id: selectedOption.id.replace('choice-', ''), // 'choice-' 접두사 제거
               value: selectedOption.value,
             }
           : null
+        console.log('SingleChoice response:', response)
+        return response
       }
       case 'multipleChoice': {
         const selectedOptions = Array.from(
           document.querySelectorAll('input[name="multipleChoice"]:checked'),
         ).map((checkbox) => ({
-          id: checkbox.id.split('-')[1],
+          id: checkbox.id.replace('multipleChoice-', ''), // 'multipleChoice-' 접두사 제거
           value: checkbox.value,
         }))
+        console.log('MultipleChoice responses:', selectedOptions)
         return selectedOptions.length > 0 ? selectedOptions : null
       }
       case 'rating': {
@@ -564,20 +568,28 @@
           ? parseInt(selectedRating.value)
           : null
         const ratingOption = step.options[ratingValue - 1]
-        return ratingOption
+        const response = ratingOption
           ? {
               id: ratingOption.id,
               value: ratingValue,
             }
           : null
+        console.log('Rating response:', response)
+        return response
       }
       case 'freeText': {
         const textResponse = document.getElementById('response')
+        console.log(
+          'FreeText response:',
+          textResponse ? textResponse.value : '',
+        )
         return textResponse ? textResponse.value : ''
       }
       case 'link':
+        console.log('Link clicked')
         return 'clicked'
       case 'info':
+        console.log('Info clicked')
         return 'clicked'
       default:
         return ''
@@ -879,6 +891,7 @@
       showStep(survey, currentStep)
       console.log('Survey container created and appended to body')
 
+      // 설문조사 시작 시 completed 값을 false로 설정
       saveSurveyData(survey._id, {
         lastShownTime: new Date().toISOString(),
         completed: false,

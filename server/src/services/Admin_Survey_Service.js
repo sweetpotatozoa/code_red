@@ -336,6 +336,34 @@ class AdminSurveyService {
 
     return SurveysRepo.getSurveyDeployStatus(surveyId)
   }
+
+  // 수정할 설문조사 정보 가져오기
+  async getSurveyForEdit(userId, surveyId) {
+    await this.checkUserIdExist(userId)
+    await this.checkSurveyIdExist(surveyId)
+    await this.checkSurveyOwnership(userId, surveyId)
+
+    return SurveysRepo.getSurveyForEdit(surveyId)
+  }
+
+  // 설문조사 업데이트
+  async updateSurvey(userId, surveyId, surveyData) {
+    await this.checkUserIdExist(userId)
+    await this.checkSurveyIdExist(surveyId)
+    await this.checkSurveyOwnership(userId, surveyId)
+
+    return SurveysRepo.updateSurvey(surveyId, surveyData)
+  }
+
+  // 설문조사 업데이트하고 배포하기
+  async updateSurveyAndDeploy(userId, surveyId, surveyData) {
+    await this.checkUserIdExist(userId)
+    await this.checkSurveyIdExist(surveyId)
+    await this.checkSurveyOwnership(userId, surveyId)
+
+    surveyData.isDeploy = true
+    return SurveysRepo.updateSurvey(surveyId, surveyData)
+  }
 }
 
 module.exports = new AdminSurveyService()

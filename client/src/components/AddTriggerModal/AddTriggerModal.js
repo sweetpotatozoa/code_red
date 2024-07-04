@@ -10,6 +10,7 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
   const [clickValue, setClickValue] = useState('')
   const [pageType, setPageType] = useState('all')
   const [pageValue, setPageValue] = useState('')
+  const [urlValue, setUrlValue] = useState('')
 
   const addTriggerHandler = () => {
     if (!title) {
@@ -20,7 +21,11 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
       alert('어떤 요소를 클릭할 때 발동할지 입력해주세요!')
       return
     }
-    if (pageType === 'specific' && !pageValue) {
+    if (type === 'url' && !urlValue) {
+      alert('URL을 입력해주세요!')
+      return
+    }
+    if (type !== 'url' && pageType === 'specific' && !pageValue) {
       alert('페이지 url을 입력해주세요!')
       return
     }
@@ -29,10 +34,11 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
       type: type,
       title: title,
       description: description,
-      clickType: clickType,
-      clickValue: clickValue,
-      pageType: pageType,
-      pageValue: pageValue,
+      clickType: type === 'click' ? clickType : undefined,
+      clickValue: type === 'click' ? clickValue : undefined,
+      pageType: type !== 'url' ? pageType : undefined,
+      pageValue: type !== 'url' ? pageValue : undefined,
+      url: type === 'url' ? urlValue : undefined,
     }
     const updatedSurvey = {
       ...survey,
@@ -55,10 +61,10 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-          <div className={styles.inputTitle}>부가설명</div>
+          <div className={styles.inputTitle}>설명</div>
           <input
             className={styles.input}
-            placeholder='ex)상세페이지에서 구매 버튼을 눌렀을 때'
+            placeholder='ex) 상세페이지에서 구매 버튼을 눌렀을 때'
             type='text'
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -141,35 +147,48 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
             </>
           )}
 
-          <div className={styles.inputTitle}>페이지 지정하기</div>
-          <div className={styles.triggerTypes}>
-            <div
-              className={`${styles.triggerType} ${
-                pageType === 'all' ? styles.selected : ''
-              }`}
-              onClick={() => setPageType('all')}
-              style={{ width: '305px' }}
-            >
-              모든 페이지
-            </div>
-            <div
-              className={`${styles.triggerType} ${
-                pageType === 'specific' ? styles.selected : ''
-              }`}
-              onClick={() => setPageType('specific')}
-              style={{ width: '300px' }}
-            >
-              특정 페이지
-            </div>
-          </div>
-          {pageType === 'specific' && (
-            <input
-              className={styles.input}
-              placeholder='페이지 url을 입력해주세요!'
-              type='text'
-              value={pageValue}
-              onChange={(e) => setPageValue(e.target.value)}
-            />
+          {type === 'url' ? (
+            <>
+              <div className={styles.inputTitle}>특정 페이지 URL 입력하기</div>
+              <input
+                className={styles.input}
+                placeholder='ex) /login '
+                type='text'
+                value={urlValue}
+                onChange={(e) => setUrlValue(e.target.value)}
+              />
+            </>
+          ) : (
+            <>
+              <div className={styles.inputTitle}>페이지 지정하기</div>
+              <div className={styles.triggerTypes}>
+                <div
+                  className={`${styles.pageType} ${
+                    pageType === 'all' ? styles.selected : ''
+                  }`}
+                  onClick={() => setPageType('all')}
+                >
+                  모든 페이지
+                </div>
+                <div
+                  className={`${styles.pageType} ${
+                    pageType === 'specific' ? styles.selected : ''
+                  }`}
+                  onClick={() => setPageType('specific')}
+                >
+                  특정 페이지
+                </div>
+              </div>
+              {pageType === 'specific' && (
+                <input
+                  className={styles.input}
+                  placeholder='페이지 url을 입력해주세요!'
+                  type='text'
+                  value={pageValue}
+                  onChange={(e) => setPageValue(e.target.value)}
+                />
+              )}
+            </>
           )}
         </div>
 
