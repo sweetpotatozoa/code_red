@@ -32,21 +32,24 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
   }, [survey.steps])
 
   const validateSteps = () => {
-    const invalid = survey.steps.filter((step) => {
+    const invalid = {}
+    survey.steps.forEach((step, index) => {
       if (
         step.nextStepId &&
         !survey.steps.some((s) => s.id === step.nextStepId)
       ) {
-        return true
+        invalid[step.id] = index
       }
       if (step.options) {
-        return step.options.some(
-          (option) =>
+        step.options.forEach((option) => {
+          if (
             option.nextStepId &&
-            !survey.steps.some((s) => s.id === option.nextStepId),
-        )
+            !survey.steps.some((s) => s.id === option.nextStepId)
+          ) {
+            invalid[step.id] = index
+          }
+        })
       }
-      return false
     })
     setInvalidSteps(invalid)
   }
@@ -63,8 +66,24 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
     }
 
     const updatedSteps = survey.steps.filter((steps) => steps.id !== id)
+    const invalidSteps = {}
+
+    updatedSteps.forEach((step) => {
+      if (step.nextStepId === id) {
+        invalidSteps[step.id] = true // 경고 말풍선 표시를 위한 플래그 설정
+      }
+      if (step.options) {
+        step.options.forEach((option) => {
+          if (option.nextStepId === id) {
+            invalidSteps[step.id] = true // 경고 말풍선 표시를 위한 플래그 설정
+          }
+        })
+      }
+    })
+
     setSurvey({ ...survey, steps: updatedSteps })
-    validateSteps()
+    setInvalidSteps(invalidSteps) // invalidSteps 상태 업데이트
+    setEditingStepId(Object.keys(invalidSteps)[0]) // 첫 번째 invalidStep 자동 열기
   }
 
   const addStepHandler = (type) => {
@@ -190,7 +209,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                     onSave={saveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
-                    showWarning={invalidSteps.includes(step)}
+                    showWarning={step.id in invalidSteps}
                   />
                 )}
                 {step.type === 'singleChoice' && (
@@ -199,7 +218,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                     onSave={saveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
-                    showWarning={invalidSteps.includes(step)}
+                    showWarning={step.id in invalidSteps}
                   />
                 )}
                 {step.type === 'multipleChoice' && (
@@ -208,7 +227,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                     onSave={saveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
-                    showWarning={invalidSteps.includes(step)}
+                    showWarning={step.id in invalidSteps}
                   />
                 )}
                 {step.type === 'rating' && (
@@ -217,7 +236,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                     onSave={saveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
-                    showWarning={invalidSteps.includes(step)}
+                    showWarning={step.id in invalidSteps}
                   />
                 )}
                 {step.type === 'link' && (
@@ -226,7 +245,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                     onSave={saveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
-                    showWarning={invalidSteps.includes(step)}
+                    showWarning={step.id in invalidSteps}
                   />
                 )}
                 {step.type === 'info' && (
@@ -235,7 +254,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                     onSave={saveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
-                    showWarning={invalidSteps.includes(step)}
+                    showWarning={step.id in invalidSteps}
                   />
                 )}
                 {step.type === 'welcome' && (

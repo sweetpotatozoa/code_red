@@ -12,7 +12,7 @@ const Edit = () => {
   const [survey, setSurvey] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [invalidSteps, setInvalidSteps] = useState([])
+  const [invalidSteps, setInvalidSteps] = useState({})
   const [mode, setMode] = useState('surveys')
 
   useEffect(() => {
@@ -30,18 +30,45 @@ const Edit = () => {
     fetchSurvey()
   }, [id])
 
+  useEffect(() => {
+    if (survey) {
+      validateSteps()
+    }
+  }, [survey])
+
+  const validateSteps = () => {
+    const invalid = {}
+    survey.steps.forEach((step, index) => {
+      if (
+        step.nextStepId &&
+        !survey.steps.some((s) => s.id === step.nextStepId)
+      ) {
+        invalid[step.id] = index
+      }
+      if (step.options) {
+        step.options.forEach((option) => {
+          if (
+            option.nextStepId &&
+            !survey.steps.some((s) => s.id === option.nextStepId)
+          ) {
+            invalid[step.id] = index
+          }
+        })
+      }
+    })
+    setInvalidSteps(invalid)
+  }
+
   const goBack = () => {
     navigate(-1)
   }
 
   const handleSave = async () => {
-    if (invalidSteps.length > 0) {
-      const stepNumbers = invalidSteps
-        .map((step) => survey.steps.indexOf(step) + 1)
+    if (Object.keys(invalidSteps).length > 0) {
+      const stepNumbers = Object.values(invalidSteps)
+        .map((index) => index)
         .join(', ')
-      alert(
-        `${stepNumbers}번 스텝의 '응답에 따른 대응'이 삭제된 스텝을 참조하고 있습니다.`,
-      )
+      alert(`${stepNumbers}번 스텝의 '응답에 따른 대응'을 수정해주세요.`)
       return
     }
 
@@ -54,13 +81,11 @@ const Edit = () => {
   }
 
   const handleDeploy = async () => {
-    if (invalidSteps.length > 0) {
-      const stepNumbers = invalidSteps
-        .map((step) => survey.steps.indexOf(step) + 1)
+    if (Object.keys(invalidSteps).length > 0) {
+      const stepNumbers = Object.values(invalidSteps)
+        .map((index) => index)
         .join(', ')
-      alert(
-        `${stepNumbers}번 스텝의 '응답에 따른 대응'이 삭제된 스텝을 참조하고 있습니다.`,
-      )
+      alert(`${stepNumbers}번 스텝의 '응답에 따른 대응'을 수정해주세요.`)
       return
     }
 

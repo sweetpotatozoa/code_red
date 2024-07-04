@@ -70,6 +70,9 @@ const EditingLink = ({ step, onSave, onCancel, steps, showWarning }) => {
             {q.title}
           </option>
         ))}
+        {!steps.some((s) => s.id === nextStepId) && nextStepId && (
+          <option value={nextStepId}>삭제된 선택지</option>
+        )}
       </select>
       {showWarning && nextStepId === '' && (
         <div className={styles.warningBubble}>

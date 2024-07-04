@@ -120,6 +120,10 @@ const EditingSingleChoice = ({
                 {q.title}
               </option>
             ))}
+            {!steps.some((s) => s.id === option.nextStepId) &&
+              option.nextStepId && (
+                <option value={option.nextStepId}>삭제된 선택지</option>
+              )}
           </select>
           {showWarning && option.nextStepId === '' && (
             <div className={styles.warningBubble}>
