@@ -1,31 +1,23 @@
 import styles from './EditingQuestion.module.css'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-const EditingSingleChoice = ({ step, onSave, onCancel, steps }) => {
+const EditingSingleChoice = ({
+  step,
+  onSave,
+  onCancel,
+  steps,
+  showWarning,
+}) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
   const [options, setOptions] = useState(() => {
-    return (step.options || []).map((option) => {
-      // 기존 옵션 객체에서 필요한 속성만 추출
-      const { id, value, nextStepId } = option
-      return {
-        id: id || uuidv4(),
-        value: value || '',
-        nextStepId: nextStepId || '',
-      }
-    })
+    return (step.options || []).map((option) => ({
+      id: option.id || uuidv4(),
+      value: option.value || '',
+      nextStepId: option.nextStepId || '',
+    }))
   })
-
-  useEffect(() => {
-    const newOptions = options.map((option) => {
-      if (option.nextStepId && !steps.some((s) => s.id === option.nextStepId)) {
-        return { ...option, nextStepId: '' }
-      }
-      return option
-    })
-    setOptions(newOptions)
-  }, [steps])
 
   const handleSave = () => {
     if (title.trim() === '') {
@@ -122,13 +114,18 @@ const EditingSingleChoice = ({ step, onSave, onCancel, steps }) => {
             onChange={(e) => nextStepHandler(option.id, e.target.value)}
             className={styles.action}
           >
-            <option value=''>다음 질문 선택</option>
+            <option value=''>다음 질문으로 이동</option>
             {steps.map((q) => (
               <option key={q.id} value={q.id}>
                 {q.title}
               </option>
             ))}
           </select>
+          {showWarning && option.nextStepId === '' && (
+            <div className={styles.warningBubble}>
+              참조하고 있던 스텝이 삭제되어 변경이 필요합니다.
+            </div>
+          )}
         </div>
       ))}
 

@@ -12,6 +12,8 @@ const Edit = () => {
   const [survey, setSurvey] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [invalidSteps, setInvalidSteps] = useState([])
+  const [mode, setMode] = useState('surveys')
 
   useEffect(() => {
     const fetchSurvey = async () => {
@@ -28,15 +30,21 @@ const Edit = () => {
     fetchSurvey()
   }, [id])
 
-  const [mode, setMode] = useState('surveys')
-
-  // 뒤로가기
   const goBack = () => {
     navigate(-1)
   }
 
-  // 저장하기
   const handleSave = async () => {
+    if (invalidSteps.length > 0) {
+      const stepNumbers = invalidSteps
+        .map((step) => survey.steps.indexOf(step) + 1)
+        .join(', ')
+      alert(
+        `${stepNumbers}번 스텝의 '응답에 따른 대응'이 삭제된 스텝을 참조하고 있습니다.`,
+      )
+      return
+    }
+
     try {
       await BackendApis.updateSurvey(id, survey)
       alert('설문조사가 성공적으로 저장되었습니다.')
@@ -45,8 +53,17 @@ const Edit = () => {
     }
   }
 
-  // 배포하기
   const handleDeploy = async () => {
+    if (invalidSteps.length > 0) {
+      const stepNumbers = invalidSteps
+        .map((step) => survey.steps.indexOf(step) + 1)
+        .join(', ')
+      alert(
+        `${stepNumbers}번 스텝의 '응답에 따른 대응'이 삭제된 스텝을 참조하고 있습니다.`,
+      )
+      return
+    }
+
     try {
       await BackendApis.deploySurvey(id, survey)
       alert('설문조사가 성공적으로 배포되었습니다.')
@@ -62,7 +79,14 @@ const Edit = () => {
 
     switch (mode) {
       case 'surveys':
-        return <Surveys survey={survey} setSurvey={setSurvey} />
+        return (
+          <Surveys
+            survey={survey}
+            setSurvey={setSurvey}
+            invalidSteps={invalidSteps}
+            setInvalidSteps={setInvalidSteps}
+          />
+        )
       case 'triggers':
         return <Triggers survey={survey} setSurvey={setSurvey} />
       case 'delays':

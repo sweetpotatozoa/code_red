@@ -1,24 +1,23 @@
 import styles from './EditingQuestion.module.css'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-const EditingMultipleChoice = ({ step, onSave, onCancel, steps }) => {
+const EditingMultipleChoice = ({
+  step,
+  onSave,
+  onCancel,
+  steps,
+  showWarning,
+}) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
   const [options, setOptions] = useState(() => {
     return (step.options || []).map((option) => ({
       id: option.id || uuidv4(),
       value: option.value || '',
-      nextStepId: option.nextStepId || '',
     }))
   })
   const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
-
-  useEffect(() => {
-    if (nextStepId && !steps.some((s) => s.id === nextStepId)) {
-      setNextStepId('')
-    }
-  }, [steps, nextStepId])
 
   const handleSave = () => {
     if (title.trim() === '') {
@@ -84,9 +83,7 @@ const EditingMultipleChoice = ({ step, onSave, onCancel, steps }) => {
         </div>
       ))}
       <div
-        onClick={() =>
-          setOptions([...options, { id: uuidv4(), value: '', nextStepId: '' }])
-        }
+        onClick={() => setOptions([...options, { id: uuidv4(), value: '' }])}
         className={styles.addOption}
       >
         선택지 추가
@@ -104,6 +101,11 @@ const EditingMultipleChoice = ({ step, onSave, onCancel, steps }) => {
           </option>
         ))}
       </select>
+      {showWarning && nextStepId === '' && (
+        <div className={styles.warningBubble}>
+          참조하고 있던 스텝이 삭제되어 변경이 필요합니다.
+        </div>
+      )}
       <div className={styles.bottom}>
         <div className={styles.leftBtn} onClick={onCancel}>
           취소

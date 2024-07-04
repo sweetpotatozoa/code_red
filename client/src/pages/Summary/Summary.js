@@ -205,7 +205,7 @@ const Summary = () => {
             </div>
             <div className={styles.summary}>
               <div className={styles.summaryTitle}>
-                <div>평균 응답 소요시간</div>
+                <div>평균 응답 완료시간</div>
               </div>
               <div className={styles.summaryNum}>
                 {summaryData?.avgResponseTime

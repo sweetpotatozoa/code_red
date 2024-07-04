@@ -1,6 +1,6 @@
 import styles from './Surveys.module.css'
 import { v4 as uuidv4 } from 'uuid'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import EditingFreeText from '../EditingQuestion/EditingFreeText'
 import EditingSingleChoice from '../EditingQuestion/EditingSingleChoice'
 import EditingMultipleChoice from '../EditingQuestion/EditingMultipleChoice'
@@ -10,7 +10,7 @@ import EditingInfo from '../EditingQuestion/EditingInfo'
 import EditingWelcome from '../EditingQuestion/EditingWelcome'
 import EditingThank from '../EditingQuestion/EditingThank'
 
-const Surveys = ({ survey, setSurvey }) => {
+const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
   if (!survey || !survey.steps) return null
 
   const [isAddStep, setIsAddStep] = useState(false)
@@ -27,6 +27,30 @@ const Surveys = ({ survey, setSurvey }) => {
     freeText: '주관식',
   }
 
+  useEffect(() => {
+    validateSteps()
+  }, [survey.steps])
+
+  const validateSteps = () => {
+    const invalid = survey.steps.filter((step) => {
+      if (
+        step.nextStepId &&
+        !survey.steps.some((s) => s.id === step.nextStepId)
+      ) {
+        return true
+      }
+      if (step.options) {
+        return step.options.some(
+          (option) =>
+            option.nextStepId &&
+            !survey.steps.some((s) => s.id === option.nextStepId),
+        )
+      }
+      return false
+    })
+    setInvalidSteps(invalid)
+  }
+
   const deleteHandler = (id) => {
     const stepToDelete = survey.steps.find((step) => step.id === id)
     if (stepToDelete.type === 'welcome' || stepToDelete.type === 'thank') {
@@ -40,6 +64,7 @@ const Surveys = ({ survey, setSurvey }) => {
 
     const updatedSteps = survey.steps.filter((steps) => steps.id !== id)
     setSurvey({ ...survey, steps: updatedSteps })
+    validateSteps()
   }
 
   const addStepHandler = (type) => {
@@ -121,16 +146,12 @@ const Surveys = ({ survey, setSurvey }) => {
   }
 
   const saveStep = (updatedStep) => {
-    const { type, options, ...rest } = updatedStep
-    const newStep = { type, ...rest }
-    if (['singleChoice', 'multipleChoice', 'rating'].includes(type)) {
-      newStep.options = options
-    }
     const updatedSteps = survey.steps.map((step) =>
-      step.id === newStep.id ? newStep : step,
+      step.id === updatedStep.id ? updatedStep : step,
     )
     setSurvey({ ...survey, steps: updatedSteps })
     setEditingStepId(null)
+    validateSteps()
   }
 
   const cancelEdit = () => {
@@ -169,6 +190,7 @@ const Surveys = ({ survey, setSurvey }) => {
                     onSave={saveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
+                    showWarning={invalidSteps.includes(step)}
                   />
                 )}
                 {step.type === 'singleChoice' && (
@@ -177,6 +199,7 @@ const Surveys = ({ survey, setSurvey }) => {
                     onSave={saveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
+                    showWarning={invalidSteps.includes(step)}
                   />
                 )}
                 {step.type === 'multipleChoice' && (
@@ -185,6 +208,7 @@ const Surveys = ({ survey, setSurvey }) => {
                     onSave={saveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
+                    showWarning={invalidSteps.includes(step)}
                   />
                 )}
                 {step.type === 'rating' && (
@@ -193,6 +217,7 @@ const Surveys = ({ survey, setSurvey }) => {
                     onSave={saveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
+                    showWarning={invalidSteps.includes(step)}
                   />
                 )}
                 {step.type === 'link' && (
@@ -201,6 +226,7 @@ const Surveys = ({ survey, setSurvey }) => {
                     onSave={saveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
+                    showWarning={invalidSteps.includes(step)}
                   />
                 )}
                 {step.type === 'info' && (
@@ -209,6 +235,7 @@ const Surveys = ({ survey, setSurvey }) => {
                     onSave={saveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
+                    showWarning={invalidSteps.includes(step)}
                   />
                 )}
                 {step.type === 'welcome' && (
