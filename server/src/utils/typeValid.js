@@ -18,4 +18,15 @@ const isInteger = (value) => {
   return false
 }
 
-module.exports = { isObjectId, isInteger }
+// str인지 확인하는 함수
+const isString = (value) => {
+  return typeof value === 'string'
+}
+
+// 아이디, 비밀번호가 유효한지 확인하는 함수
+const isValidUsernameOrPassword = (value) => {
+  const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/
+  return regex.test(value)
+}
+
+module.exports = { isObjectId, isInteger, isString, isValidUsernameOrPassword }

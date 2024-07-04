@@ -45,6 +45,7 @@ const EditingUrl = ({
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder='제목을 입력하세요.'
+        className={styles.input}
       />
       <div className={styles.title}>설명</div>
       <input
@@ -52,6 +53,7 @@ const EditingUrl = ({
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder='설명 (선택사항)'
+        className={styles.input}
       />
       <div className={styles.title}>URL</div>
       <input

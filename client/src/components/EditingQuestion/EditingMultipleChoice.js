@@ -49,6 +49,7 @@ const EditingMultipleChoice = ({ step, onSave, onCancel, steps }) => {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder='질문을 입력하세요.'
+        className={styles.input}
       />
       <div className={styles.title}>설명</div>
       <input
@@ -56,11 +57,14 @@ const EditingMultipleChoice = ({ step, onSave, onCancel, steps }) => {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder='설명 (선택사항)'
+        className={styles.input}
       />
       <div className={styles.title}>선택지</div>
       {options.map((option) => (
         <div className={styles.optionBox} key={option.id}>
           <input
+            className={styles.input}
+            key={option.id}
             type='text'
             value={option.value}
             onChange={(e) => {

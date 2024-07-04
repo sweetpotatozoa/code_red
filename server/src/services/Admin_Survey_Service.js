@@ -2,7 +2,8 @@ const UsersRepo = require('../repositories/Users_Repo')
 const SurveysRepo = require('../repositories/Surveys_Repo')
 const templatesRepo = require('../repositories/Templates_Repo')
 const ResponsesRepo = require('../repositories/Responses_Repo')
-const { ObjectId } = require('mongodb')
+const { v4: uuidv4 } = require('uuid')
+const mongoose = require('mongoose')
 
 class AdminSurveyService {
   //헬퍼 함수
@@ -222,6 +223,80 @@ class AdminSurveyService {
           return step
       }
     })
+  }
+
+  //설문조사 생성하기
+  async createSurvey(templateId, userId) {
+    // userId가 존재하는지 확인합니다.
+    await this.checkUserIdExist(userId)
+
+    // 유효한 templateId 목록을 정의합니다.
+    const validId = ['1', '2', '3', '4', '5']
+    // 주어진 templateId가 유효한지 확인합니다.
+    if (!validId.includes(templateId)) {
+      throw new Error('Invalid template id')
+    }
+
+    // templateId에 해당하는 템플릿을 데이터베이스에서 가져옵니다.
+    const template = await templatesRepo.getTemplate(templateId)
+    // 템플릿이 존재하지 않으면 에러를 발생시킵니다.
+    if (!template) {
+      throw new Error('Invalid template id')
+    }
+
+    // 기존 id와 새로운 UUID를 매핑할 객체를 생성합니다.
+    const idMapping = {}
+
+    const survey = {
+      ...template, // 템플릿의 모든 속성을 복사합니다.
+      userId: new mongoose.Types.ObjectId(userId), // userId를 설정합니다.
+      createAt: new Date(), // 현재 날짜를 설정합니다.
+      updateAt: new Date(), // 현재 날짜를 설정합니다.
+      views: 0, // views를 0으로 설정합니다.
+      steps: template.steps.map((step) => {
+        const newStepId = uuidv4() // 새로운 UUID를 생성합니다.
+        idMapping[step.id] = newStepId // 기존 id와 새 UUID를 매핑합니다.
+        const newStep = {
+          ...step,
+          id: newStepId,
+        }
+        if (Array.isArray(step.options)) {
+          newStep.options = step.options.map((option) => ({
+            ...option,
+            id: uuidv4(),
+          }))
+        }
+        return newStep
+      }),
+    }
+
+    // nextStepId 업데이트
+    survey.steps = survey.steps.map((step) => {
+      if (
+        ['singleChoice', 'rating'].includes(step.type) &&
+        Array.isArray(step.options)
+      ) {
+        return {
+          ...step,
+          options: step.options.map((option) => ({
+            ...option,
+            nextStepId: option.nextStepId ? idMapping[option.nextStepId] : null,
+          })),
+        }
+      } else {
+        const newStep = { ...step }
+        if (step.nextStepId) {
+          newStep.nextStepId = idMapping[step.nextStepId]
+        }
+        return newStep
+      }
+    })
+
+    // 최상위 id 값을 삭제합니다 (템플릿의 id).
+    delete survey.id
+
+    // 새로 생성된 survey를 데이터베이스에 저장하고 반환합니다.
+    return SurveysRepo.createSurvey(survey)
   }
 
   // 설문조사 개별 응답 가져오기

@@ -1,6 +1,6 @@
 const AdminSurveyService = require('../services/Admin_Survey_Service')
 const errorHandler = require('../utils/errorHandler')
-const { isObjectId, isInteger } = require('../utils/typeValid')
+const { isObjectId, isInteger, isString } = require('../utils/typeValid')
 
 //추가적인 예외처리를 넣고 싶다면 아래와 같이 입력하세요.
 // } catch (err) {
@@ -116,7 +116,6 @@ class AdminSurveyController {
   async updateSurveyPosition(req, res) {
     const userId = req.user.id // userId saved in jwt added by auth middleware
     const surveyPosition = req.body.surveyPosition // surveyPosition 정보
-    console.log(isInteger(surveyPosition))
 
     if (!userId || !isObjectId(userId)) {
       res.status(400).json({ message: 'Invalid user id' })
@@ -163,7 +162,8 @@ class AdminSurveyController {
   // 설문조사 생성
   async createSurvey(req, res) {
     const userId = req.user.id // userId saved in jwt added by auth middleware
-    const templateId = req.body.templateId // 템플릿 아이디
+    const templateId = req.params.templateId // 템플릿 아이디
+
     if (!userId || !isObjectId(userId)) {
       res.status(400).json({ message: 'Invalid user id' })
       return
@@ -174,7 +174,7 @@ class AdminSurveyController {
     }
     try {
       const result = await AdminSurveyService.createSurvey(templateId, userId)
-      res.status(result.status).json(result)
+      res.status(201).json(result)
     } catch (err) {
       const { status, message } = errorHandler(err, 'createSurvey')
       res.status(status).json({ message })

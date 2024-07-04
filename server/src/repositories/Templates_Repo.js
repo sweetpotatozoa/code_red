@@ -12,9 +12,21 @@ class TemplatesRepo {
       .aggregate([
         { $unwind: '$templates' },
         { $replaceRoot: { newRoot: '$templates' } },
-        { $project: { id: 1, title: 1, description: 1 } }, // 원하는 필드만 선택
       ])
       .toArray()
+  }
+
+  async getTemplate(templateId) {
+    const result = await this.collection.findOne(
+      { templates: { $elemMatch: { id: templateId } } },
+      { projection: { 'templates.$': 1 } },
+    )
+
+    if (result && result.templates && result.templates.length > 0) {
+      return result.templates[0]
+    } else {
+      return null
+    }
   }
 }
 
