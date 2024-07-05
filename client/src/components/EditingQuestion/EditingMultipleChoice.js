@@ -104,7 +104,7 @@ const EditingMultipleChoice = ({
           <option value={nextStepId}>삭제된 선택지</option>
         )}
       </select>
-      {showWarning && nextStepId === '' && (
+      {showWarning && (
         <div className={styles.warningBubble}>
           참조하고 있던 스텝이 삭제되어 변경이 필요합니다.
         </div>
