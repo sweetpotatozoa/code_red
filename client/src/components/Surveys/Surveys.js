@@ -1,6 +1,6 @@
 import styles from './Surveys.module.css'
 import { v4 as uuidv4 } from 'uuid'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import EditingFreeText from '../EditingQuestion/EditingFreeText'
 import EditingSingleChoice from '../EditingQuestion/EditingSingleChoice'
 import EditingMultipleChoice from '../EditingQuestion/EditingMultipleChoice'
@@ -15,6 +15,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
 
   const [isAddStep, setIsAddStep] = useState(false)
   const [editingStepId, setEditingStepId] = useState(null)
+  const stepRefs = useRef({})
 
   const stepTypeText = {
     welcome: '환영 인사',
@@ -26,6 +27,19 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
     thank: '감사 인사',
     freeText: '주관식',
   }
+
+  const scrollToStep = useCallback((stepId) => {
+    const stepElement = stepRefs.current[stepId]
+    if (stepElement) {
+      stepElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [])
+
+  useEffect(() => {
+    if (editingStepId) {
+      scrollToStep(editingStepId)
+    }
+  }, [editingStepId, scrollToStep])
 
   useEffect(() => {
     validateSteps()
@@ -97,7 +111,11 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
 
     setSurvey({ ...survey, steps: updatedSteps })
     setInvalidSteps(invalidSteps)
-    setEditingStepId(Object.keys(invalidSteps)[0])
+    const nextInvalidStepId = Object.keys(invalidSteps)[0]
+    if (nextInvalidStepId) {
+      setEditingStepId(nextInvalidStepId)
+      scrollToStep(nextInvalidStepId)
+    }
   }
 
   const addStepHandler = (type) => {
@@ -123,6 +141,8 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
 
     setSurvey({ ...survey, steps: updatedSteps })
     setIsAddStep(false)
+    setEditingStepId(newStep.id)
+    setTimeout(() => scrollToStep(newStep.id), 100)
   }
 
   const AddStepModal = () => {
@@ -176,6 +196,9 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
       handleSaveStep(originalStep)
     }
     setEditingStepId(editingStepId === stepId ? null : stepId)
+    if (stepId) {
+      scrollToStep(stepId)
+    }
   }
 
   const cancelEdit = () => {
@@ -198,6 +221,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
               editingStepId === step.id ? styles.editing : ''
             }`}
             key={step.id}
+            ref={(el) => (stepRefs.current[step.id] = el)}
           >
             <div className={styles.surveyNum}>
               {step.type === 'welcome'

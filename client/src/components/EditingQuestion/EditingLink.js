@@ -1,9 +1,11 @@
 import styles from './EditingQuestion.module.css'
 import { useState, useEffect } from 'react'
 
-const EditingInfo = ({ step, onSave, onCancel, steps, showWarning }) => {
+const EditingLink = ({ step, onSave, onCancel, steps, showWarning }) => {
   const [title, setTitle] = useState(step.title)
-  const [description, setDescription] = useState(step.description)
+  const [description, setDescription] = useState(step.description || '')
+  const [url, setUrl] = useState(step.url || '')
+  const [buttonText, setButtonText] = useState(step.buttonText || '')
   const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
 
   useEffect(() => {
@@ -19,7 +21,15 @@ const EditingInfo = ({ step, onSave, onCancel, steps, showWarning }) => {
       alert('제목을 입력해주세요.')
       return
     }
-    onSave({ ...step, title, description, nextStepId })
+    if (url.trim() === '') {
+      alert('URL을 입력해주세요.')
+      return
+    }
+    if (buttonText.trim() === '') {
+      alert('버튼 텍스트를 입력해주세요.')
+      return
+    }
+    onSave({ ...step, title, description, url, nextStepId, buttonText })
   }
 
   return (
@@ -34,11 +44,27 @@ const EditingInfo = ({ step, onSave, onCancel, steps, showWarning }) => {
       />
       <div className={styles.title}>설명</div>
       <input
-        className={styles.input}
         type='text'
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder='설명 (선택사항)'
+        className={styles.input}
+      />
+      <div className={styles.title}>URL</div>
+      <input
+        type='text'
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        placeholder='URL을 입력하세요.'
+        className={styles.input}
+      />
+      <div className={styles.title}>버튼 텍스트</div>
+      <input
+        type='text'
+        value={buttonText}
+        onChange={(e) => setButtonText(e.target.value)}
+        placeholder='버튼의 텍스트를 입력하세요.'
+        className={styles.input}
       />
       <div className={styles.title}>응답에 따른 대응</div>
       <select
@@ -73,4 +99,4 @@ const EditingInfo = ({ step, onSave, onCancel, steps, showWarning }) => {
   )
 }
 
-export default EditingInfo
+export default EditingLink

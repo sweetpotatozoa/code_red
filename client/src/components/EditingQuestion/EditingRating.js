@@ -18,21 +18,8 @@ const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
   const [localShowWarning, setLocalShowWarning] = useState(showWarning)
 
   useEffect(() => {
-    const checkWarnings = () => {
-      let hasWarning = false
-      options.forEach((option) => {
-        if (
-          option.nextStepId &&
-          !steps.some((s) => s.id === option.nextStepId)
-        ) {
-          hasWarning = true
-        }
-      })
-      setLocalShowWarning(hasWarning)
-    }
-
-    checkWarnings()
-  }, [options, steps])
+    setLocalShowWarning(showWarning)
+  }, [showWarning])
 
   const handleSave = () => {
     if (title.trim() === '') {
