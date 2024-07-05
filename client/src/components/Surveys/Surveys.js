@@ -54,6 +54,20 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
     setInvalidSteps(invalid)
   }
 
+  const handleSaveStep = (updatedStep) => {
+    const updatedSteps = survey.steps.map((step) =>
+      step.id === updatedStep.id ? updatedStep : step,
+    )
+    setSurvey({ ...survey, steps: updatedSteps })
+    validateSteps()
+    const nextInvalidStepId = Object.keys(invalidSteps)[0]
+    if (nextInvalidStepId) {
+      setEditingStepId(nextInvalidStepId)
+    } else {
+      setEditingStepId(null)
+    }
+  }
+
   const deleteHandler = (id) => {
     const stepToDelete = survey.steps.find((step) => step.id === id)
     if (stepToDelete.type === 'welcome' || stepToDelete.type === 'thank') {
@@ -70,20 +84,20 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
 
     updatedSteps.forEach((step) => {
       if (step.nextStepId === id) {
-        invalidSteps[step.id] = true // 경고 말풍선 표시를 위한 플래그 설정
+        invalidSteps[step.id] = true
       }
       if (step.options) {
         step.options.forEach((option) => {
           if (option.nextStepId === id) {
-            invalidSteps[step.id] = true // 경고 말풍선 표시를 위한 플래그 설정
+            invalidSteps[step.id] = true
           }
         })
       }
     })
 
     setSurvey({ ...survey, steps: updatedSteps })
-    setInvalidSteps(invalidSteps) // invalidSteps 상태 업데이트
-    setEditingStepId(Object.keys(invalidSteps)[0]) // 첫 번째 invalidStep 자동 열기
+    setInvalidSteps(invalidSteps)
+    setEditingStepId(Object.keys(invalidSteps)[0])
   }
 
   const addStepHandler = (type) => {
@@ -159,18 +173,9 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
   const toggleEditMode = (stepId) => {
     if (editingStepId && editingStepId !== stepId) {
       const originalStep = survey.steps.find((q) => q.id === editingStepId)
-      saveStep(originalStep)
+      handleSaveStep(originalStep)
     }
     setEditingStepId(editingStepId === stepId ? null : stepId)
-  }
-
-  const saveStep = (updatedStep) => {
-    const updatedSteps = survey.steps.map((step) =>
-      step.id === updatedStep.id ? updatedStep : step,
-    )
-    setSurvey({ ...survey, steps: updatedSteps })
-    setEditingStepId(null)
-    validateSteps()
   }
 
   const cancelEdit = () => {
@@ -206,7 +211,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                 {step.type === 'freeText' && (
                   <EditingFreeText
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
                     showWarning={step.id in invalidSteps}
@@ -215,7 +220,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                 {step.type === 'singleChoice' && (
                   <EditingSingleChoice
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
                     showWarning={step.id in invalidSteps}
@@ -224,7 +229,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                 {step.type === 'multipleChoice' && (
                   <EditingMultipleChoice
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
                     showWarning={step.id in invalidSteps}
@@ -233,7 +238,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                 {step.type === 'rating' && (
                   <EditingRating
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
                     showWarning={step.id in invalidSteps}
@@ -242,7 +247,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                 {step.type === 'link' && (
                   <EditingLink
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
                     showWarning={step.id in invalidSteps}
@@ -251,7 +256,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                 {step.type === 'info' && (
                   <EditingInfo
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
                     showWarning={step.id in invalidSteps}
@@ -260,7 +265,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                 {step.type === 'welcome' && (
                   <EditingWelcome
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
                   />
@@ -268,7 +273,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                 {step.type === 'thank' && (
                   <EditingThank
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
                   />

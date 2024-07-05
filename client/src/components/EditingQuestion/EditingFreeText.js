@@ -1,10 +1,18 @@
 import styles from './EditingQuestion.module.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const EditingFreeText = ({ step, onSave, onCancel, steps, showWarning }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
   const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
+
+  useEffect(() => {
+    if (nextStepId && !steps.some((s) => s.id === nextStepId)) {
+      showWarning = true
+    } else {
+      showWarning = false
+    }
+  }, [nextStepId, steps])
 
   const handleSave = () => {
     if (title.trim() === '') {

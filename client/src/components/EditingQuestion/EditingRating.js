@@ -1,5 +1,5 @@
 import styles from './EditingQuestion.module.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
@@ -15,6 +15,24 @@ const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
           : '',
     }))
   })
+  const [localShowWarning, setLocalShowWarning] = useState(showWarning)
+
+  useEffect(() => {
+    const checkWarnings = () => {
+      let hasWarning = false
+      options.forEach((option) => {
+        if (
+          option.nextStepId &&
+          !steps.some((s) => s.id === option.nextStepId)
+        ) {
+          hasWarning = true
+        }
+      })
+      setLocalShowWarning(hasWarning)
+    }
+
+    checkWarnings()
+  }, [options, steps])
 
   const handleSave = () => {
     if (title.trim() === '') {
@@ -73,13 +91,13 @@ const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
                 <option value={option.nextStepId}>삭제된 선택지</option>
               )}
           </select>
-          {showWarning && (
-            <div className={styles.warningBubble}>
-              참조하고 있던 스텝이 삭제되어 변경이 필요합니다.
-            </div>
-          )}
         </div>
       ))}
+      {localShowWarning && (
+        <div className={styles.warningBubble}>
+          참조하고 있던 스텝이 삭제되어 변경이 필요합니다.
+        </div>
+      )}
       <div className={styles.bottom}>
         <div className={styles.leftBtn} onClick={onCancel}>
           취소
