@@ -1,14 +1,16 @@
 import styles from './EditingQuestion.module.css'
 import { useState, useEffect } from 'react'
 
-const EditingInfo = ({ step, onSave, onCancel, steps }) => {
+const EditingInfo = ({ step, onSave, onCancel, steps, showWarning }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
   const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
 
   useEffect(() => {
     if (nextStepId && !steps.some((s) => s.id === nextStepId)) {
-      setNextStepId('')
+      showWarning = true
+    } else {
+      showWarning = false
     }
   }, [nextStepId, steps])
 
@@ -50,8 +52,15 @@ const EditingInfo = ({ step, onSave, onCancel, steps }) => {
             {q.title}
           </option>
         ))}
+        {!steps.some((s) => s.id === nextStepId) && nextStepId && (
+          <option value={nextStepId}>삭제된 선택지</option>
+        )}
       </select>
-
+      {showWarning && (
+        <div className={styles.warningBubble}>
+          참조하고 있던 스텝이 삭제되어 변경이 필요합니다.
+        </div>
+      )}
       <div className={styles.bottom}>
         <div className={styles.leftBtn} onClick={onCancel}>
           취소

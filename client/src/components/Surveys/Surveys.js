@@ -1,6 +1,6 @@
 import styles from './Surveys.module.css'
 import { v4 as uuidv4 } from 'uuid'
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import EditingFreeText from '../EditingQuestion/EditingFreeText'
 import EditingSingleChoice from '../EditingQuestion/EditingSingleChoice'
 import EditingMultipleChoice from '../EditingQuestion/EditingMultipleChoice'
@@ -10,11 +10,12 @@ import EditingInfo from '../EditingQuestion/EditingInfo'
 import EditingWelcome from '../EditingQuestion/EditingWelcome'
 import EditingThank from '../EditingQuestion/EditingThank'
 
-const Surveys = ({ survey, setSurvey }) => {
+const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
   if (!survey || !survey.steps) return null
 
   const [isAddStep, setIsAddStep] = useState(false)
   const [editingStepId, setEditingStepId] = useState(null)
+  const stepRefs = useRef({})
 
   const stepTypeText = {
     welcome: '환영 인사',
@@ -25,6 +26,60 @@ const Surveys = ({ survey, setSurvey }) => {
     link: '외부 링크',
     thank: '감사 인사',
     freeText: '주관식',
+  }
+
+  const scrollToStep = useCallback((stepId) => {
+    const stepElement = stepRefs.current[stepId]
+    if (stepElement) {
+      stepElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [])
+
+  useEffect(() => {
+    if (editingStepId) {
+      scrollToStep(editingStepId)
+    }
+  }, [editingStepId, scrollToStep])
+
+  useEffect(() => {
+    validateSteps()
+  }, [survey.steps])
+
+  const validateSteps = () => {
+    const invalid = {}
+    survey.steps.forEach((step, index) => {
+      if (
+        step.nextStepId &&
+        !survey.steps.some((s) => s.id === step.nextStepId)
+      ) {
+        invalid[step.id] = index
+      }
+      if (step.options) {
+        step.options.forEach((option) => {
+          if (
+            option.nextStepId &&
+            !survey.steps.some((s) => s.id === option.nextStepId)
+          ) {
+            invalid[step.id] = index
+          }
+        })
+      }
+    })
+    setInvalidSteps(invalid)
+  }
+
+  const handleSaveStep = (updatedStep) => {
+    const updatedSteps = survey.steps.map((step) =>
+      step.id === updatedStep.id ? updatedStep : step,
+    )
+    setSurvey({ ...survey, steps: updatedSteps })
+    validateSteps()
+    const nextInvalidStepId = Object.keys(invalidSteps)[0]
+    if (nextInvalidStepId) {
+      setEditingStepId(nextInvalidStepId)
+    } else {
+      setEditingStepId(null)
+    }
   }
 
   const deleteHandler = (id) => {
@@ -39,7 +94,28 @@ const Surveys = ({ survey, setSurvey }) => {
     }
 
     const updatedSteps = survey.steps.filter((steps) => steps.id !== id)
+    const invalidSteps = {}
+
+    updatedSteps.forEach((step) => {
+      if (step.nextStepId === id) {
+        invalidSteps[step.id] = true
+      }
+      if (step.options) {
+        step.options.forEach((option) => {
+          if (option.nextStepId === id) {
+            invalidSteps[step.id] = true
+          }
+        })
+      }
+    })
+
     setSurvey({ ...survey, steps: updatedSteps })
+    setInvalidSteps(invalidSteps)
+    const nextInvalidStepId = Object.keys(invalidSteps)[0]
+    if (nextInvalidStepId) {
+      setEditingStepId(nextInvalidStepId)
+      scrollToStep(nextInvalidStepId)
+    }
   }
 
   const addStepHandler = (type) => {
@@ -65,6 +141,8 @@ const Surveys = ({ survey, setSurvey }) => {
 
     setSurvey({ ...survey, steps: updatedSteps })
     setIsAddStep(false)
+    setEditingStepId(newStep.id)
+    setTimeout(() => scrollToStep(newStep.id), 100)
   }
 
   const AddStepModal = () => {
@@ -115,22 +193,12 @@ const Surveys = ({ survey, setSurvey }) => {
   const toggleEditMode = (stepId) => {
     if (editingStepId && editingStepId !== stepId) {
       const originalStep = survey.steps.find((q) => q.id === editingStepId)
-      saveStep(originalStep)
+      handleSaveStep(originalStep)
     }
     setEditingStepId(editingStepId === stepId ? null : stepId)
-  }
-
-  const saveStep = (updatedStep) => {
-    const { type, options, ...rest } = updatedStep
-    const newStep = { type, ...rest }
-    if (['singleChoice', 'multipleChoice', 'rating'].includes(type)) {
-      newStep.options = options
+    if (stepId) {
+      scrollToStep(stepId)
     }
-    const updatedSteps = survey.steps.map((step) =>
-      step.id === newStep.id ? newStep : step,
-    )
-    setSurvey({ ...survey, steps: updatedSteps })
-    setEditingStepId(null)
   }
 
   const cancelEdit = () => {
@@ -153,6 +221,7 @@ const Surveys = ({ survey, setSurvey }) => {
               editingStepId === step.id ? styles.editing : ''
             }`}
             key={step.id}
+            ref={(el) => (stepRefs.current[step.id] = el)}
           >
             <div className={styles.surveyNum}>
               {step.type === 'welcome'
@@ -166,55 +235,61 @@ const Surveys = ({ survey, setSurvey }) => {
                 {step.type === 'freeText' && (
                   <EditingFreeText
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
+                    showWarning={step.id in invalidSteps}
                   />
                 )}
                 {step.type === 'singleChoice' && (
                   <EditingSingleChoice
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
+                    showWarning={step.id in invalidSteps}
                   />
                 )}
                 {step.type === 'multipleChoice' && (
                   <EditingMultipleChoice
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
+                    showWarning={step.id in invalidSteps}
                   />
                 )}
                 {step.type === 'rating' && (
                   <EditingRating
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
+                    showWarning={step.id in invalidSteps}
                   />
                 )}
                 {step.type === 'link' && (
                   <EditingLink
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
+                    showWarning={step.id in invalidSteps}
                   />
                 )}
                 {step.type === 'info' && (
                   <EditingInfo
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
+                    showWarning={step.id in invalidSteps}
                   />
                 )}
                 {step.type === 'welcome' && (
                   <EditingWelcome
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
                   />
@@ -222,7 +297,7 @@ const Surveys = ({ survey, setSurvey }) => {
                 {step.type === 'thank' && (
                   <EditingThank
                     step={step}
-                    onSave={saveStep}
+                    onSave={handleSaveStep}
                     onCancel={cancelEdit}
                     steps={survey.steps}
                   />

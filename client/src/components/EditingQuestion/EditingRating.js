@@ -2,7 +2,7 @@ import styles from './EditingQuestion.module.css'
 import { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-const EditingRating = ({ step, onSave, onCancel, steps }) => {
+const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
   const [options, setOptions] = useState(() => {
@@ -15,16 +15,11 @@ const EditingRating = ({ step, onSave, onCancel, steps }) => {
           : '',
     }))
   })
+  const [localShowWarning, setLocalShowWarning] = useState(showWarning)
 
   useEffect(() => {
-    const newOptions = options.map((option) => {
-      if (option.nextStepId && !steps.some((s) => s.id === option.nextStepId)) {
-        return { ...option, nextStepId: '' }
-      }
-      return option
-    })
-    setOptions(newOptions)
-  }, [steps])
+    setLocalShowWarning(showWarning)
+  }, [showWarning])
 
   const handleSave = () => {
     if (title.trim() === '') {
@@ -63,7 +58,7 @@ const EditingRating = ({ step, onSave, onCancel, steps }) => {
         *별점의 경우 5점 기준 '매우 동의함', 1점 기준 '전혀 동의하지 않음'으로
         평가 됩니다.
       </div>
-      <div className={styles.title}>선택지별 액션</div>
+      <div className={styles.title}>별점별 액션</div>
       {options.map((option) => (
         <div key={option.id} className={styles.optionAction}>
           <div className={styles.optionLabel}>{option.value}점</div>
@@ -72,15 +67,24 @@ const EditingRating = ({ step, onSave, onCancel, steps }) => {
             value={option.nextStepId || ''}
             onChange={(e) => nextStepHandler(option.id, e.target.value)}
           >
-            <option value=''>다음 질문 선택</option>
+            <option value=''>다음 질문으로 이동</option>
             {steps.map((q) => (
               <option key={q.id} value={q.id}>
                 {q.title}
               </option>
             ))}
+            {!steps.some((s) => s.id === option.nextStepId) &&
+              option.nextStepId && (
+                <option value={option.nextStepId}>삭제된 선택지</option>
+              )}
           </select>
         </div>
       ))}
+      {localShowWarning && (
+        <div className={styles.warningBubble}>
+          참조하고 있던 스텝이 삭제되어 변경이 필요합니다.
+        </div>
+      )}
       <div className={styles.bottom}>
         <div className={styles.leftBtn} onClick={onCancel}>
           취소

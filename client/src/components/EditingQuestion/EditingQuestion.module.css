@@ -94,3 +94,17 @@
   height: 30px;
   border-radius: 5px;
 }
+
+.warningBubble {
+  background-color: #ffcccb;
+  color: #d8000c;
+  padding: 8px;
+  border-radius: 5px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.warningText {
+  color: #d8000c;
+  margin-left: 8px;
+}

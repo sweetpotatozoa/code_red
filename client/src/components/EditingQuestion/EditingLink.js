@@ -1,7 +1,7 @@
 import styles from './EditingQuestion.module.css'
 import { useState, useEffect } from 'react'
 
-const EditingLink = ({ step, onSave, onCancel, steps }) => {
+const EditingLink = ({ step, onSave, onCancel, steps, showWarning }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description || '')
   const [url, setUrl] = useState(step.url || '')
@@ -10,7 +10,9 @@ const EditingLink = ({ step, onSave, onCancel, steps }) => {
 
   useEffect(() => {
     if (nextStepId && !steps.some((s) => s.id === nextStepId)) {
-      setNextStepId('')
+      showWarning = true
+    } else {
+      showWarning = false
     }
   }, [nextStepId, steps])
 
@@ -19,12 +21,10 @@ const EditingLink = ({ step, onSave, onCancel, steps }) => {
       alert('제목을 입력해주세요.')
       return
     }
-
     if (url.trim() === '') {
       alert('URL을 입력해주세요.')
       return
     }
-
     if (buttonText.trim() === '') {
       alert('버튼 텍스트를 입력해주세요.')
       return
@@ -78,7 +78,15 @@ const EditingLink = ({ step, onSave, onCancel, steps }) => {
             {q.title}
           </option>
         ))}
+        {!steps.some((s) => s.id === nextStepId) && nextStepId && (
+          <option value={nextStepId}>삭제된 선택지</option>
+        )}
       </select>
+      {showWarning && (
+        <div className={styles.warningBubble}>
+          참조하고 있던 스텝이 삭제되어 변경이 필요합니다.
+        </div>
+      )}
       <div className={styles.bottom}>
         <div className={styles.leftBtn} onClick={onCancel}>
           취소

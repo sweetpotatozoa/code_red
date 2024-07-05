@@ -12,6 +12,8 @@ const Edit = () => {
   const [survey, setSurvey] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [invalidSteps, setInvalidSteps] = useState({})
+  const [mode, setMode] = useState('surveys')
 
   useEffect(() => {
     const fetchSurvey = async () => {
@@ -28,15 +30,48 @@ const Edit = () => {
     fetchSurvey()
   }, [id])
 
-  const [mode, setMode] = useState('surveys')
+  useEffect(() => {
+    if (survey) {
+      validateSteps()
+    }
+  }, [survey])
 
-  // 뒤로가기
+  const validateSteps = () => {
+    const invalid = {}
+    survey.steps.forEach((step, index) => {
+      if (
+        step.nextStepId &&
+        !survey.steps.some((s) => s.id === step.nextStepId)
+      ) {
+        invalid[step.id] = index
+      }
+      if (step.options) {
+        step.options.forEach((option) => {
+          if (
+            option.nextStepId &&
+            !survey.steps.some((s) => s.id === option.nextStepId)
+          ) {
+            invalid[step.id] = index
+          }
+        })
+      }
+    })
+    setInvalidSteps(invalid)
+  }
+
   const goBack = () => {
     navigate(-1)
   }
 
-  // 저장하기
   const handleSave = async () => {
+    if (Object.keys(invalidSteps).length > 0) {
+      const stepNumbers = Object.values(invalidSteps)
+        .map((index) => index)
+        .join(', ')
+      alert(`${stepNumbers}번 스텝의 '응답에 따른 대응'을 수정해주세요.`)
+      return
+    }
+
     try {
       await BackendApis.updateSurvey(id, survey)
       alert('설문조사가 성공적으로 저장되었습니다.')
@@ -45,8 +80,15 @@ const Edit = () => {
     }
   }
 
-  // 배포하기
   const handleDeploy = async () => {
+    if (Object.keys(invalidSteps).length > 0) {
+      const stepNumbers = Object.values(invalidSteps)
+        .map((index) => index)
+        .join(', ')
+      alert(`${stepNumbers}번 스텝의 '응답에 따른 대응'을 수정해주세요.`)
+      return
+    }
+
     try {
       await BackendApis.deploySurvey(id, survey)
       alert('설문조사가 성공적으로 배포되었습니다.')
@@ -62,7 +104,14 @@ const Edit = () => {
 
     switch (mode) {
       case 'surveys':
-        return <Surveys survey={survey} setSurvey={setSurvey} />
+        return (
+          <Surveys
+            survey={survey}
+            setSurvey={setSurvey}
+            invalidSteps={invalidSteps}
+            setInvalidSteps={setInvalidSteps}
+          />
+        )
       case 'triggers':
         return <Triggers survey={survey} setSurvey={setSurvey} />
       case 'delays':

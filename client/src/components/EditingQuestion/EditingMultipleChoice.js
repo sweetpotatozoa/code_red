@@ -2,7 +2,13 @@ import styles from './EditingQuestion.module.css'
 import { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-const EditingMultipleChoice = ({ step, onSave, onCancel, steps }) => {
+const EditingMultipleChoice = ({
+  step,
+  onSave,
+  onCancel,
+  steps,
+  showWarning,
+}) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
   const [options, setOptions] = useState(() => {
@@ -12,13 +18,11 @@ const EditingMultipleChoice = ({ step, onSave, onCancel, steps }) => {
       nextStepId: option.nextStepId || '',
     }))
   })
-  const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
+  const [localShowWarning, setLocalShowWarning] = useState(showWarning)
 
   useEffect(() => {
-    if (nextStepId && !steps.some((s) => s.id === nextStepId)) {
-      setNextStepId('')
-    }
-  }, [steps, nextStepId])
+    setLocalShowWarning(showWarning)
+  }, [showWarning])
 
   const handleSave = () => {
     if (title.trim() === '') {
@@ -33,11 +37,18 @@ const EditingMultipleChoice = ({ step, onSave, onCancel, steps }) => {
       alert('선택지를 모두 채워주세요.')
       return
     }
-    onSave({ ...step, title, description, options, nextStepId })
+    onSave({ ...step, title, description, options })
   }
 
   const deleteOptionHandler = (id) => {
     const newOptions = options.filter((option) => option.id !== id)
+    setOptions(newOptions)
+  }
+
+  const nextStepHandler = (optionId, nextStepId) => {
+    const newOptions = options.map((option) =>
+      option.id === optionId ? { ...option, nextStepId } : option,
+    )
     setOptions(newOptions)
   }
 
@@ -92,18 +103,32 @@ const EditingMultipleChoice = ({ step, onSave, onCancel, steps }) => {
         선택지 추가
       </div>
       <div className={styles.title}>응답에 따른 대응</div>
-      <select
-        className={styles.action}
-        value={nextStepId}
-        onChange={(e) => setNextStepId(e.target.value)}
-      >
-        <option value=''>다음 질문으로 이동</option>
-        {steps.map((q) => (
-          <option key={q.id} value={q.id}>
-            {q.title}
-          </option>
-        ))}
-      </select>
+      {options.map((option) => (
+        <div key={option.id} className={styles.optionAction}>
+          <div className={styles.optionLabel}>{option.value}</div>
+          <select
+            className={styles.action}
+            value={option.nextStepId || ''}
+            onChange={(e) => nextStepHandler(option.id, e.target.value)}
+          >
+            <option value=''>다음 질문으로 이동</option>
+            {steps.map((q) => (
+              <option key={q.id} value={q.id}>
+                {q.title}
+              </option>
+            ))}
+            {!steps.some((s) => s.id === option.nextStepId) &&
+              option.nextStepId && (
+                <option value={option.nextStepId}>삭제된 선택지</option>
+              )}
+          </select>
+        </div>
+      ))}
+      {localShowWarning && (
+        <div className={styles.warningBubble}>
+          참조하고 있던 스텝이 삭제되어 변경이 필요합니다.
+        </div>
+      )}
       <div className={styles.bottom}>
         <div className={styles.leftBtn} onClick={onCancel}>
           취소
