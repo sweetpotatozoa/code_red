@@ -183,6 +183,7 @@ class AdminSurveyController {
 
   // 설문조사 응답 요약 가져오기
   async getSurveySummary(req, res) {
+    console.log('getSurveySummary')
     try {
       const userId = req.user.id
       const { surveyId } = req.params
@@ -263,6 +264,67 @@ class AdminSurveyController {
       res.status(200).json(result)
     } catch (err) {
       const { status, message } = errorHandler(err, 'deleteResponse')
+      res.status(status).json({ message })
+    }
+  }
+
+  //유저 아이디 반환
+  async getUserId(req, res) {
+    const userId = req.user.id
+    if (!userId || !isObjectId(userId)) {
+      res.status(400).json({ message: 'Invalid user id' })
+      return
+    }
+    try {
+      res.status(200).json({ userId })
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'getId')
+      res.status(status).json({ message })
+    }
+  }
+
+  //연결상태 확인하기
+  async checkConnect(req, res) {
+    try {
+      const userId = req.user.id
+      if (!userId || !isObjectId(userId)) {
+        return res.status(400).json({ message: 'Invalid user id' })
+      }
+      const result = await AdminSurveyService.checkConnect(userId)
+      res.status(200).json(result)
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'checkConnection')
+      res.status(status).json({ message })
+    }
+  }
+
+  //온보딩 완료 후 정보 저장하기
+  async saveOnboardingInfo(req, res) {
+    const userId = req.user.id
+    const onboardingInfo = req.body
+    if (!userId || !isObjectId(userId)) {
+      res.status(400).json({ message: 'Invalid user id' })
+      return
+    }
+    if (
+      !onboardingInfo.role ||
+      !isString(onboardingInfo.role) ||
+      !onboardingInfo.purpose ||
+      !isString(onboardingInfo.purpose) ||
+      !onboardingInfo.isConnect ||
+      !onboardingInfo.isOnboarding
+    ) {
+      res.status(400).json({ message: 'Invalid onboarding info' })
+      return
+    }
+    try {
+      const result = await AdminSurveyService.saveOnboardingInfo(
+        userId,
+        onboardingInfo,
+      )
+      res.status(200).json(result)
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'saveOnboardingInfo')
       res.status(status).json({ message })
     }
   }

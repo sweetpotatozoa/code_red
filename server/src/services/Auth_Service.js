@@ -51,7 +51,7 @@ class AuthService {
 
   //회원가입
   async register(userData) {
-    const { userName, password, realName, phoneNumber } = userData
+    const { userName, password, realName, phoneNumber, company } = userData
     await this.checkUserNameExist(userName)
     const hash = bcrypt.hashSync(password, 10)
 
@@ -60,9 +60,11 @@ class AuthService {
       password: hash,
       realName,
       phoneNumber,
+      company,
       createAt: new Date(),
       surveyPosition: 4,
       isConnect: false,
+      isOnboarding: false,
     }
 
     await UsersRepo.createUser(newUser)
@@ -76,7 +78,7 @@ class AuthService {
     const isValid = await this.validatePassword(password, user.password) //비밀번호 일치 검사
     if (isValid) {
       const tokenResult = await this.generateToken(user._id) //토큰 부여
-      return { token: tokenResult }
+      return { token: tokenResult, isOnboarding: user.isOnboarding }
     } else {
       throw new Error('Invalid user name or password')
     }

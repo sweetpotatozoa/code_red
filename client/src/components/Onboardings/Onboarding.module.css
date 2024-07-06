@@ -1,0 +1,135 @@
+.container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 48px;
+  font-weight: bold;
+  margin-top: 32px;
+}
+
+.description {
+  font-size: 21px;
+  margin-top: 16px;
+}
+
+.contents {
+  display: flex;
+  flex-direction: column;
+  margin-top: 32px;
+  width: 700px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  width: 700px;
+}
+
+.label {
+  font-size: 18px;
+  margin-top: 8px;
+  padding: 16px;
+  background-color: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.customInput {
+  border: none;
+  font-size: 18px;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  background: transparent;
+  outline: none; /* 포커스 시 기본 아웃라인 제거 */
+  padding: 8px 0;
+  line-height: 1.5;
+}
+
+.form label input {
+  width: 14px;
+  height: 14px;
+  margin-right: 16px;
+}
+
+.button {
+  display: flex;
+  margin-top: 32px;
+  padding: 16px 32px;
+  max-width: 200px;
+  align-self: flex-end;
+  background-color: #e2e8f0;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 21px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 32px;
+  width: 100%;
+}
+
+.buttons button {
+  display: flex;
+  margin-top: 32px;
+  padding: 16px 32px;
+  background-color: #e2e8f0;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 21px;
+  margin-right: 16px;
+}
+
+.waiting {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  font-size: 18px;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.info {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.contents2 {
+  display: flex;
+  flex-direction: column;
+  width: 700px;
+  align-items: center;
+  margin-top: 32px;
+}
+
+.complete {
+  background-color: #ffffff;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+}
+
+.complete img {
+  margin-bottom: 32px;
+}

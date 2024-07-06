@@ -336,6 +336,18 @@ class AdminSurveyService {
 
     return SurveysRepo.getSurveyDeployStatus(surveyId)
   }
+
+  //연결상태 확인하기
+  async checkConnect(userId) {
+    await this.checkUserIdExist(userId)
+    return SurveysRepo.checkConnect(userId)
+  }
+
+  //온보딩 완료 후 정보 저장하기
+  async saveOnboardingInfo(userId, onboardingInfo) {
+    await this.checkUserIdExist(userId)
+    return UsersRepo.saveOnboardingInfo(userId, onboardingInfo)
+  }
 }
 
 module.exports = new AdminSurveyService()

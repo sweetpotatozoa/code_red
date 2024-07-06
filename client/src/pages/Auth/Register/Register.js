@@ -12,6 +12,7 @@ const Register = () => {
     password: '',
     realName: '',
     phoneNumber: '',
+    company: '',
   })
 
   const changeHandler = (e) => {
@@ -78,6 +79,14 @@ const Register = () => {
             placeholder='전화번호'
             onChange={changeHandler}
             value={input.phoneNumber}
+            required
+          />
+          <input
+            type='text'
+            name='company'
+            placeholder='회사명'
+            onChange={changeHandler}
+            value={input.company}
             required
           />
           <button type='submit'>회원가입</button>

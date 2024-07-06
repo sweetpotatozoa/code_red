@@ -89,6 +89,15 @@ class SurveysRepo {
     )
     return survey
   }
+
+  //연결상태 확인하기
+  async checkConnect(userId) {
+    const result = await this.collection.findOne({
+      userId: new mongoose.Types.ObjectId(userId),
+      views: { $gte: 1 },
+    })
+    return result !== null
+  }
 }
 
 module.exports = new SurveysRepo()
