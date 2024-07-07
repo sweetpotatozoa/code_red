@@ -415,7 +415,9 @@
     return `
       <div class="survey-step">
         <div class="survey-header">
-          <button type="button" id="closeSurvey" class="close-button">X</button>
+          <button type="button" id="closeSurvey" class="close-button">
+            <img src="/images/close.png" alt="close" class="close-icon">
+          </button>
         </div>
         <form id="surveyForm">
           ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
@@ -429,7 +431,9 @@
           </div>
           ${
             buttonText
-              ? `<button type="submit" id="submitSurvey">${buttonText}</button>`
+              ? `<div class="button-container">
+                   <button type="submit" id="submitSurvey" class="submit-button">${buttonText}</button>
+                 </div>`
               : ''
           }
         </form>
@@ -437,10 +441,10 @@
       ${
         step.type !== 'thank'
           ? `<div class="survey-progress">
-              <div class="progress-bar">
-                <div class="progress"></div>
+              <p class="powered-by">Powered by <span class="logo">CodeRed</span></p>
+              <div class="background-bar">
+                <div class="progress-bar"></div>
               </div>
-              <p class="powered-by">Powered by Codered</p>
             </div>`
           : ''
       }
@@ -448,7 +452,7 @@
   }
 
   function updateProgressBar(currentStepIndex, totalSteps) {
-    const progressBar = document.querySelector('.progress')
+    const progressBar = document.querySelector('.progress-bar')
     if (progressBar) {
       const progressPercentage = ((currentStepIndex + 1) / totalSteps) * 100
       progressBar.style.width = `${progressPercentage}%`
