@@ -11,13 +11,7 @@ const EditingSingleChoice = ({
 }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
-  const [options, setOptions] = useState(() => {
-    return (step.options || []).map((option) => ({
-      id: option.id || uuidv4(),
-      value: option.value || '',
-      nextStepId: option.nextStepId || '',
-    }))
-  })
+  const [options, setOptions] = useState(step.options || [])
   const [localShowWarning, setLocalShowWarning] = useState(showWarning)
 
   useEffect(() => {
@@ -44,15 +38,30 @@ const EditingSingleChoice = ({
   }
 
   const deleteOptionHandler = (id) => {
-    const newOptions = options.filter((option) => option.id !== id)
-    setOptions(newOptions)
+    setOptions(options.filter((option) => option.id !== id))
+  }
+
+  const addOptionHandler = () => {
+    setOptions([
+      ...options,
+      { id: uuidv4(), value: '새 선택지', nextStepId: '' },
+    ])
+  }
+
+  const changeOptionHandler = (id, value) => {
+    setOptions(
+      options.map((option) =>
+        option.id === id ? { ...option, value } : option,
+      ),
+    )
   }
 
   const nextStepHandler = (optionId, nextStepId) => {
-    const newOptions = options.map((option) =>
-      option.id === optionId ? { ...option, nextStepId } : option,
+    setOptions(
+      options.map((option) =>
+        option.id === optionId ? { ...option, nextStepId } : option,
+      ),
     )
-    setOptions(newOptions)
   }
 
   return (
@@ -79,15 +88,9 @@ const EditingSingleChoice = ({
         <div className={styles.optionBox} key={option.id}>
           <input
             className={styles.input}
-            key={option.id}
             type='text'
             value={option.value}
-            onChange={(e) => {
-              const newOptions = options.map((opt) =>
-                opt.id === option.id ? { ...opt, value: e.target.value } : opt,
-              )
-              setOptions(newOptions)
-            }}
+            onChange={(e) => changeOptionHandler(option.id, e.target.value)}
             placeholder='새 선택지'
           />
           <div
@@ -98,15 +101,7 @@ const EditingSingleChoice = ({
           </div>
         </div>
       ))}
-      <div
-        onClick={() =>
-          setOptions([
-            ...options,
-            { id: uuidv4(), value: '새 선택지', nextStepId: '' },
-          ])
-        }
-        className={styles.addOption}
-      >
+      <div onClick={addOptionHandler} className={styles.addOption}>
         선택지 추가
       </div>
 

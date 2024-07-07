@@ -6,14 +6,15 @@ const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
   const [options, setOptions] = useState(() => {
-    return Array.from({ length: 5 }, (_, index) => ({
-      id: uuidv4(),
-      value: index + 1,
-      nextStepId:
-        step.options && step.options[index]
-          ? step.options[index].nextStepId
-          : '',
-    }))
+    // 기존 옵션이 있으면 사용하고, 없으면 기본 5개 별점 옵션 생성
+    return (
+      step.options ||
+      Array.from({ length: 5 }, (_, index) => ({
+        id: uuidv4(),
+        value: index + 1,
+        nextStepId: '',
+      }))
+    )
   })
   const [localShowWarning, setLocalShowWarning] = useState(showWarning)
 
@@ -30,10 +31,11 @@ const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
   }
 
   const nextStepHandler = (optionId, nextStepId) => {
-    const newOptions = options.map((option) =>
-      option.id === optionId ? { ...option, nextStepId } : option,
+    setOptions(
+      options.map((option) =>
+        option.id === optionId ? { ...option, nextStepId } : option,
+      ),
     )
-    setOptions(newOptions)
   }
 
   return (

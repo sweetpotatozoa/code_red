@@ -2,6 +2,7 @@ import styles from './Edit.module.css'
 import Surveys from '../../components/Surveys/Surveys'
 import Triggers from '../../components/Triggers/Triggers'
 import Delay from '../../components/Delay/Delay'
+import SurveyPreview from '../../components/Surveys/SurveyPreview'
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import BackendApis from '../../utils/backendApis'
@@ -14,6 +15,8 @@ const Edit = () => {
   const [error, setError] = useState(null)
   const [invalidSteps, setInvalidSteps] = useState({})
   const [mode, setMode] = useState('surveys')
+  const [currentStepId, setCurrentStepId] = useState(null)
+  const [showPreviewContainer, setShowPreviewContainer] = useState(true)
 
   useEffect(() => {
     const fetchSurvey = async () => {
@@ -21,6 +24,9 @@ const Edit = () => {
         const data = await BackendApis.editSurvey(id)
         setSurvey(data)
         setLoading(false)
+        if (data.steps && data.steps.length > 0) {
+          setCurrentStepId(data.steps[0].id)
+        }
       } catch (err) {
         setError('설문조사를 불러오는데 실패했습니다.')
         setLoading(false)
@@ -121,6 +127,13 @@ const Edit = () => {
     }
   }
 
+  const refreshPreview = () => {
+    if (survey && survey.steps.length > 0) {
+      setCurrentStepId(survey.steps[0].id)
+      setShowPreviewContainer(true)
+    }
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -181,9 +194,20 @@ const Edit = () => {
               />
               <div className={styles.yourWeb}>나의 서비스</div>
             </div>
+            {survey && (
+              <SurveyPreview
+                selectedTemplate={survey}
+                currentStepId={currentStepId}
+                setCurrentStepId={setCurrentStepId}
+                showContainer={showPreviewContainer}
+                setShowContainer={setShowPreviewContainer}
+              />
+            )}
           </div>
           <div className={styles.bottom}>
-            <div className={styles.bigButton}>새로고침</div>
+            <div className={styles.bigButton} onClick={refreshPreview}>
+              새로고침
+            </div>
           </div>
         </div>
       </div>

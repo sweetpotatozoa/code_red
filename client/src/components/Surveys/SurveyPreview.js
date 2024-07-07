@@ -10,12 +10,15 @@ const SurveyPreview = ({
 }) => {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [selectedOptions, setSelectedOptions] = useState([])
+  const [survey, setSurvey] = useState(selectedTemplate)
 
   useEffect(() => {
-    if (selectedTemplate && currentStepId) {
-      const currentStep = selectedTemplate.steps.find(
-        (step) => step.id === currentStepId,
-      )
+    setSurvey(selectedTemplate)
+  }, [selectedTemplate])
+
+  useEffect(() => {
+    if (survey && currentStepId) {
+      const currentStep = survey.steps.find((step) => step.id === currentStepId)
       if (
         currentStep &&
         currentStep.type === 'welcome' &&
@@ -25,7 +28,7 @@ const SurveyPreview = ({
         handleNextStep()
       }
     }
-  }, [currentStepId, selectedTemplate])
+  }, [currentStepId, survey])
 
   const handleOptionChange = (option, isMultiple) => {
     setSelectedOptions((prevOptions) => {
@@ -47,8 +50,8 @@ const SurveyPreview = ({
   }
 
   const handleNextStep = () => {
-    if (selectedTemplate && !isTransitioning) {
-      const currentStepData = selectedTemplate.steps.find(
+    if (survey && !isTransitioning) {
+      const currentStepData = survey.steps.find(
         (step) => step.id === currentStepId,
       )
 
@@ -251,7 +254,7 @@ const SurveyPreview = ({
       )
     } else if (step.type === 'link') {
       return (
-        <a href={step.url} target='_blank'>
+        <a href={step.url} target='_blank' rel='noopener noreferrer'>
           <div className={styles.button} onClick={handleNextStep}>
             링크로 이동
           </div>
@@ -293,11 +296,8 @@ const SurveyPreview = ({
                 className={styles.progressBar}
                 style={{
                   width: `${
-                    ((selectedTemplate.steps.findIndex(
-                      (s) => s.id === step.id,
-                    ) +
-                      1) /
-                      selectedTemplate.steps.length) *
+                    ((survey.steps.findIndex((s) => s.id === step.id) + 1) /
+                      survey.steps.length) *
                     100
                   }%`,
                 }}
@@ -309,30 +309,23 @@ const SurveyPreview = ({
     )
   }
 
-  if (
-    !selectedTemplate ||
-    !selectedTemplate.steps ||
-    !currentStepId ||
-    !showContainer
-  ) {
+  if (!survey || !survey.steps || !currentStepId || !showContainer) {
     return null
   }
 
-  const currentStep = selectedTemplate.steps.find(
-    (step) => step.id === currentStepId,
-  )
+  const currentStep = survey.steps.find((step) => step.id === currentStepId)
 
   // welcome 타입이고 isActive가 false인 경우 다음 스텝을 찾음
   let displayStep = currentStep
   if (currentStep?.type === 'welcome' && !currentStep?.isActive) {
-    displayStep = selectedTemplate.steps.find(
+    displayStep = survey.steps.find(
       (step) => step.id === currentStep.nextStepId,
     )
   }
 
   const nextStepId = displayStep?.nextStepId
   const nextStep = nextStepId
-    ? selectedTemplate.steps.find((step) => step.id === nextStepId)
+    ? survey.steps.find((step) => step.id === nextStepId)
     : null
 
   return (
