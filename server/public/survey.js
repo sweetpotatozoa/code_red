@@ -47,42 +47,42 @@
     })
   }
 
- // HTTP 요청을 통해 설문조사 데이터 가져오기
- async function fetchSurvey(userId) {
-  try {
-    // 설문조사 데이터 가져오기
-    const response = await fetch(
-      `${API_URI}/api/appliedSurvey?userId=${userId}&isDeploy=true`,
-    )
-    if (!response.ok) {
-      throw new Error('Network response was not ok')
+  // HTTP 요청을 통해 설문조사 데이터 가져오기
+  async function fetchSurvey(userId) {
+    try {
+      // 설문조사 데이터 가져오기
+      const response = await fetch(
+        `${API_URI}/api/appliedSurvey?userId=${userId}&isDeploy=true`,
+      )
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      const data = await response.json()
+      console.log('Surveys loaded:', data)
+
+      const validSurveys = data.data.filter(validateSurvey)
+
+      // 사용자 데이터에서 surveyPosition 값 가져오기
+      const userResponse = await fetch(
+        `${API_URI}/api/appliedSurvey/users/${userId}`,
+      )
+      if (!userResponse.ok) {
+        throw new Error('Network response was not ok')
+      }
+      const userData = await userResponse.json()
+      const surveyPosition = userData.surveyPosition
+
+      // 각 설문조사에 surveyPosition 값 설정
+      validSurveys.forEach((survey) => {
+        survey.position = surveyPosition
+      })
+
+      return { status: data.status, data: validSurveys }
+    } catch (error) {
+      console.error('Error fetching survey:', error)
+      return null
     }
-    const data = await response.json()
-    console.log('Surveys loaded:', data)
-
-    const validSurveys = data.data.filter(validateSurvey)
-
-    // 사용자 데이터에서 surveyPosition 값 가져오기
-    const userResponse = await fetch(`${API_URI}/api/appliedSurvey/users/${userId}`)
-    if (!userResponse.ok) {
-      throw new Error('Network response was not ok')
-    }
-    const userData = await userResponse.json()
-    const surveyPosition = userData.surveyPosition
-
-    // 각 설문조사에 surveyPosition 값 설정
-    validSurveys.forEach(survey => {
-      survey.position = surveyPosition
-    })
-
-    return { status: data.status, data: validSurveys }
-  } catch (error) {
-    console.error('Error fetching survey:', error)
-    return null
   }
-}
-
-
 
   // 설문조사 응답 생성
   async function createResponse(userId, surveyId, answer) {
@@ -309,24 +309,24 @@
   }
 
   function setupRatingStars() {
-    const starContainer = document.querySelector('.starInputContainer');
+    const starContainer = document.querySelector('.starInputContainer')
     if (starContainer) {
-      const stars = starContainer.querySelectorAll('.starOptionLabel');
+      const stars = starContainer.querySelectorAll('.starOptionLabel')
       stars.forEach((star, index) => {
         star.addEventListener('click', () => {
-          const rating = 5 - index; // 역순으로 인덱스 계산
-        stars.forEach((s, i) => {
-          if (i >= index) {
-            s.classList.add('checked');
-          } else {
-            s.classList.remove('checked');
-          }
-        });
-        // 여기에 선택된 rating 값을 저장하는 로직 추가
-      });
-    });
+          const rating = 5 - index // 역순으로 인덱스 계산
+          stars.forEach((s, i) => {
+            if (i >= index) {
+              s.classList.add('checked')
+            } else {
+              s.classList.remove('checked')
+            }
+          })
+          // 여기에 선택된 rating 값을 저장하는 로직 추가
+        })
+      })
+    }
   }
-}
 
   // 설문조사 스텝 표시
   function showStep(survey, stepIndex) {
@@ -335,54 +335,58 @@
     )
     const step = activeSteps[stepIndex]
     const surveyContainer = document.getElementById('survey-popup')
-  
+
     if (!step) {
       closeSurvey(survey._id, false)
       console.log('Survey finished')
       return
     }
-  
+
     const buttonText = step.type === 'thank' ? '닫기' : getButtonText(step)
-  
+
     surveyContainer.innerHTML = generateStepHTML(step, buttonText)
-  
+
     document.getElementById('closeSurvey').onclick = () => {
       closeSurvey(survey._id, step.type === 'thank')
     }
-  
+
     const nextButton = document.getElementById('nextStepButton')
     if (nextButton) {
       if (step.type === 'thank') {
         nextButton.onclick = () => closeSurvey(survey._id, true)
       } else {
-        nextButton.onclick = async function(event) {
+        nextButton.onclick = async function (event) {
           event.preventDefault()
           const stepAnswer = getResponse(step)
-  
+
           if (stepAnswer === null) {
             return
           }
-  
+
           saveResponse(step, stepAnswer)
-  
+
           try {
             let isCompleted = false
-  
+
             if (surveyResponseId) {
               await updateResponse(surveyResponseId, surveyResponses, false)
             } else {
-              surveyResponseId = await createResponse(survey.userId, survey._id, {
-                ...surveyResponses[0],
-              })
+              surveyResponseId = await createResponse(
+                survey.userId,
+                survey._id,
+                {
+                  ...surveyResponses[0],
+                },
+              )
             }
-  
+
             if (step.type === 'link') {
               window.open(
                 step.url.startsWith('http') ? step.url : `https://${step.url}`,
                 '_blank',
               )
             }
-  
+
             let nextStepId
             if (step.type === 'singleChoice' || step.type === 'rating') {
               const selectedOptionId = stepAnswer.id
@@ -393,7 +397,7 @@
             } else {
               nextStepId = step.nextStepId
             }
-  
+
             let nextStepIndex
             if (!nextStepId || nextStepId === '') {
               nextStepIndex = stepIndex + 1
@@ -403,15 +407,19 @@
                 nextStepIndex = stepIndex + 1
               }
             }
-  
+
             if (nextStepIndex < survey.steps.length) {
               const nextStep = survey.steps[nextStepIndex]
-  
-              if (nextStep.type === 'thank' && nextStep.isActive && !isCompleted) {
+
+              if (
+                nextStep.type === 'thank' &&
+                nextStep.isActive &&
+                !isCompleted
+              ) {
                 await updateResponse(surveyResponseId, surveyResponses, true)
                 isCompleted = true
               }
-  
+
               showStep(survey, nextStepIndex)
             } else {
               const thankStep = survey.steps.find(
@@ -441,14 +449,12 @@
         }
       }
     }
-  
+
     if (step.type === 'rating') {
       setupRatingStars()
     }
-  
-    if (step.type !== 'thank') {
-      updateProgressBar(stepIndex, activeSteps.length - 1)
-    }
+
+    updateProgressBar(stepIndex, activeSteps.length - 1)
   }
 
   function generateStepHTML(step, buttonText) {
@@ -462,7 +468,11 @@
         <div class="content-wrapper">
           <div class="text-content">
             ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
-            ${step.description ? `<p class="survey-description">${step.description}</p>` : ''}
+            ${
+              step.description
+                ? `<p class="survey-description">${step.description}</p>`
+                : ''
+            }
           </div>
           <div class="input-content">
             ${generateStepContent(step)}
@@ -475,22 +485,18 @@
               : ''
           }
         </div>
-        ${
-          step.type !== 'thank'
-            ? `<div class="survey-progress">
-                <p class="powered-by">Powered by <span class="logo">CodeRed</span></p>
-                <div class="background-bar">
-                  <div class="progress-bar"></div>
-                </div>
-              </div>`
-            : ''
-        }
+        <div class="survey-progress">
+            <p class="powered-by">Powered by <span class="logo">CodeRed</span></p>
+            <div class="background-bar">
+              <div class="progress-bar"></div>
+            </div>
+          </div>
       </div>
     `
   }
 
   function updateProgressBar(currentStepIndex, totalSteps) {
-    const progressBar = document.querySelector('.progressBar')
+    const progressBar = document.querySelector('.progress-bar')
     if (progressBar) {
       const progressPercentage = ((currentStepIndex + 1) / totalSteps) * 100
       progressBar.style.width = `${progressPercentage}%`
@@ -537,26 +543,36 @@
       case 'multipleChoice':
         return `
           <div class="inputContainer">
-            ${step.options.map((option) => `
+            ${step.options
+              .map(
+                (option) => `
               <label class="optionLabel">
-                <input type="${step.type === 'singleChoice' ? 'radio' : 'checkbox'}" 
+                <input type="${
+                  step.type === 'singleChoice' ? 'radio' : 'checkbox'
+                }" 
                        name="${step.type}" 
                        value="${option.value}" 
                        id="${step.type}-${option.id}">
                 <span>${option.value}</span>
               </label>
-            `).join('')}
+            `,
+              )
+              .join('')}
           </div>
         `
       case 'rating':
         return `
           <div class="starInputContainer">
-            ${[5, 4, 3, 2, 1].map((value) => `
+            ${[5, 4, 3, 2, 1]
+              .map(
+                (value) => `
               <label class="starOptionLabel" for="rating-${value}">
                 <input type="radio" name="rating" value="${value}" id="rating-${value}">
                 <span class="star">&#9733;</span>
               </label>
-            `).join('')}
+            `,
+              )
+              .join('')}
           </div>
         `
       case 'freeText':
@@ -576,25 +592,39 @@
       case 'welcome':
         return 'clicked'
       case 'singleChoice': {
-        const selectedOption = document.querySelector('input[name="singleChoice"]:checked')
-        return selectedOption ? {
-          id: selectedOption.id.replace('singleChoice-', ''),
-          value: selectedOption.value
-        } : null
+        const selectedOption = document.querySelector(
+          'input[name="singleChoice"]:checked',
+        )
+        return selectedOption
+          ? {
+              id: selectedOption.id.replace('singleChoice-', ''),
+              value: selectedOption.value,
+            }
+          : null
       }
       case 'multipleChoice': {
-        const selectedOptions = Array.from(document.querySelectorAll('input[name="multipleChoice"]:checked'))
-        return selectedOptions.length > 0 ? selectedOptions.map(option => ({
-          id: option.id.replace('multipleChoice-', ''),
-          value: option.value
-        })) : null
+        const selectedOptions = Array.from(
+          document.querySelectorAll('input[name="multipleChoice"]:checked'),
+        )
+        return selectedOptions.length > 0
+          ? selectedOptions.map((option) => ({
+              id: option.id.replace('multipleChoice-', ''),
+              value: option.value,
+            }))
+          : null
       }
       case 'rating': {
-        const checkedStar = document.querySelector('.starOptionLabel.checked');
-        return checkedStar ? {
-          id: checkedStar.querySelector('input').id.replace('rating-', ''),
-          value: 5 - Array.from(checkedStar.parentNode.children).indexOf(checkedStar)
-        } : null;
+        const checkedStar = document.querySelector('.starOptionLabel.checked')
+        return checkedStar
+          ? {
+              id: checkedStar.querySelector('input').id.replace('rating-', ''),
+              value:
+                5 -
+                Array.from(checkedStar.parentNode.children).indexOf(
+                  checkedStar,
+                ),
+            }
+          : null
       }
       case 'freeText': {
         const textResponse = document.getElementById('response')
@@ -884,24 +914,24 @@
     window.activeSurveyId = survey._id
     currentStep = 0
     surveyResponses = []
-  
+
     const link = document.createElement('link')
     link.rel = 'stylesheet'
     link.type = 'text/css'
     link.href = `${API_URI}/survey.css`
     document.head.appendChild(link)
-  
+
     link.onload = async () => {
       const surveyContainer = document.createElement('div')
       surveyContainer.id = 'survey-popup'
-      surveyContainer.classList.add(`survey-popup-position-${survey.position}`)  // 이 줄 추가
+      surveyContainer.classList.add(`survey-popup-position-${survey.position}`) // 이 줄 추가
       document.body.appendChild(surveyContainer)
-  
+
       await incrementViews(survey._id)
-  
+
       showStep(survey, currentStep)
       console.log('Survey container created and appended to body')
-  
+
       saveSurveyData(survey._id, {
         lastShownTime: new Date().toISOString(),
         completed: false,
