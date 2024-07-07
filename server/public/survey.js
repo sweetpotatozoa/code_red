@@ -3,11 +3,14 @@
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
   window.activeSurveyId = null
-  let currentStep = 0
-  let surveyResponseId = null
-  let surveyResponses = []
-  let activeSurveys = new Set()
+  let currentStepId = null
+  let selectedTemplate = null
+  let isTransitioning = false
+  let selectedOptions = []
+  let showContainer = true
   let surveys = []
+  let surveyResponseId = null;
+  let surveyResponses = [];
 
   // 1. Helper Functions
 
@@ -294,161 +297,10 @@
 
   // 설문조사 스텝 표시
   function showStep(survey, stepIndex) {
-    const activeSteps = survey.steps.filter((step) =>
-      step.type === 'welcome' || step.type === 'thank' ? step.isActive : true,
-    )
-    const step = activeSteps[stepIndex]
-    const surveyContainer = document.getElementById('survey-popup')
-
-    if (!step) {
-      closeSurvey(survey._id, false)
-      console.log('Survey finished')
-      return
-    }
-
-    const buttonText = getButtonText(step)
-
-    surveyContainer.innerHTML = generateStepHTML(step, buttonText)
-
-    document.getElementById('closeSurvey').onclick = () => {
-      const isThankStep = step.type === 'thank'
-      closeSurvey(survey._id, isThankStep)
-    }
-
-    document.getElementById('surveyForm').onsubmit = async function (event) {
-      event.preventDefault()
-      const stepAnswer = getResponse(step)
-
-      if (stepAnswer === null) {
-        return
-      }
-
-      saveResponse(step, stepAnswer)
-
-      try {
-        let isCompleted = false
-
-        if (surveyResponseId) {
-          await updateResponse(surveyResponseId, surveyResponses, false)
-        } else {
-          surveyResponseId = await createResponse(survey.userId, survey._id, {
-            ...surveyResponses[0],
-          })
-        }
-
-        // 링크 스텝 처리
-        if (step.type === 'link') {
-          window.open(
-            step.url.startsWith('http') ? step.url : `https://${step.url}`,
-            '_blank',
-          )
-        }
-
-        // 다음 스텝 인덱스 결정 로직
-        let nextStepId
-        if (step.type === 'singleChoice' || step.type === 'rating') {
-          const selectedOptionId = stepAnswer.id.replace('choice-', '')
-          const selectedOption = step.options.find(
-            (option) => option.id === selectedOptionId,
-          )
-          nextStepId = selectedOption ? selectedOption.nextStepId : null
-        } else {
-          nextStepId = step.nextStepId
-        }
-
-        let nextStepIndex
-        if (!nextStepId || nextStepId === '') {
-          nextStepIndex = stepIndex + 1
-        } else {
-          nextStepIndex = survey.steps.findIndex((s) => s.id === nextStepId)
-          if (nextStepIndex === -1) {
-            nextStepIndex = stepIndex + 1
-          }
-        }
-
-        // 다음 스텝으로 이동 또는 설문조사 완료 처리
-        if (nextStepIndex < survey.steps.length) {
-          const nextStep = survey.steps[nextStepIndex]
-
-          // thank 스텝으로 넘어갈 때 isComplete를 true로 설정
-          if (nextStep.type === 'thank' && nextStep.isActive && !isCompleted) {
-            await updateResponse(surveyResponseId, surveyResponses, true)
-            isCompleted = true
-          }
-
-          currentStep = nextStepIndex
-          showStep(survey, currentStep)
-        } else {
-          const thankStep = survey.steps.find(
-            (step) => step.type === 'thank' && step.isActive,
-          )
-          if (thankStep) {
-            currentStep = survey.steps.findIndex(
-              (step) => step.id === thankStep.id,
-            )
-            if (!isCompleted) {
-              await updateResponse(surveyResponseId, surveyResponses, true)
-              isCompleted = true
-            }
-            showStep(survey, currentStep)
-          } else {
-            // thank 스텝이 없거나 active가 아닐 때 isComplete를 true로 설정
-            if (!isCompleted) {
-              await updateResponse(surveyResponseId, surveyResponses, true)
-              isCompleted = true
-            }
-            closeSurvey(survey._id, true)
-            console.log('Survey closed without thank step')
-          }
-        }
-      } catch (error) {
-        console.error('Error while submitting survey:', error)
-      }
-    }
-
-    if (step.type !== 'thank') {
-      updateProgressBar(stepIndex, activeSteps.length - 1)
-    }
+    selectedTemplate = survey;
+    currentStepId = survey.steps[stepIndex].id;
+    updateUI();
   }
-
-  function generateStepHTML(step, buttonText) {
-    return `
-      <div class="survey-step">
-        <div class="survey-header">
-          <button type="button" id="closeSurvey" class="close-button">X</button>
-        </div>
-        <form id="surveyForm">
-          ${
-            step.title || step.description
-              ? `<div class="step-content">
-                  ${step.title ? `<div class="step-title">${step.title}</div>` : ''}
-                  ${step.description ? `<div class="step-description">${step.description}</div>` : ''}
-                </div>`
-              : ''
-          }
-          <div>
-            ${generateStepContent(step)}
-          </div>
-          ${
-            buttonText
-              ? `<button type="submit" id="submitSurvey" class="button">${buttonText}</button>`
-              : ''
-          }
-        </form>
-      </div>
-      ${
-        step.type !== 'thank'
-          ? `<div class="survey-progress">
-              <p class="powered-by">Powered by <strong>Codered</strong></p>
-              <div class="progress-bar">
-                <div class="progress"></div>
-              </div>
-            </div>`
-          : ''
-      }
-    `;
-}
-
 
 
   function updateProgressBar(currentStepIndex, totalSteps) {
@@ -459,145 +311,259 @@
     }
   }
 
-  // 설문조사 단계별 버튼 텍스트 설정
-  function getButtonText(step) {
+  function setCurrentStepId(newStepId) {
+    currentStepId = newStepId;
+  }
+  
+  function setShowContainer(value) {
+    showContainer = value;
+  }
+  
+  function handleOptionChange(option, isMultiple) {
+    if (isMultiple) {
+      const index = selectedOptions.findIndex(selectedOption => selectedOption.id === option.id);
+      if (index !== -1) {
+        selectedOptions.splice(index, 1);
+      } else {
+        selectedOptions.push(option);
+      }
+    } else {
+      selectedOptions = [option];
+    }
+    updateUI();
+  }
+  
+  async function handleNextStep() {
+    if (selectedTemplate && !isTransitioning) {
+      const currentStepData = selectedTemplate.steps.find(
+        (step) => step.id === currentStepId
+      );
+  
+      if (!currentStepData) return;
+  
+      const stepAnswer = getResponse(currentStepData);
+      if (stepAnswer === null) return;
+  
+      saveResponse(currentStepData, stepAnswer);
+  
+      let nextStepId;
+  
+      if (
+        (currentStepData.type === 'singleChoice' ||
+          currentStepData.type === 'rating') &&
+        selectedOptions.length > 0
+      ) {
+        nextStepId = selectedOptions[0].nextStepId;
+      } else if (currentStepData.type === 'multipleChoice') {
+        nextStepId = currentStepData.nextStepId;
+      } else if (currentStepData.type !== 'thank') {
+        nextStepId = currentStepData.nextStepId;
+      }
+  
+      if (nextStepId) {
+        isTransitioning = true;
+        
+        try {
+          if (surveyResponseId) {
+            await updateResponse(surveyResponseId, surveyResponses, false);
+          } else {
+            surveyResponseId = await createResponse(selectedTemplate.userId, selectedTemplate._id, {
+              ...surveyResponses[0],
+            });
+          }
+        } catch (error) {
+          console.error('Error in handling response:', error);
+        }
+  
+        setTimeout(() => {
+          setCurrentStepId(nextStepId);
+          selectedOptions = [];
+          isTransitioning = false;
+          updateUI();
+        }, 400);
+      } else {
+        try {
+          await updateResponse(surveyResponseId, surveyResponses, true);
+        } catch (error) {
+          console.error('Error in finalizing response:', error);
+        }
+        setShowContainer(false);
+        updateUI();
+      }
+    }
+  }
+  
+  function renderCloseButton() {
+    return `
+      <div class="closeButton" onclick="setShowContainer(false); updateUI();">
+        <img src="/images/close.png" alt="close" />
+      </div>
+    `;
+  }
+  
+  function renderStepContent(step) {
+    if ((step.type === 'welcome' || step.type === 'thank') && !step.isActive) {
+      return '';
+    }
+  
+    let content = '';
     switch (step.type) {
       case 'welcome':
-        return '참여하기'
-      case 'link':
-        return step.buttonText
       case 'thank':
-        return ''
-      default:
-        return '다음'
-    }
-  }
-
-  // 설문조사 닫기
-  function closeSurvey(surveyId, isThankStep = false) {
-    const surveyPopup = document.getElementById('survey-popup')
-    if (surveyPopup) {
-      surveyPopup.remove()
-    }
-    window.activeSurveyId = null
-    console.log('Survey closed')
-
-    window.dispatchEvent(new Event('surveyCompleted'))
-
-    // 서버 응답 업데이트 (isComplete 값은 변경하지 않음)
-    if (surveyResponseId) {
-      updateResponse(surveyResponseId, surveyResponses, false)
-    }
-  }
-
-  // 설문조사 스텝 콘텐츠 생성
-  function generateStepContent(step) {
-    switch (step.type) {
-      case 'welcome':
-        return ''
-      case 'singleChoice':
-        // 단일 선택 질문의 선택지를 라디오 버튼으로 렌더링
-        return step.options
-          .map(
-            (option, index) =>
-              `<input type="radio" name="choice" value="${option.value}" id="choice-${option.id}"><label for="choice-${option.id}">${option.value}</label>`,
-          )
-          .join('')
-      case 'multipleChoice':
-        // 다중 선택 질문의 선택지를 체크박스로 렌더링
-        return step.options
-          .map(
-            (option, index) =>
-              `<input type="checkbox" name="multipleChoice" value="${option.value}" id="multipleChoice-${option.id}"><label for="multipleChoice-${option.id}">${option.value}</label>`,
-          )
-          .join('')
-      case 'rating':
-        // 평점 질문을 별점으로 렌더링
-        return `<span class="star-rating">${step.options
-          .map(
-            (_, index) =>
-              `<input type="radio" name="rating" value="${
-                index + 1
-              }" id="rating-${index}"><label for="rating-${index}">★</label>`,
-          )
-          .join('')}</span>`
+        content = `
+          <div class="title">${step.title}</div>
+          <div class="description">${step.description}</div>
+        `;
+        break;
       case 'freeText':
-        // 텍스트 입력 질문을 textarea로 렌더링
-        return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
+        content = `
+          <div class="title">${step.title}</div>
+          <div class="description">${step.description}</div>
+          <div class="inputContainer">
+            <textarea placeholder="Enter text" class="typingBox"></textarea>
+          </div>
+        `;
+        break;
+      case 'multipleChoice':
+        content = `
+          <div class="title">${step.title}</div>
+          <div class="description">${step.description}</div>
+          <div class="inputContainer">
+            ${step.options.map((option) => `
+              <label class="optionLabel ${selectedOptions.some(selectedOption => selectedOption.id === option.id) ? 'checked' : ''}">
+                <input type="checkbox" name="option" ${selectedOptions.some(selectedOption => selectedOption.id === option.id) ? 'checked' : ''} 
+                  onchange="handleOptionChange({id:'${option.id}', value:'${option.value}'}, true); updateUI();">
+                ${option.value}
+              </label>
+            `).join('')}
+          </div>
+        `;
+        break;
+      case 'singleChoice':
+        content = `
+          <div class="title">${step.title}</div>
+          <div class="description">${step.description}</div>
+          <div class="inputContainer">
+            ${step.options.map((option) => `
+              <label class="optionLabel ${selectedOptions.some(selectedOption => selectedOption.id === option.id) ? 'checked' : ''}">
+                <input type="radio" name="option" ${selectedOptions.some(selectedOption => selectedOption.id === option.id) ? 'checked' : ''} 
+                  onchange="handleOptionChange({id:'${option.id}', value:'${option.value}'}, false); updateUI();">
+                ${option.value}
+              </label>
+            `).join('')}
+          </div>
+        `;
+        break;
+      case 'rating':
+        content = `
+          <div class="title">${step.title}</div>
+          <div class="description">${step.description}</div>
+          <div class="starInputContainer">
+            ${step.options.map((option) => `
+              <label class="starOptionLabel ${selectedOptions.some(selectedOption => selectedOption.id === option.id) ? 'checked' : ''}">
+                <input type="radio" name="rating" value="${option.value}" ${selectedOptions.some(selectedOption => selectedOption.id === option.id) ? 'checked' : ''} 
+                  onchange="handleOptionChange({id:'${option.id}', value:'${option.value}'}, false); updateUI();">
+                <span class="star">&#9733;</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+        break;
       case 'link':
-        return ''
       case 'info':
-        return ''
-      case 'thank':
-        // 감사 인사 카드를 이모지와 함께 렌더링
-        return `<div class="thank-you-card"><span class="emoji">😊</span></div>`
       default:
-        return ''
+        content = `
+          <div class="title">${step.title}</div>
+          <div class="description">${step.description}</div>
+        `;
+        break;
     }
+    return content;
   }
 
-  // 응답 추출
   function getResponse(step) {
     switch (step.type) {
       case 'welcome':
-        return 'clicked'
-      case 'singleChoice': {
-        const selectedOption = document.querySelector(
-          'input[name="choice"]:checked',
-        )
-        const response = selectedOption
-          ? {
-              id: selectedOption.id.replace('choice-', ''), // 'choice-' 접두사 제거
-              value: selectedOption.value,
-            }
-          : null
-        console.log('SingleChoice response:', response)
-        return response
-      }
-      case 'multipleChoice': {
-        const selectedOptions = Array.from(
-          document.querySelectorAll('input[name="multipleChoice"]:checked'),
-        ).map((checkbox) => ({
-          id: checkbox.id.replace('multipleChoice-', ''), // 'multipleChoice-' 접두사 제거
-          value: checkbox.value,
-        }))
-        console.log('MultipleChoice responses:', selectedOptions)
-        return selectedOptions.length > 0 ? selectedOptions : null
-      }
-      case 'rating': {
-        const selectedRating = document.querySelector(
-          'input[name="rating"]:checked',
-        )
-        const ratingValue = selectedRating
-          ? parseInt(selectedRating.value)
-          : null
-        const ratingOption = step.options[ratingValue - 1]
-        const response = ratingOption
-          ? {
-              id: ratingOption.id,
-              value: ratingValue,
-            }
-          : null
-        console.log('Rating response:', response)
-        return response
-      }
-      case 'freeText': {
-        const textResponse = document.getElementById('response')
-        console.log(
-          'FreeText response:',
-          textResponse ? textResponse.value : '',
-        )
-        return textResponse ? textResponse.value : ''
-      }
+        return 'clicked';
+      case 'singleChoice':
+      case 'rating':
+        return selectedOptions.length > 0 ? selectedOptions[0] : null;
+      case 'multipleChoice':
+        return selectedOptions.length > 0 ? selectedOptions : null;
+      case 'freeText':
+        const textArea = document.querySelector('.typingBox');
+        return textArea ? textArea.value : '';
       case 'link':
-        console.log('Link clicked')
-        return 'clicked'
       case 'info':
-        console.log('Info clicked')
-        return 'clicked'
+        return 'clicked';
       default:
-        return ''
+        return '';
     }
+  }
+  
+  function renderButton(step) {
+    if (!step) return '';
+  
+    let buttonContent = '';
+    if (step.type === 'welcome') {
+      buttonContent = '<div class="button" onclick="handleNextStep()">참여하기</div>';
+    } else if (step.type === 'thank') {
+      buttonContent = '<div class="button" onclick="handleNextStep()">닫기</div>';
+    } else if (step.type === 'link') {
+      buttonContent = `<a href="${step.url}" target="_blank"><div class="button" onclick="handleNextStep()">링크로 이동</div></a>`;
+    } else {
+      buttonContent = '<div class="button" onclick="handleNextStep()">다음</div>';
+    }
+  
+    return buttonContent;
+  }
+  
+  function renderContainer(step) {
+    if (!step) return '';
+  
+    return `
+      <div class="container ${step.id === currentStepId ? (isTransitioning ? 'exit' : 'current') : 'next'}">
+        ${renderCloseButton()}
+        <div class="step">
+          ${renderStepContent(step)}
+          <div class="buttonContainer">${renderButton(step)}</div>
+          <div class="footer">
+            <div class="waterMark">
+              powered by <span class="logo">CodeRed</span>
+            </div>
+            <div class="backgroundBar">
+              <div class="progressBar" style="width: ${((selectedTemplate.steps.findIndex(s => s.id === step.id) + 1) / selectedTemplate.steps.length) * 100}%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  function updateUI() {
+    if (!selectedTemplate || !selectedTemplate.steps || !currentStepId || !showContainer) {
+      document.getElementById('survey-popup').innerHTML = '';
+      return;
+    }
+  
+    const currentStep = selectedTemplate.steps.find(step => step.id === currentStepId);
+  
+    let displayStep = currentStep;
+    if (currentStep?.type === 'welcome' && !currentStep?.isActive) {
+      displayStep = selectedTemplate.steps.find(step => step.id === currentStep.nextStepId);
+    }
+  
+    const nextStepId = displayStep?.nextStepId;
+    const nextStep = nextStepId ? selectedTemplate.steps.find(step => step.id === nextStepId) : null;
+  
+    const content = `
+      <div class="previewContainer">
+        ${displayStep ? renderContainer(displayStep) : ''}
+        ${nextStep ? renderContainer(nextStep) : ''}
+      </div>
+    `;
+  
+    document.getElementById('survey-popup').innerHTML = content;
   }
 
   // 4. Event Listener and Trigger Setup
@@ -870,37 +836,35 @@
   // 설문조사 로드 - 설문조사를 시작하고 첫 번째 스텝을 표시합니다.
   function loadSurvey(survey) {
     if (window.activeSurveyId !== null) {
-      console.log('Another survey is already active')
-      return
+      console.log('Another survey is already active');
+      return;
     }
-    window.activeSurveyId = survey._id
-    currentStep = 0
-    surveyResponses = []
-
-    const link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.type = 'text/css'
-    link.href = `${API_URI}/survey.css`
-    document.head.appendChild(link)
-
-    // CSS 파일이 로드된 후 설문조사를 표시
+    window.activeSurveyId = survey._id;
+    currentStepId = survey.steps[0].id;
+    selectedOptions = [];
+    showContainer = true;
+  
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = `${API_URI}/survey.css`;
+    document.head.appendChild(link);
+  
     link.onload = async () => {
-      const surveyContainer = document.createElement('div')
-      surveyContainer.id = 'survey-popup'
-      document.body.appendChild(surveyContainer)
-
-      // 노출 카운트 증가 함수 호출
-      await incrementViews(survey._id)
-
-      showStep(survey, currentStep)
-      console.log('Survey container created and appended to body')
-
-      // 설문조사 시작 시 completed 값을 false로 설정
+      const surveyContainer = document.createElement('div');
+      surveyContainer.id = 'survey-popup';
+      document.body.appendChild(surveyContainer);
+  
+      await incrementViews(survey._id);
+  
+      showStep(survey, 0);
+      console.log('Survey container created and appended to body');
+  
       saveSurveyData(survey._id, {
         lastShownTime: new Date().toISOString(),
         completed: false,
-      })
-    }
+      });
+    };
   }
 
   // 스크립트 초기화 호출
