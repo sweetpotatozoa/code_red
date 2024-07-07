@@ -147,8 +147,8 @@
 .optionLabel input[type='radio']:checked::before {
   content: '';
   display: block;
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   margin: 3px;
   background-color: #007bff;
   position: absolute;
