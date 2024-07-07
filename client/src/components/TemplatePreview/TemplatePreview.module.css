@@ -52,7 +52,7 @@
 .title {
   font-size: 16px;
   font-weight: bold;
-  margin-bottom: 11px;
+  margin-bottom: 16px;
 }
 
 .description {
@@ -106,7 +106,7 @@
 .backgroundBar {
   height: 8px;
   width: 100%;
-  margin-top: 19px;
+  margin-top: 16px;
   background-color: #e1e7ef;
   border-radius: 8px;
 }
