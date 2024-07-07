@@ -452,7 +452,7 @@
   }
 
   function updateProgressBar(currentStepIndex, totalSteps) {
-    const progressBar = document.querySelector('.progress-bar')
+    const progressBar = document.querySelector('.progressBar')
     if (progressBar) {
       const progressPercentage = ((currentStepIndex + 1) / totalSteps) * 100
       progressBar.style.width = `${progressPercentage}%`
