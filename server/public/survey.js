@@ -418,10 +418,12 @@
           <button type="button" id="closeSurvey" class="close-button">X</button>
         </div>
         <form id="surveyForm">
-          ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
           ${
-            step.description
-              ? `<p class="survey-description">${step.description}</p>`
+            step.title || step.description
+              ? `<div class="step-content">
+                  ${step.title ? `<div class="step-title">${step.title}</div>` : ''}
+                  ${step.description ? `<div class="step-description">${step.description}</div>` : ''}
+                </div>`
               : ''
           }
           <div>
@@ -429,7 +431,7 @@
           </div>
           ${
             buttonText
-              ? `<button type="submit" id="submitSurvey">${buttonText}</button>`
+              ? `<button type="submit" id="submitSurvey" class="button">${buttonText}</button>`
               : ''
           }
         </form>
@@ -437,15 +439,17 @@
       ${
         step.type !== 'thank'
           ? `<div class="survey-progress">
+              <p class="powered-by">Powered by <strong>Codered</strong></p>
               <div class="progress-bar">
                 <div class="progress"></div>
               </div>
-              <p class="powered-by">Powered by Codered</p>
             </div>`
           : ''
       }
-    `
-  }
+    `;
+}
+
+
 
   function updateProgressBar(currentStepIndex, totalSteps) {
     const progressBar = document.querySelector('.progress')
