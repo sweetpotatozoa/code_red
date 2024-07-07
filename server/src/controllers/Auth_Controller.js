@@ -18,12 +18,14 @@ const {
 class AuthController {
   // 회원가입
   async register(req, res) {
-    const { userName, password, realName, phoneNumber } = req.body.input
+    const { userName, password, realName, phoneNumber, company } =
+      req.body.input
     if (
       !isString(userName) ||
       !isString(password) ||
       !isString(realName) ||
-      !isString(phoneNumber)
+      !isString(phoneNumber) ||
+      !isString(company)
     ) {
       res.status(400).json({ message: 'Invalid input' })
       return

@@ -90,6 +90,15 @@ class SurveysRepo {
     return survey
   }
 
+  //연결상태 확인하기
+  async checkConnect(userId) {
+    const result = await this.collection.findOne({
+      userId: new mongoose.Types.ObjectId(userId),
+      views: { $gte: 1 },
+    })
+    return result !== null
+  }
+
   // 수정할 설문조사 정보 가져오기
   async getSurveyForEdit(surveyId) {
     const survey = await this.collection.findOne(

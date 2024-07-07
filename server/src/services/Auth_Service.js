@@ -4,6 +4,8 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const configs = require('../utils/configs')
+const Templates_Repo = require('../repositories/Templates_Repo')
+const Surveys_Repo = require('../repositories/Surveys_Repo')
 
 class AuthService {
   //헬퍼 함수
@@ -51,7 +53,7 @@ class AuthService {
 
   //회원가입
   async register(userData) {
-    const { userName, password, realName, phoneNumber } = userData
+    const { userName, password, realName, phoneNumber, company } = userData
     await this.checkUserNameExist(userName)
     const hash = bcrypt.hashSync(password, 10)
 
@@ -60,12 +62,25 @@ class AuthService {
       password: hash,
       realName,
       phoneNumber,
+      company,
       createAt: new Date(),
       surveyPosition: 4,
       isConnect: false,
+      isOnboarding: false,
+    }
+    const createdUser = await UsersRepo.createUser(newUser)
+
+    const connectSample = await Templates_Repo.getConnectSample()
+
+    const newSurvey = {
+      ...connectSample,
+      userId: createdUser.insertedId,
+      createAt: new Date(),
+      updateAt: new Date(),
+      views: 0,
     }
 
-    await UsersRepo.createUser(newUser)
+    await Surveys_Repo.createSurvey(newSurvey)
     return { message: 'Sign up success' }
   }
 
@@ -76,7 +91,7 @@ class AuthService {
     const isValid = await this.validatePassword(password, user.password) //비밀번호 일치 검사
     if (isValid) {
       const tokenResult = await this.generateToken(user._id) //토큰 부여
-      return { token: tokenResult }
+      return { token: tokenResult, isOnboarding: user.isOnboarding }
     } else {
       throw new Error('Invalid user name or password')
     }

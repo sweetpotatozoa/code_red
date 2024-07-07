@@ -1,0 +1,51 @@
+.container {
+  display: flex;
+  width: 100%;
+  background-color: #f8fafc;
+  min-width: 1420px;
+  overflow-x: auto;
+  padding: 32px 0;
+  align-items: center;
+  flex-direction: column;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  width: 1180px;
+  padding: 32px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  align-items: center;
+}
+
+.logo img {
+  height: 30px;
+  width: 110px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+}
+
+.progressBar {
+  width: 436px;
+  height: 12px;
+  background-color: #e2e8f0;
+  border-radius: 30px;
+}
+
+.percentBar {
+  height: 12px;
+  background-color: #00c4b8;
+  border-radius: 30px;
+}
+
+.percent {
+  font-size: 18px;
+  font-weight: bold;
+  color: #8e949d;
+  margin-left: 16px;
+}

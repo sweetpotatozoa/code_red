@@ -54,19 +54,34 @@ class UsersRepo {
 
   // 유저 생성
   async createUser(newUser) {
-    await this.collection.insertOne(newUser)
+    const createdUser = await this.collection.insertOne(newUser)
+    return createdUser
   }
 
   // 유저 정보 가져오기
   async getUserByUserName(userName) {
     const userPassword = await this.collection.findOne(
       { userName: userName },
-      { projection: { password: 1, _id: 1 } },
+      { projection: { password: 1, _id: 1, isOnboarding: 1 } },
     )
     return userPassword
   }
 
-  //
+  //온보딩 완료 후 정보 저장하기
+  async saveOnboardingInfo(userId, onboardingInfo) {
+    await this.collection.findOneAndUpdate(
+      { _id: new mongoose.Types.ObjectId(userId) },
+      {
+        $set: {
+          isConnect: onboardingInfo.isConnect,
+          isOnboarding: onboardingInfo.isOnboarding,
+          purpose: onboardingInfo.purpose,
+          role: onboardingInfo.role,
+        },
+      },
+    )
+    return true
+  }
 }
 
 module.exports = new UsersRepo()

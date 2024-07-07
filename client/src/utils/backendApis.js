@@ -121,6 +121,39 @@ class BackendApis {
     return result
   }
 
+  //유저아이디 가져오기
+  async getId(method = 'GET', params = {}) {
+    const result = await fetcher(
+      '/api/adminSurvey/getId',
+      this.token,
+      method,
+      params,
+    )
+    return result
+  }
+
+  //연결상태 확인하기
+  async checkConnect(method = 'GET', params = {}) {
+    const result = await fetcher(
+      '/api/adminSurvey/checkConnect',
+      this.token,
+      method,
+      params,
+    )
+    return result
+  }
+
+  //온보딩 완료 후 정보 저장하기
+  async saveOnboardingInfo(method = 'POST', params = {}) {
+    const result = await fetcher(
+      '/api/adminSurvey/saveOnboardingInfo',
+      this.token,
+      method,
+      params,
+    )
+    return result
+  }
+
   async getSurveySummary(surveyId) {
     return await fetcher(`/api/adminSurvey/${surveyId}`, this.token, 'GET')
   }
