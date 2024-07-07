@@ -18,14 +18,17 @@
   bottom: 16px;
   left: 16px;
 }
+
 .survey-popup-position-2 {
   top: 16px;
   left: 16px;
 }
+
 .survey-popup-position-3 {
   top: 16px;
   right: 16px;
 }
+
 .survey-popup-position-4 {
   bottom: 16px;
   right: 16px;
@@ -119,46 +122,15 @@
   background-color: #f9f9f9;
 }
 
-/* 공통 스타일 */
-.optionLabel input {
+.optionLabel input[type='checkbox'] {
   margin-right: 8px;
   width: 12px;
   height: 12px;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
   border: 1px solid #ccc;
   outline: none;
   transition: border-color 0.2s, background-color 0.2s;
   position: relative;
   cursor: pointer;
-}
-
-/* 라디오 버튼 스타일 */
-.optionLabel input[type='radio'] {
-  border-radius: 50%;
-}
-
-.optionLabel input[type='radio']:checked {
-  background-color: #fff;
-  border-color: #007bff;
-}
-
-.optionLabel input[type='radio']:checked::before {
-  content: '';
-  display: block;
-  width: 8px;
-  height: 8px;
-  background-color: #007bff;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-}
-
-/* 체크박스 스타일 */
-.optionLabel input[type='checkbox'] {
   border-radius: 3px;
 }
 
@@ -181,7 +153,6 @@
   left: 0;
 }
 
-/* 선택된 옵션 레이블 스타일 */
 .optionLabel.checked {
   border-color: #007bff;
   background-color: #e9f5ff;
@@ -305,4 +276,35 @@ textarea {
 
 .logo {
   font-weight: bold;
+}
+
+/* 라디오 버튼 스타일 */
+.optionLabel input[type='radio'] {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.2s;
+  position: relative;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.optionLabel input[type='radio']:checked {
+  background-color: #fff;
+  border-color: #007bff;
+}
+
+.optionLabel input[type='radio']:checked::before {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  background-color: #007bff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
 }
