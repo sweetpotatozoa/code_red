@@ -112,6 +112,7 @@
   transition: background-color 0.2s, border-color 0.2s;
   margin-bottom: 8px;
   font-size: 14px;
+  font-weight: bold;
   box-sizing: border-box;
 }
 
@@ -150,8 +151,8 @@
 .optionLabel input[type='radio']:checked::before {
   content: '';
   display: block;
-  width: 4px;
-  height: 4px;
+  width: 8px;
+  height: 8px;
   background-color: #007bff;
   border-radius: 50%;
 }
