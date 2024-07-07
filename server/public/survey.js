@@ -454,7 +454,7 @@
       setupRatingStars()
     }
 
-    updateProgressBar(stepIndex, activeSteps.length - 1)
+    updateProgressBar(step.id, survey.steps)
   }
 
   function generateStepHTML(step, buttonText) {
@@ -495,10 +495,13 @@
     `
   }
 
-  function updateProgressBar(currentStepIndex, totalSteps) {
-    const progressBar = document.querySelector('.progress-bar')
+  function updateProgressBar(currentStepId, steps) {
+    const progressBar = document.querySelector('.progressBar')
     if (progressBar) {
-      const progressPercentage = ((currentStepIndex + 1) / totalSteps) * 100
+      const currentStepIndex = steps.findIndex(
+        (step) => step.id === currentStepId,
+      )
+      const progressPercentage = ((currentStepIndex + 1) / steps.length) * 100
       progressBar.style.width = `${progressPercentage}%`
     }
   }
