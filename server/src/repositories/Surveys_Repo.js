@@ -98,7 +98,6 @@ class SurveysRepo {
     })
     return result !== null
   }
-}
 
   // 수정할 설문조사 정보 가져오기
   async getSurveyForEdit(surveyId) {
