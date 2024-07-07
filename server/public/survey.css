@@ -8,14 +8,13 @@
     transform 0.4s ease-in-out,
     opacity 0.4s ease-in-out;
   padding: 24px;
-  max-height: 400px;
+  max-height: 80vh; /* 뷰포트 높이의 80%로 최대 높이 제한400px이였음 */ 
   overflow-y: auto;
   z-index: 1000;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   min-height: auto; /* 최소 높이를 자동으로 설정 */
-  max-height: 80vh; /* 뷰포트 높이의 80%로 최대 높이 제한 */
 }
 
 .survey-popup-position-1 {
@@ -162,7 +161,8 @@
 
 textarea {
   display: block;
-  width: 100%;
+  width: 90%;
+  max-width: 340px; /* 여기에 max-width를 추가하여 가운데 정렬 유지 */
   padding: 8px;
   min-height: 100px;
   border: 1px solid #ccc;
@@ -242,4 +242,18 @@ textarea {
 
 .logo {
   font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  #survey-popup {
+    width: calc(100% - 32px);
+    max-height: 90vh;
+  }
+  .optionLabel {
+    width: 100%;
+    max-width: none;
+  }
+  .submit-button {
+    width: 100%;
+  }
 }
