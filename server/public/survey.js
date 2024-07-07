@@ -333,15 +333,15 @@
       closeSurvey(survey._id, isThankStep)
     }
   
-    const nextStepButton = document.getElementById('nextStepButton')
-    if (nextStepButton) {
-      nextStepButton.onclick = async function (event) {
-        event.preventDefault()
-        const stepAnswer = getResponse(step)
-  
-        if (stepAnswer === null) {
-          return
-        }
+    const nextButton = document.getElementById('nextStepButton')
+  if (nextButton) {
+    nextButton.onclick = async function(event) {
+      event.preventDefault()
+      const stepAnswer = getResponse(step)
+
+      if (stepAnswer === null) {
+        return
+      }
   
         saveResponse(step, stepAnswer)
   
@@ -560,58 +560,32 @@
       case 'welcome':
         return 'clicked'
       case 'singleChoice': {
-        const selectedOption = document.querySelector(
-          'input[name="choice"]:checked',
-        )
-        const response = selectedOption
-          ? {
-              id: selectedOption.id.replace('choice-', ''), // 'choice-' 접두사 제거
-              value: selectedOption.value,
-            }
-          : null
-        console.log('SingleChoice response:', response)
-        return response
+        const selectedOption = document.querySelector('input[name="singleChoice"]:checked')
+        return selectedOption ? {
+          id: selectedOption.id.replace('singleChoice-', ''),
+          value: selectedOption.value
+        } : null
       }
       case 'multipleChoice': {
-        const selectedOptions = Array.from(
-          document.querySelectorAll('input[name="multipleChoice"]:checked'),
-        ).map((checkbox) => ({
-          id: checkbox.id.replace('multipleChoice-', ''), // 'multipleChoice-' 접두사 제거
-          value: checkbox.value,
-        }))
-        console.log('MultipleChoice responses:', selectedOptions)
-        return selectedOptions.length > 0 ? selectedOptions : null
+        const selectedOptions = Array.from(document.querySelectorAll('input[name="multipleChoice"]:checked'))
+        return selectedOptions.length > 0 ? selectedOptions.map(option => ({
+          id: option.id.replace('multipleChoice-', ''),
+          value: option.value
+        })) : null
       }
       case 'rating': {
-        const selectedRating = document.querySelector(
-          'input[name="rating"]:checked',
-        )
-        const ratingValue = selectedRating
-          ? parseInt(selectedRating.value)
-          : null
-        const ratingOption = step.options[ratingValue - 1]
-        const response = ratingOption
-          ? {
-              id: ratingOption.id,
-              value: ratingValue,
-            }
-          : null
-        console.log('Rating response:', response)
-        return response
+        const selectedRating = document.querySelector('input[name="rating"]:checked')
+        return selectedRating ? {
+          id: selectedRating.id.replace('rating-', ''),
+          value: parseInt(selectedRating.value)
+        } : null
       }
       case 'freeText': {
         const textResponse = document.getElementById('response')
-        console.log(
-          'FreeText response:',
-          textResponse ? textResponse.value : '',
-        )
         return textResponse ? textResponse.value : ''
       }
       case 'link':
-        console.log('Link clicked')
-        return 'clicked'
       case 'info':
-        console.log('Info clicked')
         return 'clicked'
       default:
         return ''
