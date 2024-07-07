@@ -324,19 +324,17 @@
       return
     }
   
-    const buttonText = getButtonText(step)
+    const buttonText = step.type === 'thank' ? '닫기' : getButtonText(step)
   
     surveyContainer.innerHTML = generateStepHTML(step, buttonText)
   
     document.getElementById('closeSurvey').onclick = () => {
-      const isThankStep = step.type === 'thank'
-      closeSurvey(survey._id, isThankStep)
+      closeSurvey(survey._id, step.type === 'thank')
     }
   
     const nextButton = document.getElementById('nextStepButton')
     if (nextButton) {
       if (step.type === 'thank') {
-        nextButton.textContent = '닫기'
         nextButton.onclick = () => closeSurvey(survey._id, true)
       } else {
         nextButton.onclick = async function(event) {
@@ -360,7 +358,6 @@
               })
             }
   
-            // 링크 스텝 처리
             if (step.type === 'link') {
               window.open(
                 step.url.startsWith('http') ? step.url : `https://${step.url}`,
@@ -368,7 +365,6 @@
               )
             }
   
-            // 다음 스텝 인덱스 결정 로직
             let nextStepId
             if (step.type === 'singleChoice' || step.type === 'rating') {
               const selectedOptionId = stepAnswer.id
@@ -390,11 +386,9 @@
               }
             }
   
-            // 다음 스텝으로 이동 또는 설문조사 완료 처리
             if (nextStepIndex < survey.steps.length) {
               const nextStep = survey.steps[nextStepIndex]
   
-              // thank 스텝으로 넘어갈 때 isComplete를 true로 설정
               if (nextStep.type === 'thank' && nextStep.isActive && !isCompleted) {
                 await updateResponse(surveyResponseId, surveyResponses, true)
                 isCompleted = true
@@ -415,7 +409,6 @@
                 }
                 showStep(survey, thankStepIndex)
               } else {
-                // thank 스텝이 없거나 active가 아닐 때 isComplete를 true로 설정
                 if (!isCompleted) {
                   await updateResponse(surveyResponseId, surveyResponses, true)
                   isCompleted = true

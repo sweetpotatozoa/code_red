@@ -12,6 +12,8 @@
   overflow-y: auto;
   z-index: 1000;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .survey-popup-position-1 {
@@ -59,11 +61,10 @@
 }
 
 .content-wrapper {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  flex-grow: 1;
-  margin-bottom: 40px;
+  min-height: 300px;
 }
 
 .text-content {
@@ -104,12 +105,11 @@
   border-radius: 5px;
   background-color: #fff;
   cursor: pointer;
-  width: 90%; /* 100%에서 90%로 변경 */
-  max-width: 340px; /* 최대 너비 설정 */
+  width: 90%;
+  max-width: 340px;
   transition: background-color 0.2s ease;
   margin-bottom: 8px;
   font-size: 14px;
-  
 }
 
 .optionLabel:hover {
@@ -136,10 +136,10 @@
 }
 
 .starOptionLabel {
-  font-size: 40px;
-  color: #ccc;
+  font-size: 48px;
+  color: #e1e7ef;
   cursor: pointer;
-  margin: 0 4px;
+  margin: 0 8px;
 }
 
 .starOptionLabel input {
@@ -208,7 +208,8 @@ textarea {
 }
 
 .survey-progress {
-  margin-top: 12px; /* 24px에서 12px로 줄임 */
+  margin-top: auto;
+  padding-top: 12px;
   width: 100%;
 }
 
@@ -216,8 +217,8 @@ textarea {
   height: 8px;
   width: 100%;
   background-color: #e1e7ef;
-  border-radius: 4px; /* 8px에서 4px로 줄임 */
-  overflow: hidden; 
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .progress-bar {
@@ -232,7 +233,7 @@ textarea {
   text-align: center;
   font-size: 12px;
   color: #555;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
 }
 
 .logo {
