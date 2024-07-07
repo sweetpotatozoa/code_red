@@ -12,6 +12,23 @@ const fakeAuth = (req, res, next) => {
 // userId를 이용하여 설문조사 목록을 가져옴.
 router.get('/', fakeAuth, wrapAsync(AdminSurveyController.getSurveys))
 
+//온보딩 완료 후 정보 저장하기
+router.post(
+  '/saveOnboardingInfo',
+  fakeAuth,
+  wrapAsync(AdminSurveyController.saveOnboardingInfo),
+)
+
+// 연결상태 확인하기
+router.get(
+  '/checkConnect',
+  fakeAuth,
+  wrapAsync(AdminSurveyController.checkConnect),
+)
+
+// 유저 아이디 반환
+router.get('/getId', fakeAuth, wrapAsync(AdminSurveyController.getUserId))
+
 // 각 설문조사의 배포상태를 변경함
 router.put(
   '/toggleSurveyDeploy/:id',
@@ -48,13 +65,6 @@ router.post(
   '/templates/:templateId',
   fakeAuth,
   wrapAsync(AdminSurveyController.createSurvey),
-)
-
-// 설문조사 응답 요약
-router.get(
-  '/:surveyId',
-  fakeAuth,
-  wrapAsync(AdminSurveyController.getSurveySummary),
 )
 
 // 설문조사 질문별 요약
@@ -117,6 +127,13 @@ router.get(
     ) //각 설문조사 아이디, userId saved in jwt added by auth middleware
     return res.status(result.status).send(result)
   }),
+
+  // 설문조사 응답 요약
+  router.get(
+    '/:surveyId',
+    fakeAuth,
+    wrapAsync(AdminSurveyController.getSurveySummary),
+  ),
 )
 
 module.exports = router
