@@ -90,6 +90,7 @@
 .inputContainer {
   display: flex;
   flex-direction: column;
+  justify-content: center; /* 방금 추가 */
   align-items: center;
   width: 100%;
   max-width: 100%;
@@ -169,7 +170,7 @@ textarea {
   overflow-y: auto;
   word-wrap: break-word;
   white-space: pre-wrap;
-  margin-bottom: 10px;
+  margin-bottom: 0 auto 10px; /* 원래 그냥 10이였음 */
 }
 
 .button-container {
