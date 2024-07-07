@@ -569,10 +569,11 @@
               <label class="optionLabel">
                 <input type="${
                   step.type === 'singleChoice' ? 'radio' : 'checkbox'
-                }" 
-                       name="${step.type}" 
-                       value="${option.value}" 
-                       id="${step.type}-${option.id}">
+                }"
+                      name="${step.type}"
+                      value="${option.value}"
+                      id="${step.type}-${option.id}"
+                      onchange="this.closest('.optionLabel').classList.toggle('checked', this.checked)">
                 <span>${option.value}</span>
               </label>
             `,

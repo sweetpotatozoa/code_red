@@ -96,8 +96,9 @@
   align-items: center;
   width: 100%;
   max-width: 100%;
-  margin: 0 auto;
-  margin-bottom: 16px;
+  margin: 0 0 16px 0;
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
 .optionLabel {
@@ -112,6 +113,7 @@
   transition: background-color 0.2s, border-color 0.2s;
   margin-bottom: 8px;
   font-size: 14px;
+  box-sizing: border-box;
 }
 
 .optionLabel:hover {
@@ -130,40 +132,42 @@
   -moz-appearance: none;
   appearance: none;
   border: 1px solid #ccc;
-  border-radius: 50%; /* 라디오 버튼을 위한 원형 */
+  width: 14px;
+  height: 14px;
   outline: none;
   transition: border-color 0.2s, background-color 0.2s;
+  position: relative;
+}
+
+.optionLabel input[type='radio'] {
+  border-radius: 50%;
 }
 
 .optionLabel input[type='checkbox'] {
-  border-radius: 3px; /* 체크박스를 위한 약간 둥근 모서리 */
+  border-radius: 3px;
 }
 
 .optionLabel input[type='radio']:checked,
 .optionLabel input[type='checkbox']:checked {
-  background-color: #007bff;
+  background-color: #fff;
   border-color: #007bff;
 }
 
-/* 체크박스에 체크 표시 추가 */
+.optionLabel input[type='radio']:checked::before,
 .optionLabel input[type='checkbox']:checked::before {
-  content: '\2713'; /* 체크 표시 유니코드 */
-  display: block;
-  text-align: center;
-  color: white;
-  font-size: 10px;
-  line-height: 14px;
-}
-
-/* 라디오 버튼에 내부 원 추가 */
-.optionLabel input[type='radio']:checked::before {
   content: '';
   display: block;
   width: 6px;
   height: 6px;
   margin: 3px;
+  background-color: #007bff;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.optionLabel input[type='radio']:checked::before {
   border-radius: 50%;
-  background-color: white;
 }
 
 .optionLabel.checked {
@@ -182,7 +186,7 @@
 
 .starOptionLabel {
   font-size: 48px;
-  color: #e1e7ef;
+  color: #ccc;
   cursor: pointer;
   margin: 0 8px;
 }
