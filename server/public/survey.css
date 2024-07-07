@@ -129,29 +129,18 @@
   appearance: none;
   border: 1px solid #ccc;
   outline: none;
-  transition: border-color 0.2s, background-color 0.2s;
-  position: relative;
+  transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
   cursor: pointer;
 }
 
 /* 라디오 버튼 스타일 */
 .optionLabel input[type='radio'] {
   border-radius: 50%;
-  display: grid;
-  place-items: center;
 }
 
 .optionLabel input[type='radio']:checked {
   border-color: #007bff;
-}
-
-.optionLabel input[type='radio']:checked::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  background-color: #007bff;
-  border-radius: 50%;
-  display: block;
+  box-shadow: inset 0 0 0 3px #007bff;
 }
 
 /* 체크박스 스타일 */
