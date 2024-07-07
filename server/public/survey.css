@@ -18,17 +18,14 @@
   bottom: 16px;
   left: 16px;
 }
-
 .survey-popup-position-2 {
   top: 16px;
   left: 16px;
 }
-
 .survey-popup-position-3 {
   top: 16px;
   right: 16px;
 }
-
 .survey-popup-position-4 {
   bottom: 16px;
   right: 16px;
@@ -126,6 +123,9 @@
   margin-right: 8px;
   width: 12px;
   height: 12px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   border: 1px solid #ccc;
   outline: none;
   transition: border-color 0.2s, background-color 0.2s;
@@ -153,6 +153,55 @@
   left: 0;
 }
 
+/* 라디오 버튼 스타일 */
+.optionLabel input[type='radio'] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  width: 12px;
+  height: 12px;
+}
+
+.optionLabel {
+  position: relative;
+  padding-left: 24px; /* 여백 조정 */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.optionLabel::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px; /* 원하는 라디오 버튼 크기로 조정 */
+  height: 12px; /* 원하는 라디오 버튼 크기로 조정 */
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+.optionLabel input[type='radio']:checked + .optionLabel::before {
+  background-color: #fff;
+  border-color: #007bff;
+}
+
+.optionLabel input[type='radio']:checked + .optionLabel::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px; /* 라디오 버튼 내부 원 크기 */
+  height: 6px; /* 라디오 버튼 내부 원 크기 */
+  background-color: #007bff;
+  border-radius: 50%;
+}
+
+/* 선택된 옵션 레이블 스타일 */
 .optionLabel.checked {
   border-color: #007bff;
   background-color: #e9f5ff;
@@ -276,35 +325,4 @@ textarea {
 
 .logo {
   font-weight: bold;
-}
-
-/* 라디오 버튼 스타일 */
-.optionLabel input[type='radio'] {
-  margin-right: 8px;
-  width: 16px;
-  height: 16px;
-  border: 1px solid #ccc;
-  outline: none;
-  transition: border-color 0.2s, background-color 0.2s;
-  position: relative;
-  cursor: pointer;
-  border-radius: 50%;
-}
-
-.optionLabel input[type='radio']:checked {
-  background-color: #fff;
-  border-color: #007bff;
-}
-
-.optionLabel input[type='radio']:checked::before {
-  content: '';
-  display: block;
-  width: 8px;
-  height: 8px;
-  background-color: #007bff;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
 }
