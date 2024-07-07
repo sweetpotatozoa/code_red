@@ -157,7 +157,14 @@ textarea {
   border-radius: 8px;
 }
 
-.progressBar {
+.background-bar {
+  height: 8px;
+  width: 100%;
+  background-color: #e1e7ef;
+  border-radius: 8px;
+}
+
+.progress-bar {
   height: 8px;
   width: 0;
   background-color: #64738b;
