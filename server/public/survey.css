@@ -1,7 +1,7 @@
 #survey-popup {
   position: absolute;
   width: 384px;
-  background-color: #f8fafc;
+  background-color: white;
   border-radius: 10px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   transition:
