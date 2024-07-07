@@ -479,7 +479,7 @@
       <div class="survey-step">
         <div class="survey-header">
           <button type="button" id="closeSurvey" class="close-button">
-            <img src="${API_URI}/images/close.png" alt="close" class="close-icon">
+            <img src="${API_URI}/images/close.svg" alt="close" class="close-icon">
           </button>
         </div>
         <div class="content-wrapper">
