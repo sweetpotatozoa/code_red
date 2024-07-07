@@ -73,12 +73,15 @@
 .survey-title {
   font-size: 16px;
   font-weight: bold;
-  margin-bottom: 11px;
+  margin: 0 0 16px 0;
+  padding: 0;
 }
 
 .survey-description {
   font-size: 14px;
   color: #344156;
+  margin: 0 0 16px 0;
+  padding: 0;
 }
 
 .input-content {
@@ -222,6 +225,7 @@ textarea {
   display: flex;
   justify-content: flex-end;
   width: 100%;
+  margin-bottom: 16px;
 }
 
 .submit-button {
@@ -255,7 +259,6 @@ textarea {
 
 .survey-progress {
   margin-top: auto;
-  padding-top: 12px;
   width: 100%;
   padding-bottom: 4px;
 }
