@@ -298,17 +298,19 @@
       const stars = starContainer.querySelectorAll('.starOptionLabel');
       stars.forEach((star, index) => {
         star.addEventListener('click', () => {
-          stars.forEach((s, i) => {
-            if (i <= index) {
-              s.classList.add('checked');
-            } else {
-              s.classList.remove('checked');
-            }
-          });
+          const rating = 5 - index; // 역순으로 인덱스 계산
+        stars.forEach((s, i) => {
+          if (i >= index) {
+            s.classList.add('checked');
+          } else {
+            s.classList.remove('checked');
+          }
         });
+        // 여기에 선택된 rating 값을 저장하는 로직 추가
       });
-    }
+    });
   }
+}
 
   // 설문조사 스텝 표시
   function showStep(survey, stepIndex) {
@@ -572,11 +574,11 @@
         })) : null
       }
       case 'rating': {
-        const selectedRating = document.querySelector('input[name="rating"]:checked')
-        return selectedRating ? {
-          id: selectedRating.id.replace('rating-', ''),
-          value: parseInt(selectedRating.value)
-        } : null
+        const checkedStar = document.querySelector('.starOptionLabel.checked');
+        return checkedStar ? {
+          id: checkedStar.querySelector('input').id.replace('rating-', ''),
+          value: 5 - Array.from(checkedStar.parentNode.children).indexOf(checkedStar)
+        } : null;
       }
       case 'freeText': {
         const textResponse = document.getElementById('response')

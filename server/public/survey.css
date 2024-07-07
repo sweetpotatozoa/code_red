@@ -14,6 +14,8 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  min-height: auto; /* 최소 높이를 자동으로 설정 */
+  max-height: 80vh; /* 뷰포트 높이의 80%로 최대 높이 제한 */
 }
 
 .survey-popup-position-1 {
@@ -64,7 +66,7 @@
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  min-height: 300px;
+  min-height: auto; /* 최소 높이를 자동으로 설정 원래 300px이엇음 */
 }
 
 .text-content {
@@ -133,6 +135,7 @@
   align-items: center;
   margin-bottom: 32px;
   width: 100%;
+  flex-direction: row-reverse; /* 추가 */
 }
 
 .starOptionLabel {
@@ -211,6 +214,7 @@ textarea {
   margin-top: auto;
   padding-top: 12px;
   width: 100%;
+  padding-bottom: 12px; /* 추가 */
 }
 
 .background-bar {
