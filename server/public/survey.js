@@ -412,11 +412,13 @@
   }
 
   function generateStepHTML(step, buttonText) {
+    const closeIconUrl = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/images/close.png';
+    
     return `
       <div class="survey-step">
         <div class="survey-header">
           <button type="button" id="closeSurvey" class="close-button">
-            <img src="/images/close.png" alt="close" class="close-icon">
+            <img src="${closeIconUrl}" alt="close" class="close-icon">
           </button>
         </div>
         <form id="surveyForm">
@@ -448,7 +450,7 @@
             </div>`
           : ''
       }
-    `
+    `;
   }
 
   function updateProgressBar(currentStepIndex, totalSteps) {
