@@ -55,6 +55,17 @@ class AppliedSurveyController {
       res.status(500).json({ status: 500, message: error.message })
     }
   }
+
+  async getUserInfo(req, res) {
+    try {
+      const { userId } = req.params
+      const user = await AppliedSurveyService.getUserInfo(userId)
+      res.status(200).json(user)
+    } catch (error) {
+      console.error('Error in getUserInfo:', error)
+      res.status(500).json({ status: 500, message: error.message })
+    }
+  }
 }
 
 module.exports = new AppliedSurveyController()

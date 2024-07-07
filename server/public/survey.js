@@ -47,34 +47,41 @@
     })
   }
 
-  // HTTP 요청을 통해 설문조사 데이터 가져오기
-  async function fetchSurvey(userId) {
-    try {
-      const response = await fetch(
-        `${API_URI}/api/appliedSurvey?userId=${userId}&isDeploy=true`,
-      )
-      if (!response.ok) {
-        throw new Error('Network response was not ok')
-      }
-      const data = await response.json()
-      console.log('Surveys loaded:', data)
-  
-      const validSurveys = data.data.filter(validateSurvey)
-  
-      // UsersRepo를 사용하여 surveyPosition 값을 가져옵니다.
-      const userInfo = await UsersRepo.getUserInfo(userId)
-      const surveyPosition = userInfo.surveyPosition
-  
-      validSurveys.forEach(survey => {
-        survey.position = surveyPosition
-      })
-  
-      return { status: data.status, data: validSurveys }
-    } catch (error) {
-      console.error('Error fetching survey:', error)
-      return null
+ // HTTP 요청을 통해 설문조사 데이터 가져오기
+ async function fetchSurvey(userId) {
+  try {
+    // 설문조사 데이터 가져오기
+    const response = await fetch(
+      `${API_URI}/api/appliedSurvey?userId=${userId}&isDeploy=true`,
+    )
+    if (!response.ok) {
+      throw new Error('Network response was not ok')
     }
+    const data = await response.json()
+    console.log('Surveys loaded:', data)
+
+    const validSurveys = data.data.filter(validateSurvey)
+
+    // 사용자 데이터에서 surveyPosition 값 가져오기
+    const userResponse = await fetch(`${API_URI}/api/appliedSurvey/users/${userId}`)
+    if (!userResponse.ok) {
+      throw new Error('Network response was not ok')
+    }
+    const userData = await userResponse.json()
+    const surveyPosition = userData.surveyPosition
+
+    // 각 설문조사에 surveyPosition 값 설정
+    validSurveys.forEach(survey => {
+      survey.position = surveyPosition
+    })
+
+    return { status: data.status, data: validSurveys }
+  } catch (error) {
+    console.error('Error fetching survey:', error)
+    return null
   }
+}
+
 
 
   // 설문조사 응답 생성
