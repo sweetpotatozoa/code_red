@@ -58,15 +58,24 @@
       }
       const data = await response.json()
       console.log('Surveys loaded:', data)
-
+  
       const validSurveys = data.data.filter(validateSurvey)
-
+  
+      // UsersRepo를 사용하여 surveyPosition 값을 가져옵니다.
+      const userInfo = await UsersRepo.getUserInfo(userId)
+      const surveyPosition = userInfo.surveyPosition
+  
+      validSurveys.forEach(survey => {
+        survey.position = surveyPosition
+      })
+  
       return { status: data.status, data: validSurveys }
     } catch (error) {
       console.error('Error fetching survey:', error)
       return null
     }
   }
+
 
   // 설문조사 응답 생성
   async function createResponse(userId, surveyId, answer) {
