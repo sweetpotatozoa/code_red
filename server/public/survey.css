@@ -125,7 +125,8 @@
   height: 14px;
 }
 
-.optionLabel input[type='radio'] .optionLabel input[type='checkbox'] {
+.optionLabel input[type='radio'],
+.optionLabel input[type='checkbox'] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
