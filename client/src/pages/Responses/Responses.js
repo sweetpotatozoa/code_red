@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import styles from './Responses.module.css'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { toZonedTime, format } from 'date-fns-tz'
 
 import BackendApis from '../../utils/backendApis'
 
@@ -28,7 +29,7 @@ const Responses = () => {
           BackendApis.getUserInfo(),
         ])
         setSurvey(surveyData || { isDeploy: false })
-        setResponses(responsesData || [])
+        setResponses(responsesData) // BackendApis.getResponse(id)는 항상 배열을 반환한다고 가정
         setUserInfo(userInfoData)
         setSelectedPosition(userInfoData.surveyPosition || 4)
       } catch (error) {
@@ -109,6 +110,11 @@ const Responses = () => {
     navigate('/')
   }
 
+  const formatKoreanTime = (utcTime) => {
+    const kstDate = toZonedTime(utcTime, 'Asia/Seoul')
+    return format(kstDate, 'yyyy-MM-dd HH:mm:ss', { timeZone: 'Asia/Seoul' })
+  }
+
   if (isLoading) return <div>로딩 중...</div>
   if (error) return <div>{error}</div>
   if (!survey) return <div>설문조사를 찾을 수 없습니다.</div>
@@ -180,34 +186,40 @@ const Responses = () => {
         <div className={styles.responses}>
           {isLoading && <div>로딩 중...</div>}
           {error && <div className={styles.error}>{error}</div>}
-          {responses.map((response) => (
-            <div className={styles.response} key={response._id}>
-              <div className={styles.responseTitle}>{response.createAt}</div>
-              <div className={styles.contents}>
-                {response.answers.map((a) => (
-                  <div className={styles.content} key={a.stepId}>
-                    <div className={styles.stepTitle}>{a.stepTitle}</div>
-                    <div className={styles.answerValue}>
-                      {Array.isArray(a.answer)
-                        ? a.answer.map((ans) => ans.value).join(', ')
-                        : a.answer.value || a.answer}
+          {responses.length > 0 ? (
+            responses.map((response) => (
+              <div className={styles.response} key={response._id}>
+                <div className={styles.responseTitle}>
+                  {formatKoreanTime(response.createAt)}
+                </div>
+                <div className={styles.contents}>
+                  {response.answers.map((a) => (
+                    <div className={styles.content} key={a.stepId}>
+                      <div className={styles.stepTitle}>{a.stepTitle}</div>
+                      <div className={styles.answerValue}>
+                        {Array.isArray(a.answer)
+                          ? a.answer.map((ans) => ans.value).join(', ')
+                          : a.answer.value || a.answer}
+                      </div>
                     </div>
+                  ))}
+                </div>
+                <div className={styles.isComplete}>
+                  {response.isComplete ? '제출완료' : '중도이탈'}
+                </div>
+                <div className={styles.bottom}>
+                  <div
+                    className={styles.btnButton}
+                    onClick={() => deleteResponse(response._id)}
+                  >
+                    삭제
                   </div>
-                ))}
-              </div>
-              <div className={styles.isComplete}>
-                {response.isComplete ? '제출완료' : '중도이탈'}
-              </div>
-              <div className={styles.bottom}>
-                <div
-                  className={styles.btnButton}
-                  onClick={() => deleteResponse(response._id)}
-                >
-                  삭제
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <div>아직 응답이 없습니다.</div>
+          )}
         </div>
       </div>
       {isSetting && (

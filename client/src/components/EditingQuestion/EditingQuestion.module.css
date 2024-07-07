@@ -25,10 +25,12 @@
   justify-content: center;
   color: #11192c;
   width: 50px;
+  font-size: 14px;
   height: 40px;
   cursor: pointer;
   margin-left: 8px;
   padding: 8px;
+  white-space: nowrap;
 }
 
 .addOption {
@@ -86,8 +88,23 @@
 
 .action {
   display: flex;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
+  margin-top: 8px;
   width: 100%;
   height: 30px;
   border-radius: 5px;
+}
+
+.warningBubble {
+  background-color: #ffcccb;
+  color: #d8000c;
+  padding: 8px;
+  border-radius: 5px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.warningText {
+  color: #d8000c;
+  margin-left: 8px;
 }

@@ -1,16 +1,16 @@
 import styles from './EditingQuestion.module.css'
 import { useState } from 'react'
 
-const EditingThank = ({ question, onSave, onCancel }) => {
-  const [title, setTitle] = useState(question.title)
-  const [description, setDescription] = useState(question.description)
+const EditingThank = ({ step, onSave, onCancel }) => {
+  const [title, setTitle] = useState(step.title)
+  const [description, setDescription] = useState(step.description)
 
   const handleSave = () => {
     if (title.trim() === '') {
       alert('제목을 입력해주세요.')
       return
     }
-    onSave({ ...question, title, description })
+    onSave({ ...step, title, description })
   }
 
   return (

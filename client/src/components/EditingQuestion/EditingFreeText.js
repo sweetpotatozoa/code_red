@@ -1,21 +1,25 @@
 import styles from './EditingQuestion.module.css'
+import { useState, useEffect } from 'react'
 
-import React, { useState } from 'react'
+const EditingFreeText = ({ step, onSave, onCancel, steps, showWarning }) => {
+  const [title, setTitle] = useState(step.title)
+  const [description, setDescription] = useState(step.description)
+  const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
 
-const EditingFreeText = ({ question, onSave, onCancel, questions }) => {
-  const [title, setTitle] = useState(question.title)
-  const [description, setDescription] = useState(question.description)
-  const [nextQuestionId, setNextQuestionId] = useState(
-    question.nextQuestionId || '',
-  )
+  useEffect(() => {
+    if (nextStepId && !steps.some((s) => s.id === nextStepId)) {
+      showWarning = true
+    } else {
+      showWarning = false
+    }
+  }, [nextStepId, steps])
 
-  //저장 핸들러
   const handleSave = () => {
     if (title.trim() === '') {
       alert('제목을 입력해주세요.')
       return
     }
-    onSave({ ...question, title, description, nextQuestionId })
+    onSave({ ...step, title, description, nextStepId })
   }
 
   return (
@@ -39,14 +43,24 @@ const EditingFreeText = ({ question, onSave, onCancel, questions }) => {
       <div className={styles.title}>응답에 따른 대응</div>
       <select
         className={styles.action}
-        value={nextQuestionId}
-        onChange={(e) => setNextQuestionId(e.target.value)}
+        value={nextStepId}
+        onChange={(e) => setNextStepId(e.target.value)}
       >
         <option value=''>다음 질문으로 이동</option>
-        {questions.map((q) => (
-          <option key={q.id}>{q.title}</option>
+        {steps.map((q) => (
+          <option key={q.id} value={q.id}>
+            {q.title}
+          </option>
         ))}
+        {!steps.some((s) => s.id === nextStepId) && nextStepId && (
+          <option value={nextStepId}>삭제된 선택지</option>
+        )}
       </select>
+      {showWarning && (
+        <div className={styles.warningBubble}>
+          참조하고 있던 스텝이 삭제되어 변경이 필요합니다.
+        </div>
+      )}
       <div className={styles.bottom}>
         <div className={styles.leftBtn} onClick={onCancel}>
           취소

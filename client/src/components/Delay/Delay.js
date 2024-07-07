@@ -1,11 +1,41 @@
 import styles from './Delay.module.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const Delays = ({ survey, setSurvey }) => {
-  const [delayType, setDelayType] = useState(survey.delayType || '')
-  const [delayValue, setDelayValue] = useState(survey.delayValue || 0)
+  const [delayType, setDelayType] = useState(survey.delay?.delayType || '')
+  const [delayValue, setDelayValue] = useState(survey.delay?.delayValue || 0)
+
+  // 초를 일로 변환하는 함수
+  const secondsToDays = (seconds) => {
+    return Math.round(seconds / 86400) // 86400초 = 1일
+  }
+
+  // 일을 초로 변환하는 함수
+  const daysToSeconds = (days) => {
+    return days * 86400
+  }
+
+  useEffect(() => {
+    // 컴포넌트가 마운트되거나 survey가 변경될 때 delayValue를 일 단위로 변환
+    setDelayValue(secondsToDays(survey.delay?.delayValue || 0))
+  }, [survey])
 
   if (!survey) return null // survey가 없으면 아무것도 렌더링하지 않음
+
+  const updateDelay = (type, value) => {
+    setDelayType(type)
+    const newDelayValueInSeconds = daysToSeconds(value)
+    setDelayValue(value)
+    setSurvey({
+      ...survey,
+      delay: {
+        ...survey.delay,
+        delayType: type,
+        delayValue: newDelayValueInSeconds,
+      },
+    })
+  }
+
   return (
     <div className={styles.delay}>
       <div className={styles.explain}>
@@ -21,7 +51,7 @@ const Delays = ({ survey, setSurvey }) => {
             className={`${styles.type} ${
               delayType === 'once' ? styles.selected : ''
             }`}
-            onClick={() => setDelayType('once')}
+            onClick={() => updateDelay('once', delayValue)}
           >
             최초1회
           </div>
@@ -29,7 +59,7 @@ const Delays = ({ survey, setSurvey }) => {
             className={`${styles.type} ${
               delayType === 'untilCompleted' ? styles.selected : ''
             }`}
-            onClick={() => setDelayType('untilCompleted')}
+            onClick={() => updateDelay('untilCompleted', delayValue)}
           >
             응답할 때 까지
           </div>
@@ -37,7 +67,7 @@ const Delays = ({ survey, setSurvey }) => {
             className={`${styles.type} ${
               delayType === 'always' ? styles.selected : ''
             }`}
-            onClick={() => setDelayType('always')}
+            onClick={() => updateDelay('always', delayValue)}
           >
             항상
           </div>
@@ -75,7 +105,7 @@ const Delays = ({ survey, setSurvey }) => {
                 className={`${styles.type} ${
                   delayValue === 1 ? styles.selected : ''
                 }`}
-                onClick={() => setDelayValue(1)}
+                onClick={() => updateDelay(delayType, 1)}
               >
                 1일
               </div>
@@ -83,7 +113,7 @@ const Delays = ({ survey, setSurvey }) => {
                 className={`${styles.type} ${
                   delayValue === 3 ? styles.selected : ''
                 }`}
-                onClick={() => setDelayValue(3)}
+                onClick={() => updateDelay(delayType, 3)}
               >
                 3일
               </div>
@@ -91,7 +121,7 @@ const Delays = ({ survey, setSurvey }) => {
                 className={`${styles.type} ${
                   delayValue === 7 ? styles.selected : ''
                 }`}
-                onClick={() => setDelayValue(7)}
+                onClick={() => updateDelay(delayType, 7)}
               >
                 7일
               </div>

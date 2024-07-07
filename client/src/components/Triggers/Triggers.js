@@ -7,6 +7,24 @@ import EditingClick from '../EditingTriggers/EditingClick'
 import EditingExit from '../EditingTriggers/EditingExit'
 import EditingScroll from '../EditingTriggers/EditingScroll'
 
+// 트리거 타입을 한글로 변환하는 함수
+const getTriggerTypeInKorean = (type) => {
+  switch (type) {
+    case 'firstVisit':
+      return '첫 방문'
+    case 'url':
+      return 'URL'
+    case 'click':
+      return '클릭'
+    case 'exit':
+      return '이탈'
+    case 'scroll':
+      return '스크롤'
+    default:
+      return type // 알 수 없는 타입의 경우 원래 값을 반환
+  }
+}
+
 const Triggers = ({ survey, setSurvey }) => {
   const [isAddTrigger, setIsAddTrigger] = useState(false)
   if (!survey) return null // survey가 없으면 아무것도 렌더링하지 않음
@@ -79,31 +97,43 @@ const Triggers = ({ survey, setSurvey }) => {
                       survey={survey}
                       setSurvey={setSurvey}
                       setEditingTriggerId={setEditingTriggerId}
-                    ></EditingFirstVisit>
+                    />
                   )}
                   {trigger.type === 'url' && (
                     <EditingUrl
                       trigger={trigger}
                       TriggerEditCancel={TriggerEditCancel}
-                    ></EditingUrl>
+                      survey={survey}
+                      setSurvey={setSurvey}
+                      setEditingTriggerId={setEditingTriggerId}
+                    />
                   )}
                   {trigger.type === 'click' && (
                     <EditingClick
                       trigger={trigger}
                       TriggerEditCancel={TriggerEditCancel}
-                    ></EditingClick>
+                      survey={survey}
+                      setSurvey={setSurvey}
+                      setEditingTriggerId={setEditingTriggerId}
+                    />
                   )}
                   {trigger.type === 'exit' && (
                     <EditingExit
                       trigger={trigger}
                       TriggerEditCancel={TriggerEditCancel}
-                    ></EditingExit>
+                      survey={survey}
+                      setSurvey={setSurvey}
+                      setEditingTriggerId={setEditingTriggerId}
+                    />
                   )}
                   {trigger.type === 'scroll' && (
                     <EditingScroll
                       trigger={trigger}
                       TriggerEditCancel={TriggerEditCancel}
-                    ></EditingScroll>
+                      survey={survey}
+                      setSurvey={setSurvey}
+                      setEditingTriggerId={setEditingTriggerId}
+                    />
                   )}
                 </div>
               ) : (
@@ -113,7 +143,7 @@ const Triggers = ({ survey, setSurvey }) => {
                 >
                   <div className={styles.triggerTitle}>{trigger.title}</div>
                   <div className={styles.triggerDescription}>
-                    {trigger.type}
+                    {getTriggerTypeInKorean(trigger.type)}
                   </div>
                 </div>
               )}

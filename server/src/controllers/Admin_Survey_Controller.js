@@ -279,6 +279,26 @@ class AdminSurveyController {
       res.status(200).json({ userId })
     } catch (err) {
       const { status, message } = errorHandler(err, 'getId')
+      }
+  }
+
+  // 수정할 설문조사 정보 가져오기
+  async getSurveyForEdit(req, res) {
+    const userId = req.user.id
+    const surveyId = req.params.id
+
+    if (!userId || !isObjectId(userId)) {
+      return res.status(400).json({ message: 'Invalid user id' })
+    }
+    if (!surveyId || !isObjectId(surveyId)) {
+      return res.status(400).json({ message: 'Invalid survey id' })
+    }
+
+    try {
+      const result = await AdminSurveyService.getSurveyForEdit(userId, surveyId)
+      res.status(200).json(result)
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'getSurveyForEdit')
       res.status(status).json({ message })
     }
   }
@@ -294,6 +314,31 @@ class AdminSurveyController {
       res.status(200).json(result)
     } catch (err) {
       const { status, message } = errorHandler(err, 'checkConnection')
+      }
+  }
+      
+  // 설문조사 업데이트
+  async updateSurvey(req, res) {
+    const userId = req.user.id
+    const surveyId = req.params.id
+    const surveyData = req.body
+
+    if (!userId || !isObjectId(userId)) {
+      return res.status(400).json({ message: 'Invalid user id' })
+    }
+    if (!surveyId || !isObjectId(surveyId)) {
+      return res.status(400).json({ message: 'Invalid survey id' })
+    }
+
+    try {
+      const result = await AdminSurveyService.updateSurvey(
+        userId,
+        surveyId,
+        surveyData,
+      )
+      res.status(200).json(result)
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'updateSurvey')
       res.status(status).json({ message })
     }
   }
@@ -325,6 +370,32 @@ class AdminSurveyController {
       res.status(200).json(result)
     } catch (err) {
       const { status, message } = errorHandler(err, 'saveOnboardingInfo')
+      }
+  }
+    
+  // 설문조사 업데이트하고 배포하기
+  async updateSurveyAndDeploy(req, res) {
+    const userId = req.user.id
+    const surveyId = req.params.id
+    const surveyData = req.body
+
+    if (!userId || !isObjectId(userId)) {
+      return res.status(400).json({ message: 'Invalid user id' })
+    }
+    if (!surveyId || !isObjectId(surveyId)) {
+      return res.status(400).json({ message: 'Invalid survey id' })
+    }
+
+    try {
+      const result = await AdminSurveyService.updateSurveyAndDeploy(
+        userId,
+        surveyId,
+        surveyData,
+      )
+      res.status(200).json(result)
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'updateSurveyAndDeploy')
+
       res.status(status).json({ message })
     }
   }

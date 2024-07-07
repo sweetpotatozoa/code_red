@@ -1,31 +1,35 @@
 import styles from './EditingQuestion.module.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-const EditingLink = ({ question, onSave, onCancel, questions }) => {
-  const [title, setTitle] = useState(question.title)
-  const [description, setDescription] = useState(question.description || '')
-  const [url, setUrl] = useState(question.url || '')
-  const [buttonText, setButtonText] = useState(question.buttonText || '')
-  const [nextQuestionId, setNextQuestionId] = useState(
-    question.nextQuestionId || '',
-  )
+const EditingLink = ({ step, onSave, onCancel, steps, showWarning }) => {
+  const [title, setTitle] = useState(step.title)
+  const [description, setDescription] = useState(step.description || '')
+  const [url, setUrl] = useState(step.url || '')
+  const [buttonText, setButtonText] = useState(step.buttonText || '')
+  const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
+
+  useEffect(() => {
+    if (nextStepId && !steps.some((s) => s.id === nextStepId)) {
+      showWarning = true
+    } else {
+      showWarning = false
+    }
+  }, [nextStepId, steps])
 
   const handleSave = () => {
     if (title.trim() === '') {
       alert('제목을 입력해주세요.')
       return
     }
-
     if (url.trim() === '') {
       alert('URL을 입력해주세요.')
       return
     }
-
     if (buttonText.trim() === '') {
       alert('버튼 텍스트를 입력해주세요.')
       return
     }
-    onSave({ ...question, title, description, url, nextQuestionId, buttonText })
+    onSave({ ...step, title, description, url, nextStepId, buttonText })
   }
 
   return (
@@ -65,14 +69,24 @@ const EditingLink = ({ question, onSave, onCancel, questions }) => {
       <div className={styles.title}>응답에 따른 대응</div>
       <select
         className={styles.action}
-        value={nextQuestionId}
-        onChange={(e) => setNextQuestionId(e.target.value)}
+        value={nextStepId}
+        onChange={(e) => setNextStepId(e.target.value)}
       >
         <option value=''>다음 질문으로 이동</option>
-        {questions.map((q) => (
-          <option key={q.id}>{q.title}</option>
+        {steps.map((q) => (
+          <option key={q.id} value={q.id}>
+            {q.title}
+          </option>
         ))}
+        {!steps.some((s) => s.id === nextStepId) && nextStepId && (
+          <option value={nextStepId}>삭제된 선택지</option>
+        )}
       </select>
+      {showWarning && (
+        <div className={styles.warningBubble}>
+          참조하고 있던 스텝이 삭제되어 변경이 필요합니다.
+        </div>
+      )}
       <div className={styles.bottom}>
         <div className={styles.leftBtn} onClick={onCancel}>
           취소
