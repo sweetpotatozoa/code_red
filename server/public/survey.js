@@ -350,6 +350,23 @@
       closeSurvey(survey._id, step.type === 'thank')
     }
 
+    if (step.type === 'singleChoice' || step.type === 'multipleChoice') {
+      const optionLabels = document.querySelectorAll('.optionLabel')
+      optionLabels.forEach((label) => {
+        const input = label.querySelector('input')
+        input.addEventListener('change', function () {
+          if (step.type === 'singleChoice') {
+            optionLabels.forEach((l) => l.classList.remove('checked'))
+          }
+          if (this.checked) {
+            label.classList.add('checked')
+          } else {
+            label.classList.remove('checked')
+          }
+        })
+      })
+    }
+
     const nextButton = document.getElementById('nextStepButton')
     if (nextButton) {
       if (step.type === 'thank') {
