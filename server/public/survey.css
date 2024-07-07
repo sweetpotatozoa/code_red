@@ -87,10 +87,7 @@
 
 .inputContainer {
   display: flex;
-  margin-bottom: 16px;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
   width: 100%;
 }
 
@@ -106,7 +103,6 @@
   transition: background-color 0.2s ease;
   margin-bottom: 8px;
   font-size: 14px;
-  font-weight: bold;
 }
 
 .optionLabel:hover {
@@ -116,6 +112,7 @@
 .optionLabel input {
   margin-right: 8px;
   width: 16px;
+  height: 16px;
 }
 
 .optionLabel.checked {
@@ -125,29 +122,32 @@
 
 .starInputContainer {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-bottom: 32px;
   width: 100%;
-  flex-direction: row-reverse;
 }
 
-.starInputContainer:hover .starOptionLabel .star {
+.starOptionLabel {
+  font-size: 24px;
   color: #ccc;
-}
-
-.starInputContainer .starOptionLabel:hover .star,
-.starInputContainer .starOptionLabel:hover ~ .starOptionLabel .star {
-  color: #ffca28;
-}
-
-.starInputContainer .starOptionLabel.checked .star,
-.starInputContainer .starOptionLabel.checked ~ .starOptionLabel .star {
-  color: #ffca28;
+  cursor: pointer;
+  margin: 0 2px;
 }
 
 .starOptionLabel input {
   display: none;
+}
+
+.starOptionLabel .star {
+  transition: color 0.2s;
+}
+
+.starInputContainer .starOptionLabel:hover .star,
+.starInputContainer .starOptionLabel:hover ~ .starOptionLabel .star,
+.starInputContainer .starOptionLabel.checked .star,
+.starInputContainer .starOptionLabel.checked ~ .starOptionLabel .star {
+  color: #ffca28;
 }
 
 textarea {

@@ -292,6 +292,24 @@
     }
   }
 
+  function setupRatingStars() {
+    const starContainer = document.querySelector('.starInputContainer');
+    if (starContainer) {
+      const stars = starContainer.querySelectorAll('.starOptionLabel');
+      stars.forEach((star, index) => {
+        star.addEventListener('click', () => {
+          stars.forEach((s, i) => {
+            if (i <= index) {
+              s.classList.add('checked');
+            } else {
+              s.classList.remove('checked');
+            }
+          });
+        });
+      });
+    }
+  }
+
   // 설문조사 스텝 표시
   function showStep(survey, stepIndex) {
     const activeSteps = survey.steps.filter((step) =>
@@ -344,6 +362,10 @@
               step.url.startsWith('http') ? step.url : `https://${step.url}`,
               '_blank',
             )
+          }
+
+          if (step.type === 'rating') {
+            setupRatingStars();
           }
   
           // 다음 스텝 인덱스 결정 로직
@@ -496,47 +518,37 @@
       case 'welcome':
         return ''
       case 'singleChoice':
-        return step.options
-          .map(
-            (option) => `
-              <div class="option-container">
-                <input type="radio" name="choice" value="${option.value}" id="choice-${option.id}">
-                <label for="choice-${option.id}">${option.value}</label>
-              </div>
-            `
-          )
-          .join('')
       case 'multipleChoice':
-        return step.options
-          .map(
-            (option) => `
-              <div class="option-container">
-                <input type="checkbox" name="multipleChoice" value="${option.value}" id="multipleChoice-${option.id}">
-                <label for="multipleChoice-${option.id}">${option.value}</label>
-              </div>
-            `
-          )
-          .join('')
+        return `
+          <div class="inputContainer">
+            ${step.options.map((option) => `
+              <label class="optionLabel">
+                <input type="${step.type === 'singleChoice' ? 'radio' : 'checkbox'}" 
+                       name="${step.type}" 
+                       value="${option.value}" 
+                       id="${step.type}-${option.id}">
+                <span>${option.value}</span>
+              </label>
+            `).join('')}
+          </div>
+        `
       case 'rating':
-        // 평점 질문을 별점으로 렌더링
-        return `<span class="star-rating">${step.options
-          .map(
-            (_, index) =>
-              `<input type="radio" name="rating" value="${
-                index + 1
-              }" id="rating-${index}"><label for="rating-${index}">★</label>`,
-          )
-          .join('')}</span>`
+        return `
+          <div class="starInputContainer">
+            ${[5, 4, 3, 2, 1].map((value) => `
+              <label class="starOptionLabel" for="rating-${value}">
+                <input type="radio" name="rating" value="${value}" id="rating-${value}">
+                <span class="star">★</span>
+              </label>
+            `).join('')}
+          </div>
+        `
       case 'freeText':
-        // 텍스트 입력 질문을 textarea로 렌더링
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
       case 'link':
-        return ''
       case 'info':
-        return ''
       case 'thank':
-        // 감사 인사 카드를 이모지와 함께 렌더링
-        return `<div class="thank-you-card"><span class="emoji">😊</span></div>`
+        return ''
       default:
         return ''
     }
