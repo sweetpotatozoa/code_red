@@ -54,7 +54,8 @@ class UsersRepo {
 
   // 유저 생성
   async createUser(newUser) {
-    await this.collection.insertOne(newUser)
+    const createdUser = await this.collection.insertOne(newUser)
+    return createdUser
   }
 
   // 유저 정보 가져오기

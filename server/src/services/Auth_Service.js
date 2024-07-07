@@ -4,6 +4,8 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const configs = require('../utils/configs')
+const Templates_Repo = require('../repositories/Templates_Repo')
+const Surveys_Repo = require('../repositories/Surveys_Repo')
 
 class AuthService {
   //헬퍼 함수
@@ -66,8 +68,19 @@ class AuthService {
       isConnect: false,
       isOnboarding: false,
     }
+    const createdUser = await UsersRepo.createUser(newUser)
 
-    await UsersRepo.createUser(newUser)
+    const connectSample = await Templates_Repo.getConnectSample()
+
+    const newSurvey = {
+      ...connectSample,
+      userId: createdUser.insertedId,
+      createAt: new Date(),
+      updateAt: new Date(),
+      views: 0,
+    }
+
+    await Surveys_Repo.createSurvey(newSurvey)
     return { message: 'Sign up success' }
   }
 
