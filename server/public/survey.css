@@ -83,8 +83,9 @@
 }
 
 .input-content {
-  margin-bottom: 20px;
-  width: 100%;
+  /* margin-bottom: 20px;
+  width: 100%; */
+  padding: 0 20px; /* 좌우 padding 추가 */
 }
 
 .inputContainer {
@@ -160,8 +161,8 @@
 
 textarea {
   display: block;
-  width: 90%; /* 중앙 정렬을 위한 수정 */
-  max-width: 340px;
+  width: 100%; /* 너비를 100%로 설정 */
+  max-width: 100%; /* 최대 너비도 100%로 설정 */
   padding: 8px;
   min-height: 100px;
   border: 1px solid #ccc;
@@ -170,7 +171,8 @@ textarea {
   overflow-y: auto;
   word-wrap: break-word;
   white-space: pre-wrap;
-  margin-bottom: 0 auto 10px; /* 원래 그냥 10이였음 */
+  margin: 0 0 10px 0; /* 마진 수정 */
+  box-sizing: border-box; /* 패딩을 너비에 포함 */
 }
 
 .button-container {
