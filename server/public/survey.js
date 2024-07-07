@@ -496,7 +496,7 @@
   }
 
   function updateProgressBar(currentStepId, steps) {
-    const progressBar = document.querySelector('.progressBar')
+    const progressBar = document.querySelector('.progress-bar')
     if (progressBar) {
       const currentStepIndex = steps.findIndex(
         (step) => step.id === currentStepId,
