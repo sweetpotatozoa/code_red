@@ -103,7 +103,7 @@
 .optionLabel {
   display: flex;
   align-items: center;
-  padding: 12px;
+  padding: 16px;
   border: 1px solid #ccc;
   border-radius: 5px;
   background-color: #fff;
@@ -112,6 +112,7 @@
   transition: background-color 0.2s, border-color 0.2s;
   margin-bottom: 8px;
   font-size: 14px;
+  font-weight: bold;
   box-sizing: border-box;
 }
 
@@ -119,19 +120,20 @@
   background-color: #f9f9f9;
 }
 
+/* 체크박스 스타일 */
 .optionLabel input[type='checkbox'] {
   margin-right: 8px;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   border: 1px solid #ccc;
+  border-radius: 3px;
   outline: none;
   transition: border-color 0.2s, background-color 0.2s;
   position: relative;
   cursor: pointer;
-  border-radius: 3px;
 }
 
 .optionLabel input[type='checkbox']:checked {
@@ -155,50 +157,37 @@
 
 /* 라디오 버튼 스타일 */
 .optionLabel input[type='radio'] {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  width: 12px;
-  height: 12px;
-}
-
-.optionLabel {
-  position: relative;
-  padding-left: 24px; /* 여백 조정 */
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.optionLabel::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 12px; /* 원하는 라디오 버튼 크기로 조정 */
-  height: 12px; /* 원하는 라디오 버튼 크기로 조정 */
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   border: 1px solid #ccc;
   border-radius: 50%;
-  background-color: #fff;
-  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s, background-color 0.2s;
+  position: relative;
+  cursor: pointer;
 }
 
-.optionLabel input[type='radio']:checked + .optionLabel::before {
-  background-color: #fff;
+.optionLabel input[type='radio']:checked {
   border-color: #007bff;
+  background-color: #007bff;
 }
 
-.optionLabel input[type='radio']:checked + .optionLabel::after {
+.optionLabel input[type='radio']:checked::before {
   content: '';
-  position: absolute;
-  left: 3px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 6px; /* 라디오 버튼 내부 원 크기 */
-  height: 6px; /* 라디오 버튼 내부 원 크기 */
-  background-color: #007bff;
+  display: block;
+  width: 8px;
+  height: 8px;
+  margin: 3px;
+  background-color: #fff;
   border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 /* 선택된 옵션 레이블 스타일 */
