@@ -122,8 +122,8 @@
 /* 라디오 버튼 스타일 */
 .optionLabel input[type='radio'] {
   margin-right: 8px;
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
