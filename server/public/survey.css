@@ -12,7 +12,6 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  min-height: auto; /* 최소 높이를 자동으로 설정 */
 }
 
 .survey-popup-position-1 {
@@ -35,7 +34,7 @@
 .survey-step {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex-grow: 1;
 }
 
 .survey-header {
