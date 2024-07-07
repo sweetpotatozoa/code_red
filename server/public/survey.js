@@ -344,7 +344,6 @@
           const stepAnswer = getResponse(step)
   
           if (stepAnswer === null) {
-            alert('Please select an option before proceeding.')
             return
           }
   
