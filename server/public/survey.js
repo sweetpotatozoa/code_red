@@ -412,23 +412,19 @@
   }
 
   function generateStepHTML(step, buttonText) {
-    const closeIconUrl = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/images/close.png';
-    
     return `
       <div class="survey-step">
         <div class="survey-header">
           <button type="button" id="closeSurvey" class="close-button">
-            <img src="${closeIconUrl}" alt="close" class="close-icon">
+            <img src="${API_URI}/images/close.png" alt="close" class="close-icon">
           </button>
         </div>
-        <form id="surveyForm">
-          ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
-          ${
-            step.description
-              ? `<p class="survey-description">${step.description}</p>`
-              : ''
-          }
-          <div>
+        <div class="content-wrapper">
+          <div class="text-content">
+            ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
+            ${step.description ? `<p class="survey-description">${step.description}</p>` : ''}
+          </div>
+          <div class="input-content">
             ${generateStepContent(step)}
           </div>
           ${
@@ -438,19 +434,19 @@
                  </div>`
               : ''
           }
-        </form>
+        </div>
+        ${
+          step.type !== 'thank'
+            ? `<div class="survey-progress">
+                <p class="powered-by">Powered by <span class="logo">CodeRed</span></p>
+                <div class="background-bar">
+                  <div class="progress-bar"></div>
+                </div>
+              </div>`
+            : ''
+        }
       </div>
-      ${
-        step.type !== 'thank'
-          ? `<div class="survey-progress">
-              <p class="powered-by">Powered by <span class="logo">CodeRed</span></p>
-              <div class="background-bar">
-                <div class="progress-bar"></div>
-              </div>
-            </div>`
-          : ''
-      }
-    `;
+    `
   }
 
   function updateProgressBar(currentStepIndex, totalSteps) {
@@ -498,19 +494,25 @@
       case 'welcome':
         return ''
       case 'singleChoice':
-        // 단일 선택 질문의 선택지를 라디오 버튼으로 렌더링
         return step.options
           .map(
-            (option, index) =>
-              `<input type="radio" name="choice" value="${option.value}" id="choice-${option.id}"><label for="choice-${option.id}">${option.value}</label>`,
+            (option) => `
+              <div class="option-container">
+                <input type="radio" name="choice" value="${option.value}" id="choice-${option.id}">
+                <label for="choice-${option.id}">${option.value}</label>
+              </div>
+            `
           )
           .join('')
       case 'multipleChoice':
-        // 다중 선택 질문의 선택지를 체크박스로 렌더링
         return step.options
           .map(
-            (option, index) =>
-              `<input type="checkbox" name="multipleChoice" value="${option.value}" id="multipleChoice-${option.id}"><label for="multipleChoice-${option.id}">${option.value}</label>`,
+            (option) => `
+              <div class="option-container">
+                <input type="checkbox" name="multipleChoice" value="${option.value}" id="multipleChoice-${option.id}">
+                <label for="multipleChoice-${option.id}">${option.value}</label>
+              </div>
+            `
           )
           .join('')
       case 'rating':
@@ -889,6 +891,7 @@
     link.onload = async () => {
       const surveyContainer = document.createElement('div')
       surveyContainer.id = 'survey-popup'
+      surveyContainer.classList.add(`survey-popup-position-${survey.position}`)
       document.body.appendChild(surveyContainer)
 
       // 노출 카운트 증가 함수 호출
