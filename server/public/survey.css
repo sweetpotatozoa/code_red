@@ -160,7 +160,7 @@
 
 textarea {
   display: block;
-  width: 95%; /* 중앙 정렬을 위한 수정 */
+  width: 90%; /* 중앙 정렬을 위한 수정 */
   max-width: 340px;
   padding: 8px;
   min-height: 100px;
