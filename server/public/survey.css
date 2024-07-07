@@ -1,200 +1,109 @@
 #survey-popup {
   position: fixed;
-  width: 384px;
+  bottom: 20px;
+  right: 20px;
+  width: 300px;
   background-color: white;
+  border: 1px solid #ccc;
   border-radius: 10px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
-  padding: 24px;
-  max-height: 80vh; /* 뷰포트 높이의 80%로 최대 높이 제한 */
-  overflow-y: auto; /* 세로 스크롤 가능 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
   z-index: 1000;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
 }
 
 .survey-popup-position-1 {
-  bottom: 16px;
-  left: 16px;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
 }
 .survey-popup-position-2 {
-  top: 16px;
-  left: 16px;
+  position: fixed;
+  top: 20px;
+  left: 20px;
 }
 .survey-popup-position-3 {
-  top: 16px;
-  right: 16px;
+  position: fixed;
+  top: 20px;
+  right: 20px;
 }
 .survey-popup-position-4 {
-  bottom: 16px;
-  right: 16px;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
 }
 
 .survey-step {
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
+  align-items: center;
 }
 
 .survey-header {
   width: 100%;
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 16px;
 }
 
 .close-button {
-  display: flex;
-  justify-content: flex-end;
-  cursor: pointer;
   background: none;
   border: none;
-  padding: 0;
-}
-
-.close-icon {
-  width: 16px;
-  height: 16px;
-}
-
-.content-wrapper {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: auto; /* 최소 높이를 자동으로 설정 원래 300px이엇음 */
-  overflow-y: auto; /* 추가: 내부 요소에 대한 세로 스크롤 */
-}
-
-.text-content {
-  margin-bottom: 20px;
+  font-size: 1.2em;
+  cursor: pointer;
+  color: #333;
 }
 
 .survey-title {
-  font-size: 16px;
   font-weight: bold;
-  margin-bottom: 11px;
+  font-size: 1.2em;
 }
 
 .survey-description {
-  font-size: 14px;
-  color: #344156;
-  margin-bottom: 20px;
+  color: gray;
+  font-size: 0.9em;
 }
 
-.input-content {
-  margin-bottom: 20px;
-  width: 100%;
+label {
+  margin-bottom: 10px;
+  font-weight: bold;
 }
 
-.inputContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
+input[type='radio'] {
+  margin-right: 10px;
 }
 
-.optionLabel {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #fff;
-  cursor: pointer;
-  width: 90%;
-  max-width: 340px;
-  transition: background-color 0.2s ease;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-.optionLabel:hover {
-  background-color: #f9f9f9;
-}
-
-.optionLabel input {
-  margin-right: 8px;
-  width: 16px;
-  height: 16px;
-}
-
-.optionLabel.checked {
-  border-color: #007bff;
-  background-color: #e9f5ff;
-}
-
-.starInputContainer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-  width: 100%;
-  flex-direction: row-reverse;
-}
-
-.starOptionLabel {
-  font-size: 48px;
-  color: #e1e7ef;
-  cursor: pointer;
-  margin: 0 8px;
-}
-
-.starOptionLabel input {
+.star-rating input[type='radio'] {
   display: none;
 }
 
-.starOptionLabel .star {
-  transition: color 0.2s;
+.star-rating label {
+  font-size: 1.5em;
+  color: lightgray;
+  cursor: pointer;
 }
 
-.starInputContainer .starOptionLabel:hover .star,
-.starInputContainer .starOptionLabel:hover ~ .starOptionLabel .star,
-.starInputContainer .starOptionLabel.checked .star,
-.starInputContainer .starOptionLabel.checked ~ .starOptionLabel .star {
-  color: #ffca28;
+.star-rating input[type='radio']:checked ~ label {
+  color: gold;
 }
 
 textarea {
-  display: block;
-  width: 90%; /* 중앙 정렬을 위한 수정 */
-  max-width: 340px;
-  padding: 8px;
-  min-height: 100px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  resize: none;
-  overflow-y: auto;
-  word-wrap: break-word;
-  white-space: pre-wrap;
+  width: 100%;
+  height: 100px;
   margin-bottom: 10px;
 }
 
-.button-container {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
-  width: 100%;
-}
-
-.submit-button {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #64738b;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 5px;
-  cursor: pointer;
-  padding: 11px 13px;
+button {
+  padding: 10px 20px;
   border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
 }
 
-.submit-button:hover {
-  background-color: #4a5568;
+button#nextStep,
+button#submitSurvey {
+  width: 100%;
 }
 
 .thank-you-card {
@@ -212,7 +121,6 @@ textarea {
   margin-top: auto;
   padding-top: 12px;
   width: 100%;
-  padding-bottom: 8px;
 }
 
 .background-bar {
@@ -231,13 +139,16 @@ textarea {
   transition: width 0.5s;
 }
 
-.powered-by {
-  text-align: center;
-  font-size: 12px;
-  color: #555;
-  margin-bottom: 16px;
+.progress {
+  height: 10px;
+  background-color: #007bff;
+  width: 0;
+  transition: width 0.5s;
 }
 
-.logo {
-  font-weight: bold;
+.powered-by {
+  text-align: center;
+  font-size: 0.8em;
+  color: #555;
+  margin-top: 10px;
 }

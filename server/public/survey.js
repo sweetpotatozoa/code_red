@@ -47,42 +47,26 @@
     })
   }
 
- // HTTP 요청을 통해 설문조사 데이터 가져오기
- async function fetchSurvey(userId) {
-  try {
-    // 설문조사 데이터 가져오기
-    const response = await fetch(
-      `${API_URI}/api/appliedSurvey?userId=${userId}&isDeploy=true`,
-    )
-    if (!response.ok) {
-      throw new Error('Network response was not ok')
+  // HTTP 요청을 통해 설문조사 데이터 가져오기
+  async function fetchSurvey(userId) {
+    try {
+      const response = await fetch(
+        `${API_URI}/api/appliedSurvey?userId=${userId}&isDeploy=true`,
+      )
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      const data = await response.json()
+      console.log('Surveys loaded:', data)
+
+      const validSurveys = data.data.filter(validateSurvey)
+
+      return { status: data.status, data: validSurveys }
+    } catch (error) {
+      console.error('Error fetching survey:', error)
+      return null
     }
-    const data = await response.json()
-    console.log('Surveys loaded:', data)
-
-    const validSurveys = data.data.filter(validateSurvey)
-
-    // 사용자 데이터에서 surveyPosition 값 가져오기
-    const userResponse = await fetch(`${API_URI}/api/appliedSurvey/users/${userId}`)
-    if (!userResponse.ok) {
-      throw new Error('Network response was not ok')
-    }
-    const userData = await userResponse.json()
-    const surveyPosition = userData.surveyPosition
-
-    // 각 설문조사에 surveyPosition 값 설정
-    validSurveys.forEach(survey => {
-      survey.position = surveyPosition
-    })
-
-    return { status: data.status, data: validSurveys }
-  } catch (error) {
-    console.error('Error fetching survey:', error)
-    return null
   }
-}
-
-
 
   // 설문조사 응답 생성
   async function createResponse(userId, surveyId, answer) {
@@ -308,26 +292,6 @@
     }
   }
 
-  function setupRatingStars() {
-    const starContainer = document.querySelector('.starInputContainer');
-    if (starContainer) {
-      const stars = starContainer.querySelectorAll('.starOptionLabel');
-      stars.forEach((star, index) => {
-        star.addEventListener('click', () => {
-          const rating = 5 - index; // 역순으로 인덱스 계산
-        stars.forEach((s, i) => {
-          if (i >= index) {
-            s.classList.add('checked');
-          } else {
-            s.classList.remove('checked');
-          }
-        });
-        // 여기에 선택된 rating 값을 저장하는 로직 추가
-      });
-    });
-  }
-}
-
   // 설문조사 스텝 표시
   function showStep(survey, stepIndex) {
     const activeSteps = survey.steps.filter((step) =>
@@ -335,117 +299,113 @@
     )
     const step = activeSteps[stepIndex]
     const surveyContainer = document.getElementById('survey-popup')
-  
+
     if (!step) {
       closeSurvey(survey._id, false)
       console.log('Survey finished')
       return
     }
-  
-    const buttonText = step.type === 'thank' ? '닫기' : getButtonText(step)
-  
+
+    const buttonText = getButtonText(step)
+
     surveyContainer.innerHTML = generateStepHTML(step, buttonText)
-  
+
     document.getElementById('closeSurvey').onclick = () => {
-      closeSurvey(survey._id, step.type === 'thank')
+      const isThankStep = step.type === 'thank'
+      closeSurvey(survey._id, isThankStep)
     }
-  
-    const nextButton = document.getElementById('nextStepButton')
-    if (nextButton) {
-      if (step.type === 'thank') {
-        nextButton.onclick = () => closeSurvey(survey._id, true)
-      } else {
-        nextButton.onclick = async function(event) {
-          event.preventDefault()
-          const stepAnswer = getResponse(step)
-  
-          if (stepAnswer === null) {
-            return
-          }
-  
-          saveResponse(step, stepAnswer)
-  
-          try {
-            let isCompleted = false
-  
-            if (surveyResponseId) {
-              await updateResponse(surveyResponseId, surveyResponses, false)
-            } else {
-              surveyResponseId = await createResponse(survey.userId, survey._id, {
-                ...surveyResponses[0],
-              })
-            }
-  
-            if (step.type === 'link') {
-              window.open(
-                step.url.startsWith('http') ? step.url : `https://${step.url}`,
-                '_blank',
-              )
-            }
-  
-            let nextStepId
-            if (step.type === 'singleChoice' || step.type === 'rating') {
-              const selectedOptionId = stepAnswer.id
-              const selectedOption = step.options.find(
-                (option) => option.id === selectedOptionId,
-              )
-              nextStepId = selectedOption ? selectedOption.nextStepId : null
-            } else {
-              nextStepId = step.nextStepId
-            }
-  
-            let nextStepIndex
-            if (!nextStepId || nextStepId === '') {
-              nextStepIndex = stepIndex + 1
-            } else {
-              nextStepIndex = survey.steps.findIndex((s) => s.id === nextStepId)
-              if (nextStepIndex === -1) {
-                nextStepIndex = stepIndex + 1
-              }
-            }
-  
-            if (nextStepIndex < survey.steps.length) {
-              const nextStep = survey.steps[nextStepIndex]
-  
-              if (nextStep.type === 'thank' && nextStep.isActive && !isCompleted) {
-                await updateResponse(surveyResponseId, surveyResponses, true)
-                isCompleted = true
-              }
-  
-              showStep(survey, nextStepIndex)
-            } else {
-              const thankStep = survey.steps.find(
-                (step) => step.type === 'thank' && step.isActive,
-              )
-              if (thankStep) {
-                const thankStepIndex = survey.steps.findIndex(
-                  (step) => step.id === thankStep.id,
-                )
-                if (!isCompleted) {
-                  await updateResponse(surveyResponseId, surveyResponses, true)
-                  isCompleted = true
-                }
-                showStep(survey, thankStepIndex)
-              } else {
-                if (!isCompleted) {
-                  await updateResponse(surveyResponseId, surveyResponses, true)
-                  isCompleted = true
-                }
-                closeSurvey(survey._id, true)
-                console.log('Survey closed without thank step')
-              }
-            }
-          } catch (error) {
-            console.error('Error while submitting survey:', error)
+
+    document.getElementById('surveyForm').onsubmit = async function (event) {
+      event.preventDefault()
+      const stepAnswer = getResponse(step)
+
+      if (stepAnswer === null) {
+        return
+      }
+
+      saveResponse(step, stepAnswer)
+
+      try {
+        let isCompleted = false
+
+        if (surveyResponseId) {
+          await updateResponse(surveyResponseId, surveyResponses, false)
+        } else {
+          surveyResponseId = await createResponse(survey.userId, survey._id, {
+            ...surveyResponses[0],
+          })
+        }
+
+        // 링크 스텝 처리
+        if (step.type === 'link') {
+          window.open(
+            step.url.startsWith('http') ? step.url : `https://${step.url}`,
+            '_blank',
+          )
+        }
+
+        // 다음 스텝 인덱스 결정 로직
+        let nextStepId
+        if (step.type === 'singleChoice' || step.type === 'rating') {
+          const selectedOptionId = stepAnswer.id.replace('choice-', '')
+          const selectedOption = step.options.find(
+            (option) => option.id === selectedOptionId,
+          )
+          nextStepId = selectedOption ? selectedOption.nextStepId : null
+        } else {
+          nextStepId = step.nextStepId
+        }
+
+        let nextStepIndex
+        if (!nextStepId || nextStepId === '') {
+          nextStepIndex = stepIndex + 1
+        } else {
+          nextStepIndex = survey.steps.findIndex((s) => s.id === nextStepId)
+          if (nextStepIndex === -1) {
+            nextStepIndex = stepIndex + 1
           }
         }
+
+        // 다음 스텝으로 이동 또는 설문조사 완료 처리
+        if (nextStepIndex < survey.steps.length) {
+          const nextStep = survey.steps[nextStepIndex]
+
+          // thank 스텝으로 넘어갈 때 isComplete를 true로 설정
+          if (nextStep.type === 'thank' && nextStep.isActive && !isCompleted) {
+            await updateResponse(surveyResponseId, surveyResponses, true)
+            isCompleted = true
+          }
+
+          currentStep = nextStepIndex
+          showStep(survey, currentStep)
+        } else {
+          const thankStep = survey.steps.find(
+            (step) => step.type === 'thank' && step.isActive,
+          )
+          if (thankStep) {
+            currentStep = survey.steps.findIndex(
+              (step) => step.id === thankStep.id,
+            )
+            if (!isCompleted) {
+              await updateResponse(surveyResponseId, surveyResponses, true)
+              isCompleted = true
+            }
+            showStep(survey, currentStep)
+          } else {
+            // thank 스텝이 없거나 active가 아닐 때 isComplete를 true로 설정
+            if (!isCompleted) {
+              await updateResponse(surveyResponseId, surveyResponses, true)
+              isCompleted = true
+            }
+            closeSurvey(survey._id, true)
+            console.log('Survey closed without thank step')
+          }
+        }
+      } catch (error) {
+        console.error('Error while submitting survey:', error)
       }
     }
-  
-    if (step.type === 'rating') {
-      setupRatingStars()
-    }
-  
+
     if (step.type !== 'thank') {
       updateProgressBar(stepIndex, activeSteps.length - 1)
     }
@@ -455,42 +415,42 @@
     return `
       <div class="survey-step">
         <div class="survey-header">
-          <button type="button" id="closeSurvey" class="close-button">
-            <img src="${API_URI}/images/close.png" alt="close" class="close-icon">
-          </button>
+          <button type="button" id="closeSurvey" class="close-button">X</button>
         </div>
-        <div class="content-wrapper">
-          <div class="text-content">
-            ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
-            ${step.description ? `<p class="survey-description">${step.description}</p>` : ''}
-          </div>
-          <div class="input-content">
+        <form id="surveyForm">
+          ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
+          ${
+            step.description
+              ? `<p class="survey-description">${step.description}</p>`
+              : ''
+          }
+          <div>
             ${generateStepContent(step)}
           </div>
           ${
             buttonText
-              ? `<div class="button-container">
-                   <button type="button" id="nextStepButton" class="submit-button">${buttonText}</button>
-                 </div>`
+              ? `<button type="submit" id="submitSurvey">${buttonText}</button>`
               : ''
           }
-        </div>
-        ${
-          step.type !== 'thank'
-            ? `<div class="survey-progress">
-                <p class="powered-by">Powered by <span class="logo">CodeRed</span></p>
-                <div class="background-bar">
-                  <div class="progress-bar"></div>
-                </div>
-              </div>`
-            : ''
-        }
+        </form>
       </div>
+      ${
+        step.type !== 'thank'
+          ? `
+        <div class="survey-progress">
+          <div class="background-bar">
+            <div class="progress-bar"></div>
+          </div>
+          <p class="powered-by">Powered by Codered</p>
+        </div>
+      `
+          : ''
+      }
     `
   }
 
   function updateProgressBar(currentStepIndex, totalSteps) {
-    const progressBar = document.querySelector('.progressBar')
+    const progressBar = document.querySelector('.progress')
     if (progressBar) {
       const progressPercentage = ((currentStepIndex + 1) / totalSteps) * 100
       progressBar.style.width = `${progressPercentage}%`
@@ -534,37 +494,41 @@
       case 'welcome':
         return ''
       case 'singleChoice':
+        // 단일 선택 질문의 선택지를 라디오 버튼으로 렌더링
+        return step.options
+          .map(
+            (option, index) =>
+              `<input type="radio" name="choice" value="${option.value}" id="choice-${option.id}"><label for="choice-${option.id}">${option.value}</label>`,
+          )
+          .join('')
       case 'multipleChoice':
-        return `
-          <div class="inputContainer">
-            ${step.options.map((option) => `
-              <label class="optionLabel">
-                <input type="${step.type === 'singleChoice' ? 'radio' : 'checkbox'}" 
-                       name="${step.type}" 
-                       value="${option.value}" 
-                       id="${step.type}-${option.id}">
-                <span>${option.value}</span>
-              </label>
-            `).join('')}
-          </div>
-        `
+        // 다중 선택 질문의 선택지를 체크박스로 렌더링
+        return step.options
+          .map(
+            (option, index) =>
+              `<input type="checkbox" name="multipleChoice" value="${option.value}" id="multipleChoice-${option.id}"><label for="multipleChoice-${option.id}">${option.value}</label>`,
+          )
+          .join('')
       case 'rating':
-        return `
-          <div class="starInputContainer">
-            ${[5, 4, 3, 2, 1].map((value) => `
-              <label class="starOptionLabel" for="rating-${value}">
-                <input type="radio" name="rating" value="${value}" id="rating-${value}">
-                <span class="star">&#9733;</span>
-              </label>
-            `).join('')}
-          </div>
-        `
+        // 평점 질문을 별점으로 렌더링
+        return `<span class="star-rating">${step.options
+          .map(
+            (_, index) =>
+              `<input type="radio" name="rating" value="${
+                index + 1
+              }" id="rating-${index}"><label for="rating-${index}">★</label>`,
+          )
+          .join('')}</span>`
       case 'freeText':
+        // 텍스트 입력 질문을 textarea로 렌더링
         return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
       case 'link':
-      case 'info':
-      case 'thank':
         return ''
+      case 'info':
+        return ''
+      case 'thank':
+        // 감사 인사 카드를 이모지와 함께 렌더링
+        return `<div class="thank-you-card"><span class="emoji">😊</span></div>`
       default:
         return ''
     }
@@ -576,32 +540,58 @@
       case 'welcome':
         return 'clicked'
       case 'singleChoice': {
-        const selectedOption = document.querySelector('input[name="singleChoice"]:checked')
-        return selectedOption ? {
-          id: selectedOption.id.replace('singleChoice-', ''),
-          value: selectedOption.value
-        } : null
+        const selectedOption = document.querySelector(
+          'input[name="choice"]:checked',
+        )
+        const response = selectedOption
+          ? {
+              id: selectedOption.id.replace('choice-', ''), // 'choice-' 접두사 제거
+              value: selectedOption.value,
+            }
+          : null
+        console.log('SingleChoice response:', response)
+        return response
       }
       case 'multipleChoice': {
-        const selectedOptions = Array.from(document.querySelectorAll('input[name="multipleChoice"]:checked'))
-        return selectedOptions.length > 0 ? selectedOptions.map(option => ({
-          id: option.id.replace('multipleChoice-', ''),
-          value: option.value
-        })) : null
+        const selectedOptions = Array.from(
+          document.querySelectorAll('input[name="multipleChoice"]:checked'),
+        ).map((checkbox) => ({
+          id: checkbox.id.replace('multipleChoice-', ''), // 'multipleChoice-' 접두사 제거
+          value: checkbox.value,
+        }))
+        console.log('MultipleChoice responses:', selectedOptions)
+        return selectedOptions.length > 0 ? selectedOptions : null
       }
       case 'rating': {
-        const checkedStar = document.querySelector('.starOptionLabel.checked');
-        return checkedStar ? {
-          id: checkedStar.querySelector('input').id.replace('rating-', ''),
-          value: 5 - Array.from(checkedStar.parentNode.children).indexOf(checkedStar)
-        } : null;
+        const selectedRating = document.querySelector(
+          'input[name="rating"]:checked',
+        )
+        const ratingValue = selectedRating
+          ? parseInt(selectedRating.value)
+          : null
+        const ratingOption = step.options[ratingValue - 1]
+        const response = ratingOption
+          ? {
+              id: ratingOption.id,
+              value: ratingValue,
+            }
+          : null
+        console.log('Rating response:', response)
+        return response
       }
       case 'freeText': {
         const textResponse = document.getElementById('response')
+        console.log(
+          'FreeText response:',
+          textResponse ? textResponse.value : '',
+        )
         return textResponse ? textResponse.value : ''
       }
       case 'link':
+        console.log('Link clicked')
+        return 'clicked'
       case 'info':
+        console.log('Info clicked')
         return 'clicked'
       default:
         return ''
@@ -884,24 +874,26 @@
     window.activeSurveyId = survey._id
     currentStep = 0
     surveyResponses = []
-  
+
     const link = document.createElement('link')
     link.rel = 'stylesheet'
     link.type = 'text/css'
     link.href = `${API_URI}/survey.css`
     document.head.appendChild(link)
-  
+
+    // CSS 파일이 로드된 후 설문조사를 표시
     link.onload = async () => {
       const surveyContainer = document.createElement('div')
       surveyContainer.id = 'survey-popup'
-      surveyContainer.classList.add(`survey-popup-position-${survey.position}`)  // 이 줄 추가
       document.body.appendChild(surveyContainer)
-  
+
+      // 노출 카운트 증가 함수 호출
       await incrementViews(survey._id)
-  
+
       showStep(survey, currentStep)
       console.log('Survey container created and appended to body')
-  
+
+      // 설문조사 시작 시 completed 값을 false로 설정
       saveSurveyData(survey._id, {
         lastShownTime: new Date().toISOString(),
         completed: false,
