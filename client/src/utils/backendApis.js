@@ -224,9 +224,9 @@ class BackendApis {
     )
   }
 
-  async downloadResponses(responseId) {
+  async downloadResponses(surveyId) {
     return await fetcher(
-      `/api/adminSurvey/download/${responseId}`,
+      `/api/adminSurvey/download/${surveyId}`,
       this.token,
       'GET',
     )

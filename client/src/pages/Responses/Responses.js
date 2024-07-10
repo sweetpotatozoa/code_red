@@ -128,11 +128,9 @@ const Responses = () => {
       document.body.appendChild(link)
       link.click()
       link.parentNode.removeChild(link)
-
-      alert('CSV 파일이 성공적으로 다운로드되었습니다.')
     } catch (error) {
       console.error('Error downloading CSV:', error)
-      setError('CSV 다운로드 중 오류가 발생했습니다.')
+      setError('다운로드 중 오류가 발생했습니다.')
     } finally {
       setIsDownloading(false)
     }
@@ -140,13 +138,14 @@ const Responses = () => {
 
   if (isLoading) return <div className={styles.loading}>로딩 중...</div>
   if (error) return <div className={styles.error}>{error}</div>
-  if (!survey) return <div className={styles.error}>설문조사를 찾을 수 없습니다.</div>
+  if (!survey)
+    return <div className={styles.error}>설문조사를 찾을 수 없습니다.</div>
 
   return (
     <div className={styles.container}>
       <div className={styles.sideBar}>
         <img
-          src="/images/logo.png"
+          src='/images/logo.png'
           className={styles.logo}
           onClick={goToHome}
           alt='Logo'
@@ -172,9 +171,9 @@ const Responses = () => {
         <div className={styles.basicSetting}>
           <div className={styles.setting}>연결상태 정상</div>
           <a
-            href="https://www.naver.com/"
-            target="_blank"
-            rel="noopener noreferrer"
+            href='https://www.naver.com/'
+            target='_blank'
+            rel='noopener noreferrer'
           >
             <div className={styles.setting}>가이드</div>
           </a>
@@ -187,7 +186,7 @@ const Responses = () => {
             </div>
             <label className={styles.switch}>
               <input
-                type="checkbox"
+                type='checkbox'
                 checked={survey?.isDeploy}
                 onChange={surveyDeployHandler}
               />

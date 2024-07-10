@@ -4,7 +4,7 @@ const templatesRepo = require('../repositories/Templates_Repo')
 const ResponsesRepo = require('../repositories/Responses_Repo')
 const { v4: uuidv4 } = require('uuid')
 const mongoose = require('mongoose')
-const { Parser } = require('json2csv');
+const { Parser } = require('json2csv')
 
 class AdminSurveyService {
   //헬퍼 함수
@@ -337,7 +337,7 @@ class AdminSurveyService {
 
     return SurveysRepo.getSurveyDeployStatus(surveyId)
   }
-  
+
   //연결상태 확인하기
   async checkConnect(userId) {
     await this.checkUserIdExist(userId)
@@ -349,7 +349,6 @@ class AdminSurveyService {
     await this.checkUserIdExist(userId)
     return UsersRepo.saveOnboardingInfo(userId, onboardingInfo)
   }
-
 
   // 수정할 설문조사 정보 가져오기
   async getSurveyForEdit(userId, surveyId) {
@@ -380,57 +379,106 @@ class AdminSurveyService {
   }
 
   async getResponsesAsCSV(userId, surveyId) {
-    const responses = await this.getResponses(userId, surveyId);
-    
+    console.log(
+      `getResponsesAsCSV called with userId: ${userId}, surveyId: ${surveyId}`,
+    )
+
+    await this.checkUserIdExist(userId)
+    await this.checkSurveyIdExist(surveyId)
+    await this.checkSurveyOwnership(userId, surveyId)
+
+    const responses = await ResponsesRepo.getSurveyResponses(surveyId)
+    console.log('Raw responses:', JSON.stringify(responses, null, 2))
+
     if (responses.length === 0) {
-      return null;
+      console.log('No responses found')
+      return null
     }
 
-    const fields = this.getCSVFields(responses);
-    const opts = { fields };
-    const parser = new Parser(opts);
-    return parser.parse(this.formatResponsesForCSV(responses));
+    const fields = this.getCSVFields(responses)
+    console.log('CSV Fields:', fields)
+
+    const opts = { fields }
+    const parser = new Parser(opts)
+
+    const formattedResponses = this.formatResponsesForCSV(responses)
+    console.log(
+      'Formatted responses:',
+      JSON.stringify(formattedResponses, null, 2),
+    )
+
+    const csvData = parser.parse(formattedResponses)
+    console.log('CSV Data (first 500 characters):', csvData.substring(0, 500))
+
+    return csvData
   }
 
   getCSVFields(responses) {
-    const baseFields = ['Response ID', 'Created At', 'Is Complete'];
-    const questionFields = this.getUniqueQuestions(responses);
-    return [...baseFields, ...questionFields];
+    const baseFields = ['Response ID', 'Created At', 'Is Complete']
+    const questionFields = this.getUniqueQuestions(responses)
+    const allFields = [...baseFields, ...questionFields]
+    console.log('All CSV Fields:', allFields)
+    return allFields
   }
 
   getUniqueQuestions(responses) {
-    const questions = new Set();
-    responses.forEach(response => {
-      response.answers.forEach(answer => questions.add(answer.stepTitle));
-    });
-    return Array.from(questions);
+    const questions = new Set()
+    responses.forEach((response) => {
+      response.answers.forEach((answer) => questions.add(answer.stepTitle))
+    })
+    const uniqueQuestions = Array.from(questions)
+    console.log('Unique Questions:', uniqueQuestions)
+    return uniqueQuestions
   }
 
   formatResponsesForCSV(responses) {
-    return responses.map(response => {
+    return responses.map((response) => {
       const baseInfo = {
-        'Response ID': response._id,
-        'Created At': this.formatDate(response.createAt),
-        'Is Complete': response.isComplete ? '제출완료' : '중도이탈'
-      };
+        'Response ID': response._id.toString(),
+        'Created At': this.formatDateCSV(response.createAt),
+        'Is Complete': response.isComplete ? '제출완료' : '중도이탈',
+      }
 
-      const answers = {};
-      response.answers.forEach(answer => {
-        answers[answer.stepTitle] = Array.isArray(answer.answer) 
-          ? answer.answer.map(ans => ans.value).join(', ')
-          : answer.answer.value || answer.answer;
-      });
+      const answers = {}
+      response.answers.forEach((answer) => {
+        answers[answer.stepTitle] = this.formatAnswer(answer.answer)
+      })
 
-      return { ...baseInfo, ...answers };
-    });
+      const formattedResponse = { ...baseInfo, ...answers }
+      console.log(
+        'Formatted Response:',
+        JSON.stringify(formattedResponse, null, 2),
+      )
+      return formattedResponse
+    })
   }
 
-  formatDate(date) {
-    const d = new Date(date);
-    const pad = (n) => (n < 10 ? '0' + n : n);
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  formatDateCSV(date) {
+    const d = new Date(date)
+    const pad = (n) => (n < 10 ? '0' + n : n)
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
+      d.getDate(),
+    )} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  }
+
+  formatAnswer(answer) {
+    console.log('Formatting answer:', answer)
+    if (Array.isArray(answer)) {
+      return answer.map((a) => this.formatSingleAnswer(a)).join(', ')
+    } else {
+      return this.formatSingleAnswer(answer)
+    }
+  }
+
+  formatSingleAnswer(answer) {
+    if (answer === null || answer === undefined) {
+      return ''
+    } else if (typeof answer === 'object') {
+      return answer.value || answer.text || JSON.stringify(answer)
+    } else {
+      return String(answer)
+    }
   }
 }
-
 
 module.exports = new AdminSurveyService()

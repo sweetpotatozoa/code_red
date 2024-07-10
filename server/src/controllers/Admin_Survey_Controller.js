@@ -279,7 +279,7 @@ class AdminSurveyController {
       res.status(200).json({ userId })
     } catch (err) {
       const { status, message } = errorHandler(err, 'getId')
-      }
+    }
   }
 
   // 수정할 설문조사 정보 가져오기
@@ -314,9 +314,9 @@ class AdminSurveyController {
       res.status(200).json(result)
     } catch (err) {
       const { status, message } = errorHandler(err, 'checkConnection')
-      }
+    }
   }
-      
+
   // 설문조사 업데이트
   async updateSurvey(req, res) {
     const userId = req.user.id
@@ -370,9 +370,9 @@ class AdminSurveyController {
       res.status(200).json(result)
     } catch (err) {
       const { status, message } = errorHandler(err, 'saveOnboardingInfo')
-      }
+    }
   }
-    
+
   // 설문조사 업데이트하고 배포하기
   async updateSurveyAndDeploy(req, res) {
     const userId = req.user.id
@@ -401,29 +401,41 @@ class AdminSurveyController {
   }
 
   async downloadResponses(req, res) {
-    const userId = req.user.id;
-    const surveyId = req.params.id;
+    const userId = req.user.id
+    const surveyId = req.params.id
+
+    if (!userId || !isObjectId(userId)) {
+      res.status(400).json({ message: 'Invalid user id' })
+      return
+    }
+
+    if (!surveyId || !isObjectId(surveyId)) {
+      res.status(400).json({ message: 'Invalid survey id' })
+      return
+    }
 
     try {
-      await this.checkUserIdExist(userId);
-      await this.checkSurveyIdExist(surveyId);
-      await this.checkSurveyOwnership(userId, surveyId);
+      const result = await AdminSurveyService.getResponsesAsCSV(
+        userId,
+        surveyId,
+      )
 
-      const csvData = await AdminSurveyService.getResponsesAsCSV(userId, surveyId);
-      
-      if (!csvData) {
-        return res.status(404).json({ message: "No responses found" });
+      if (!result) {
+        res.status(404).json({ message: 'No responses found' })
+        return
       }
 
-      res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', `attachment; filename=survey_responses_${surveyId}.csv`);
-      res.send(csvData);
+      res.setHeader('Content-Type', 'text/csv')
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename=survey_responses_${surveyId}.csv`,
+      )
+      res.status(200).send(result)
     } catch (err) {
-      const { status, message } = errorHandler(err, 'downloadResponses');
-      res.status(status).json({ message });
+      const { status, message } = errorHandler(err, 'downloadResponses')
+      res.status(status).json({ message })
     }
   }
-  
 }
 
 module.exports = new AdminSurveyController()
