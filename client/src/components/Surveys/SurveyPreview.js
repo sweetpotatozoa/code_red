@@ -51,9 +51,10 @@ const SurveyPreview = ({
 
   const handleNextStep = () => {
     if (survey && !isTransitioning) {
-      const currentStepData = survey.steps.find(
+      const currentStepIndex = survey.steps.findIndex(
         (step) => step.id === currentStepId,
       )
+      const currentStepData = survey.steps[currentStepIndex]
 
       if (!currentStepData) return
 
@@ -69,6 +70,18 @@ const SurveyPreview = ({
         nextStepId = currentStepData.nextStepId
       } else if (currentStepData.type !== 'thank') {
         nextStepId = currentStepData.nextStepId
+      }
+
+      if (nextStepId === '') {
+        // 다음 인덱스의 스텝으로 이동
+        const nextStepIndex = currentStepIndex + 1
+        if (nextStepIndex < survey.steps.length) {
+          nextStepId = survey.steps[nextStepIndex].id
+        } else {
+          // 마지막 스텝인 경우 설문 종료
+          setShowContainer(false)
+          return
+        }
       }
 
       if (nextStepId) {
@@ -207,7 +220,7 @@ const SurveyPreview = ({
                     )}
                     onChange={() => handleOptionChange(option, false)}
                   />
-                  <span className={styles.star}>&#9733;</span>
+                  <span className={styles.star}>&#9733</span>
                 </label>
               ))}
             </div>
