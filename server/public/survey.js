@@ -706,18 +706,16 @@
     surveys.forEach((survey) => {
       survey.triggers.forEach((trigger) => {
         if (trigger.type === 'url') {
-          const triggerUrl = new URL(trigger.url, window.location.origin)
-
           // #checkConnection 특별 케이스 처리
-          if (
-            currentUrl.hash === '#checkConnection' &&
-            trigger.url === '#checkConnection'
-          ) {
-            showSurvey(survey)
+          if (trigger.url === '#checkConnection') {
+            if (currentUrl.hash === '#checkConnection') {
+              showSurvey(survey)
+            }
             return
           }
 
-          // 기존 URL 트리거 로직 (쿼리와 해시 무시)
+          // 일반적인 URL 트리거 처리 (pathname만 비교)
+          const triggerUrl = new URL(trigger.url, window.location.origin)
           if (
             currentUrl.pathname === triggerUrl.pathname ||
             (currentUrl.pathname === '/' && triggerUrl.pathname === '')
@@ -728,6 +726,10 @@
       })
     })
   }
+
+  // 디버깅을 위한 로그 추가
+  console.log('Current URL:', window.location.href)
+  console.log('Surveys:', surveys)
 
   // 페이지가 특정 URL인지 확인하는 함수
   function isCorrectPage(trigger) {
