@@ -279,7 +279,7 @@ class AdminSurveyController {
       res.status(200).json({ userId })
     } catch (err) {
       const { status, message } = errorHandler(err, 'getId')
-      }
+    }
   }
 
   // 수정할 설문조사 정보 가져오기
@@ -314,9 +314,9 @@ class AdminSurveyController {
       res.status(200).json(result)
     } catch (err) {
       const { status, message } = errorHandler(err, 'checkConnection')
-      }
+    }
   }
-      
+
   // 설문조사 업데이트
   async updateSurvey(req, res) {
     const userId = req.user.id
@@ -370,9 +370,9 @@ class AdminSurveyController {
       res.status(200).json(result)
     } catch (err) {
       const { status, message } = errorHandler(err, 'saveOnboardingInfo')
-      }
+    }
   }
-    
+
   // 설문조사 업데이트하고 배포하기
   async updateSurveyAndDeploy(req, res) {
     const userId = req.user.id
@@ -397,6 +397,41 @@ class AdminSurveyController {
       const { status, message } = errorHandler(err, 'updateSurveyAndDeploy')
 
       res.status(status).json({ message })
+    }
+  }
+
+  async downloadResponses(req, res) {
+    try {
+      const userId = req.user.id
+      const surveyId = req.params.id
+
+      console.log(
+        `Attempting to generate CSV for userId: ${userId}, surveyId: ${surveyId}`,
+      )
+
+      const csvData = await AdminSurveyService.getResponsesAsCSV(
+        userId,
+        surveyId,
+      )
+
+      if (!csvData) {
+        console.log('No CSV data generated')
+        return res.status(404).json({ message: 'No responses found' })
+      }
+
+      console.log(`CSV data generated successfully. Length: ${csvData.length}`)
+
+      res.setHeader('Content-Type', 'text/csv')
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename=survey_responses_${surveyId}.csv`,
+      )
+      res.send(csvData)
+    } catch (err) {
+      console.error('Error in downloadResponses:', err)
+      res
+        .status(500)
+        .json({ message: 'Internal server error', error: err.message })
     }
   }
 }

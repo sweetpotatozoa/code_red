@@ -39,4 +39,5 @@ class AppliedSurveyService {
   }
 }
 
+
 module.exports = new AppliedSurveyService()

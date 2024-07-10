@@ -7,14 +7,11 @@ const EditingLink = ({ step, onSave, onCancel, steps, showWarning }) => {
   const [url, setUrl] = useState(step.url || '')
   const [buttonText, setButtonText] = useState(step.buttonText || '')
   const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
+  const [localShowWarning, setLocalShowWarning] = useState(showWarning)
 
   useEffect(() => {
-    if (nextStepId && !steps.some((s) => s.id === nextStepId)) {
-      showWarning = true
-    } else {
-      showWarning = false
-    }
-  }, [nextStepId, steps])
+    setLocalShowWarning(showWarning)
+  }, [showWarning])
 
   const handleSave = () => {
     if (title.trim() === '') {
@@ -82,7 +79,7 @@ const EditingLink = ({ step, onSave, onCancel, steps, showWarning }) => {
           <option value={nextStepId}>삭제된 선택지</option>
         )}
       </select>
-      {showWarning && (
+      {localShowWarning && (
         <div className={styles.warningBubble}>
           참조하고 있던 스텝이 삭제되어 변경이 필요합니다.
         </div>

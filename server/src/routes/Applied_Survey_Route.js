@@ -10,5 +10,6 @@ router.post(
   '/:surveyId/increment-views',
   AppliedSurveyController.incrementViews,
 )
+router.get('/users/:userId', AppliedSurveyController.getUserInfo)
 
 module.exports = router

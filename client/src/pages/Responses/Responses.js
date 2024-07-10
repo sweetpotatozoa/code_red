@@ -1,9 +1,7 @@
-import { useNavigate } from 'react-router-dom'
-import styles from './Responses.module.css'
-import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toZonedTime, format } from 'date-fns-tz'
-
+import styles from './Responses.module.css'
 import BackendApis from '../../utils/backendApis'
 
 const Responses = () => {
@@ -14,6 +12,7 @@ const Responses = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const [survey, setSurvey] = useState({ isDeploy: false })
+  const [isDownloading, setIsDownloading] = useState(false)
 
   const navigate = useNavigate()
   const { id } = useParams()
@@ -29,7 +28,7 @@ const Responses = () => {
           BackendApis.getUserInfo(),
         ])
         setSurvey(surveyData || { isDeploy: false })
-        setResponses(responsesData) // BackendApis.getResponse(id)는 항상 배열을 반환한다고 가정
+        setResponses(responsesData)
         setUserInfo(userInfoData)
         setSelectedPosition(userInfoData.surveyPosition || 4)
       } catch (error) {
@@ -115,9 +114,44 @@ const Responses = () => {
     return format(kstDate, 'yyyy-MM-dd HH:mm:ss', { timeZone: 'Asia/Seoul' })
   }
 
-  if (isLoading) return <div>로딩 중...</div>
-  if (error) return <div>{error}</div>
-  if (!survey) return <div>설문조사를 찾을 수 없습니다.</div>
+  const downloadCSV = async () => {
+    try {
+      const response = await BackendApis.downloadResponses(id)
+
+      console.log('Response type:', typeof response)
+      console.log('Response content:', response)
+
+      if (response instanceof Blob) {
+        // 응답이 Blob 형식인 경우 (기대하는 형식)
+        const url = window.URL.createObjectURL(response)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `survey_responses_${id}.csv`)
+        document.body.appendChild(link)
+        link.click()
+        link.parentNode.removeChild(link)
+      } else if (typeof response === 'object' && response !== null) {
+        // 응답이 JSON 객체인 경우 (에러 메시지 등)
+        console.error('Server returned an error:', response)
+        alert(
+          `CSV 다운로드에 실패했습니다: ${
+            response.message || '알 수 없는 오류'
+          }`,
+        )
+      } else {
+        console.error('Unexpected response format:', response)
+        alert('CSV 다운로드에 실패했습니다: 알 수 없는 응답 형식')
+      }
+    } catch (error) {
+      console.error('Error downloading CSV:', error)
+      alert('CSV 다운로드 중 오류가 발생했습니다.')
+    }
+  }
+
+  if (isLoading) return <div className={styles.loading}>로딩 중...</div>
+  if (error) return <div className={styles.error}>{error}</div>
+  if (!survey)
+    return <div className={styles.error}>설문조사를 찾을 수 없습니다.</div>
 
   return (
     <div className={styles.container}>
@@ -126,6 +160,7 @@ const Responses = () => {
           src='/images/logo.png'
           className={styles.logo}
           onClick={goToHome}
+          alt='Logo'
         />
         <div className={styles.navBar}>
           <div className={styles.nav}>설문조사</div>
@@ -181,11 +216,15 @@ const Responses = () => {
           <div className={styles.selectedNavs}>개별 응답</div>
         </div>
         <div className={styles.download}>
-          <div className={styles.downloadButton}>CSV 다운로드</div>
+          <button
+            className={styles.downloadButton}
+            onClick={downloadCSV}
+            disabled={isDownloading || responses.length === 0}
+          >
+            {isDownloading ? 'Downloading...' : 'CSV 다운로드'}
+          </button>
         </div>
         <div className={styles.responses}>
-          {isLoading && <div>로딩 중...</div>}
-          {error && <div className={styles.error}>{error}</div>}
           {responses.length > 0 ? (
             responses.map((response) => (
               <div className={styles.response} key={response._id}>
@@ -208,17 +247,17 @@ const Responses = () => {
                   {response.isComplete ? '제출완료' : '중도이탈'}
                 </div>
                 <div className={styles.bottom}>
-                  <div
+                  <button
                     className={styles.btnButton}
                     onClick={() => deleteResponse(response._id)}
                   >
                     삭제
-                  </div>
+                  </button>
                 </div>
               </div>
             ))
           ) : (
-            <div>아직 응답이 없습니다.</div>
+            <div className={styles.noResponses}>아직 응답이 없습니다.</div>
           )}
         </div>
       </div>
@@ -228,21 +267,24 @@ const Responses = () => {
             <div className={styles.title}>설문조사 위치설정</div>
             <select
               className={styles.select}
-              onChange={(e) => setSelectedPosition(e.target.value)}
+              onChange={(e) => setSelectedPosition(Number(e.target.value))}
               value={selectedPosition}
             >
-              <option value='4'>우측 하단</option>
-              <option value='1'>좌측 하단</option>
-              <option value='2'>좌측 상단</option>
-              <option value='3'>우측 상단</option>
+              <option value={4}>우측 하단</option>
+              <option value={1}>좌측 하단</option>
+              <option value={2}>좌측 상단</option>
+              <option value={3}>우측 상단</option>
             </select>
             <div className={styles.bottom}>
-              <div className={styles.btnButton2} onClick={settingCancelHandler}>
+              <button
+                className={styles.btnButton2}
+                onClick={settingCancelHandler}
+              >
                 취소
-              </div>
-              <div className={styles.btnButton} onClick={settingSaveHandler}>
+              </button>
+              <button className={styles.btnButton} onClick={settingSaveHandler}>
                 저장
-              </div>
+              </button>
             </div>
           </div>
         </div>

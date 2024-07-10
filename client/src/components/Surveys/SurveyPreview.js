@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import styles from './TemplatePreview.module.css'
+import styles from './SurveyPreview.module.css'
 
-const TemplatePreview = ({
+const SurveyPreview = ({
   selectedTemplate,
   currentStepId,
   setCurrentStepId,
@@ -10,12 +10,15 @@ const TemplatePreview = ({
 }) => {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [selectedOptions, setSelectedOptions] = useState([])
+  const [survey, setSurvey] = useState(selectedTemplate)
 
   useEffect(() => {
-    if (selectedTemplate && currentStepId) {
-      const currentStep = selectedTemplate.steps.find(
-        (step) => step.id === currentStepId,
-      )
+    setSurvey(selectedTemplate)
+  }, [selectedTemplate])
+
+  useEffect(() => {
+    if (survey && currentStepId) {
+      const currentStep = survey.steps.find((step) => step.id === currentStepId)
       if (
         currentStep &&
         currentStep.type === 'welcome' &&
@@ -25,7 +28,7 @@ const TemplatePreview = ({
         handleNextStep()
       }
     }
-  }, [currentStepId, selectedTemplate])
+  }, [currentStepId, survey])
 
   const handleOptionChange = (option, isMultiple) => {
     setSelectedOptions((prevOptions) => {
@@ -47,10 +50,11 @@ const TemplatePreview = ({
   }
 
   const handleNextStep = () => {
-    if (selectedTemplate && !isTransitioning) {
-      const currentStepData = selectedTemplate.steps.find(
+    if (survey && !isTransitioning) {
+      const currentStepIndex = survey.steps.findIndex(
         (step) => step.id === currentStepId,
       )
+      const currentStepData = survey.steps[currentStepIndex]
 
       if (!currentStepData) return
 
@@ -66,6 +70,18 @@ const TemplatePreview = ({
         nextStepId = currentStepData.nextStepId
       } else if (currentStepData.type !== 'thank') {
         nextStepId = currentStepData.nextStepId
+      }
+
+      if (nextStepId === '') {
+        // 다음 인덱스의 스텝으로 이동
+        const nextStepIndex = currentStepIndex + 1
+        if (nextStepIndex < survey.steps.length) {
+          nextStepId = survey.steps[nextStepIndex].id
+        } else {
+          // 마지막 스텝인 경우 설문 종료
+          setShowContainer(false)
+          return
+        }
       }
 
       if (nextStepId) {
@@ -204,7 +220,7 @@ const TemplatePreview = ({
                     )}
                     onChange={() => handleOptionChange(option, false)}
                   />
-                  <span className={styles.star}>&#9733;</span>
+                  <span className={styles.star}>&#9733</span>
                 </label>
               ))}
             </div>
@@ -251,7 +267,7 @@ const TemplatePreview = ({
       )
     } else if (step.type === 'link') {
       return (
-        <a href={step.url} target='_blank'>
+        <a href={step.url} target='_blank' rel='noopener noreferrer'>
           <div className={styles.button} onClick={handleNextStep}>
             링크로 이동
           </div>
@@ -293,11 +309,8 @@ const TemplatePreview = ({
                 className={styles.progressBar}
                 style={{
                   width: `${
-                    ((selectedTemplate.steps.findIndex(
-                      (s) => s.id === step.id,
-                    ) +
-                      1) /
-                      selectedTemplate.steps.length) *
+                    ((survey.steps.findIndex((s) => s.id === step.id) + 1) /
+                      survey.steps.length) *
                     100
                   }%`,
                 }}
@@ -309,30 +322,23 @@ const TemplatePreview = ({
     )
   }
 
-  if (
-    !selectedTemplate ||
-    !selectedTemplate.steps ||
-    !currentStepId ||
-    !showContainer
-  ) {
+  if (!survey || !survey.steps || !currentStepId || !showContainer) {
     return null
   }
 
-  const currentStep = selectedTemplate.steps.find(
-    (step) => step.id === currentStepId,
-  )
+  const currentStep = survey.steps.find((step) => step.id === currentStepId)
 
   // welcome 타입이고 isActive가 false인 경우 다음 스텝을 찾음
   let displayStep = currentStep
   if (currentStep?.type === 'welcome' && !currentStep?.isActive) {
-    displayStep = selectedTemplate.steps.find(
+    displayStep = survey.steps.find(
       (step) => step.id === currentStep.nextStepId,
     )
   }
 
   const nextStepId = displayStep?.nextStepId
   const nextStep = nextStepId
-    ? selectedTemplate.steps.find((step) => step.id === nextStepId)
+    ? survey.steps.find((step) => step.id === nextStepId)
     : null
 
   return (
@@ -343,4 +349,4 @@ const TemplatePreview = ({
   )
 }
 
-export default TemplatePreview
+export default SurveyPreview

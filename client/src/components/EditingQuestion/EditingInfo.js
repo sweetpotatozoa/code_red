@@ -5,18 +5,19 @@ const EditingInfo = ({ step, onSave, onCancel, steps, showWarning }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
   const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
+  const [localShowWarning, setLocalShowWarning] = useState(showWarning)
 
   useEffect(() => {
-    if (nextStepId && !steps.some((s) => s.id === nextStepId)) {
-      showWarning = true
-    } else {
-      showWarning = false
-    }
-  }, [nextStepId, steps])
+    setLocalShowWarning(showWarning)
+  }, [showWarning])
 
   const handleSave = () => {
     if (title.trim() === '') {
       alert('제목을 입력해주세요.')
+      return
+    }
+    if (description.trim() === '') {
+      alert('설명을 입력해주세요.')
       return
     }
     onSave({ ...step, title, description, nextStepId })
@@ -29,18 +30,18 @@ const EditingInfo = ({ step, onSave, onCancel, steps, showWarning }) => {
         type='text'
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder='질문을 입력하세요.'
+        placeholder='제목을 입력하세요.'
         className={styles.input}
       />
       <div className={styles.title}>설명</div>
-      <input
-        className={styles.input}
-        type='text'
+      <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        placeholder='설명 (선택사항)'
+        placeholder='설명을 입력하세요.'
+        className={styles.textarea}
+        rows={4}
       />
-      <div className={styles.title}>응답에 따른 대응</div>
+      <div className={styles.title}>다음 스텝</div>
       <select
         className={styles.action}
         value={nextStepId}
@@ -56,7 +57,7 @@ const EditingInfo = ({ step, onSave, onCancel, steps, showWarning }) => {
           <option value={nextStepId}>삭제된 선택지</option>
         )}
       </select>
-      {showWarning && (
+      {localShowWarning && (
         <div className={styles.warningBubble}>
           참조하고 있던 스텝이 삭제되어 변경이 필요합니다.
         </div>

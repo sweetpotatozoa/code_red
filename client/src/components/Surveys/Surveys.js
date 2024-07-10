@@ -127,7 +127,13 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
     }
 
     if (['singleChoice', 'multipleChoice', 'rating'].includes(type)) {
-      newStep.options = ['옵션1', '옵션2', '옵션3', '옵션4', '옵션5']
+      newStep.options = [
+        { id: uuidv4(), value: '옵션1' },
+        { id: uuidv4(), value: '옵션2' },
+        { id: uuidv4(), value: '옵션3' },
+        { id: uuidv4(), value: '옵션4' },
+        { id: uuidv4(), value: '옵션5' },
+      ]
     }
 
     const updatedSteps = [...survey.steps]
