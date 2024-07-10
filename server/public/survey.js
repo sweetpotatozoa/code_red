@@ -383,8 +383,6 @@
           saveResponse(step, stepAnswer)
 
           try {
-            let isCompleted = false
-
             if (surveyResponseId) {
               await updateResponse(surveyResponseId, surveyResponses, false)
             } else {
@@ -425,43 +423,37 @@
               }
             }
 
-            // 다음 스텝으로 이동
-            if (nextStepIndex < survey.steps.length) {
+            // isComplete 결정 로직
+            let isComplete = false
+            if (nextStepIndex >= activeSteps.length) {
+              // 마지막 스텝 완료
+              isComplete = true
+            } else {
               const nextStep = survey.steps[nextStepIndex]
-
-              // thank 스텝이 비활성화된 경우 마지막 스텝 바로 전 스텝에서 isComplete 설정
-              const lastStep = nextStep.type === 'thank' && !nextStep.isActive
-              if (lastStep && !isCompleted) {
-                await updateResponse(surveyResponseId, surveyResponses, true)
-                isCompleted = true
+              if (nextStep.type === 'thank' && nextStep.isActive) {
+                // thank 스텝으로 진입
+                isComplete = true
               }
+            }
 
+            // isComplete가 true일 때만 updateResponse 호출
+            if (isComplete) {
+              await updateResponse(surveyResponseId, surveyResponses, true)
+            }
+
+            // 다음 스텝으로 이동 또는 설문 종료
+            if (nextStepIndex < activeSteps.length) {
               showStep(survey, nextStepIndex)
             } else {
-              // 마지막 스텝이거나 thank 스텝이 비활성화된 경우
               const thankStep = survey.steps.find(
-                (step) => step.type === 'thank',
+                (step) => step.type === 'thank' && step.isActive,
               )
               if (thankStep) {
                 const thankStepIndex = survey.steps.findIndex(
                   (step) => step.id === thankStep.id,
                 )
-                if (!isCompleted) {
-                  await updateResponse(surveyResponseId, surveyResponses, true)
-                  isCompleted = true
-                }
-                if (thankStep.isActive) {
-                  showStep(survey, thankStepIndex)
-                } else {
-                  await updateResponse(surveyResponseId, surveyResponses, true) // thank 스텝이 비활성화된 경우에도 isComplete를 true로 설정
-                  closeSurvey(survey._id, true)
-                  console.log('Survey closed without active thank step')
-                }
+                showStep(survey, thankStepIndex)
               } else {
-                if (!isCompleted) {
-                  await updateResponse(surveyResponseId, surveyResponses, true)
-                  isCompleted = true
-                }
                 closeSurvey(survey._id, true)
                 console.log('Survey closed without thank step')
               }
@@ -544,7 +536,7 @@
   }
 
   // 설문조사 닫기
-  function closeSurvey(surveyId, isThankStep = false) {
+  function closeSurvey(surveyId, isComplete = false) {
     const surveyPopup = document.getElementById('survey-popup')
     if (surveyPopup) {
       surveyPopup.remove()
@@ -554,9 +546,9 @@
 
     window.dispatchEvent(new Event('surveyCompleted'))
 
-    // 서버 응답 업데이트 (isComplete 값은 변경하지 않음)
-    if (surveyResponseId && !isThankStep) {
-      updateResponse(surveyResponseId, surveyResponses, false)
+    // 서버 응답 업데이트
+    if (surveyResponseId) {
+      updateResponse(surveyResponseId, surveyResponses, isComplete)
     }
   }
 
