@@ -707,6 +707,17 @@
       survey.triggers.forEach((trigger) => {
         if (trigger.type === 'url') {
           const triggerUrl = new URL(trigger.url, window.location.origin)
+
+          // #checkConnection 특별 케이스 처리
+          if (
+            currentUrl.hash === '#checkConnection' &&
+            trigger.url === '#checkConnection'
+          ) {
+            showSurvey(survey)
+            return
+          }
+
+          // 기존 URL 트리거 로직 (쿼리와 해시 무시)
           if (
             currentUrl.pathname === triggerUrl.pathname ||
             (currentUrl.pathname === '/' && triggerUrl.pathname === '')
@@ -909,21 +920,18 @@
       const surveyData = await fetchSurvey(userId)
       if (surveyData) {
         const cleanupTriggers = setupTriggers(surveyData.data)
+
         // 페이지 언로드 시 클린업 수행
         window.addEventListener('beforeunload', () =>
           cleanupTriggers(window.activeSurveyId),
         )
+
         // 설문조사 완료 시 클린업 수행 + 닫기 버튼을 눌러서 완료할 시에도 동작
         function handleSurveyCompletion() {
           cleanupTriggers(window.activeSurveyId)
           window.removeEventListener('surveyCompleted', handleSurveyCompletion)
         }
         window.addEventListener('surveyCompleted', handleSurveyCompletion)
-
-        // 연결 상태 확인
-        if (window.location.hash === '#checkConnection') {
-          checkConnection()
-        }
 
         console.log('Survey script initialized')
       }
