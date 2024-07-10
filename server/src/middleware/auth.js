@@ -9,7 +9,6 @@ const auth = (req, res, next) => {
   try {
     const verified = jwt.verify(token, configs.accessTokenSecret)
     req.user = verified.user
-    req.seller = verified.seller
     next()
   } catch (err) {
     return res.status(401).json({ status: 4011, msg: 'Invalid Token' })

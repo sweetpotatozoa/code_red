@@ -32,12 +32,31 @@ const fetcher = async (
 
 class BackendApis {
   constructor() {
+    this.token = localStorage.getItem('token')
+  }
+
+  setToken(token) {
+    this.token = token
+    localStorage.setItem('token', token)
+  }
+
+  getToken() {
+    return localStorage.getItem('token')
+  }
+
+  clearToken() {
     this.token = null
+    localStorage.removeItem('token')
   }
 
   //소유한 설문조사 목록 가져오기
   async getSurveys(method = 'GET', params = {}) {
-    const result = await fetcher('/api/adminSurvey', this.token, method, params)
+    const result = await fetcher(
+      '/api/adminSurvey',
+      this.getToken(),
+      method,
+      params,
+    )
     return result
   }
 
@@ -45,7 +64,7 @@ class BackendApis {
   async getSurvey(surveyId) {
     return await fetcher(
       `/api/adminSurvey/getSurvey/${surveyId}`,
-      this.token,
+      this.getToken(),
       'GET',
     )
   }
@@ -54,7 +73,7 @@ class BackendApis {
   async getUserInfo(method = 'GET', params = {}) {
     const result = await fetcher(
       '/api/adminSurvey/userInfo',
-      this.token,
+      this.getToken(),
       method,
       params,
     )
@@ -63,7 +82,12 @@ class BackendApis {
 
   // 인증 상태 확인 메소드
   async checkAuth(method = 'GET', params = {}) {
-    const result = await fetcher('/api/auth/check', this.token, method, params)
+    const result = await fetcher(
+      '/api/auth/check',
+      this.getToken(),
+      method,
+      params,
+    )
     return result
   }
 
@@ -71,7 +95,7 @@ class BackendApis {
   async editSurveyPosition(method = 'PUT', params = {}) {
     const result = await fetcher(
       '/api/adminSurvey/surveyPosition',
-      this.token,
+      this.getToken(),
       method,
       params,
     )
@@ -82,7 +106,7 @@ class BackendApis {
   async deleteSurvey(surveyId, method = 'DELETE', params = {}) {
     const result = await fetcher(
       `/api/adminSurvey/deleteSurvey/${surveyId}`,
-      this.token,
+      this.getToken(),
       method,
       params,
     )
@@ -93,7 +117,7 @@ class BackendApis {
   async toggleSurveyDeploy(surveyId, method = 'PUT', params = {}) {
     const result = await fetcher(
       `/api/adminSurvey/toggleSurveyDeploy/${surveyId}`,
-      this.token,
+      this.getToken(),
       method,
       params,
     )
@@ -104,7 +128,7 @@ class BackendApis {
   async getTemplates(method = 'GET', params = {}) {
     const result = await fetcher(
       '/api/adminSurvey/templates',
-      this.token,
+      this.getToken(),
       method,
       params,
     )
@@ -115,7 +139,7 @@ class BackendApis {
   async createSurvey(templateId, method = 'POST', params = {}) {
     const result = await fetcher(
       `/api/adminSurvey/templates/${templateId}`,
-      this.token,
+      this.getToken(),
       method,
       params,
     )
@@ -132,15 +156,22 @@ class BackendApis {
   //로그인
   async login(method = 'POST', params = {}) {
     const result = await fetcher('/api/auth/login', '', method, params)
-    if (result.token) this.token = result.token
+    if (result.token) {
+      this.setToken(result.token)
+    }
     return result
+  }
+
+  //로그아웃
+  logout() {
+    this.clearToken()
   }
 
   //유저아이디 가져오기
   async getId(method = 'GET', params = {}) {
     const result = await fetcher(
       '/api/adminSurvey/getId',
-      this.token,
+      this.getToken(),
       method,
       params,
     )
@@ -151,7 +182,7 @@ class BackendApis {
   async checkConnect(method = 'GET', params = {}) {
     const result = await fetcher(
       '/api/adminSurvey/checkConnect',
-      this.token,
+      this.getToken(),
       method,
       params,
     )
@@ -162,7 +193,7 @@ class BackendApis {
   async saveOnboardingInfo(method = 'POST', params = {}) {
     const result = await fetcher(
       '/api/adminSurvey/saveOnboardingInfo',
-      this.token,
+      this.getToken(),
       method,
       params,
     )
@@ -170,13 +201,13 @@ class BackendApis {
   }
 
   async getSurveySummary(surveyId) {
-    return await fetcher(`/api/adminSurvey/${surveyId}`, this.token, 'GET')
+    return await fetcher(`/api/adminSurvey/${surveyId}`, this.getToken(), 'GET')
   }
 
   async getSurveyQuestions(surveyId) {
     return await fetcher(
       `/api/adminSurvey/${surveyId}/questions`,
-      this.token,
+      this.getToken(),
       'GET',
     )
   }
@@ -184,7 +215,7 @@ class BackendApis {
   async isDeployToggle(method = 'PUT', params = {}) {
     const result = await fetcher(
       '/api/isDeployToggle',
-      this.token,
+      this.getToken(),
       method,
       params,
     )
@@ -194,7 +225,7 @@ class BackendApis {
   async getConnectStatus(method = 'GET', params = {}) {
     const result = await fetcher(
       '/api/connectStatus',
-      this.token,
+      this.getToken(),
       method,
       params,
     )
@@ -202,13 +233,17 @@ class BackendApis {
   }
 
   async editSurvey(surveyId) {
-    return await fetcher(`/api/adminSurvey/edit/${surveyId}`, this.token, 'GET')
+    return await fetcher(
+      `/api/adminSurvey/edit/${surveyId}`,
+      this.getToken(),
+      'GET',
+    )
   }
 
   async updateSurvey(surveyId, surveyData) {
     return await fetcher(
       `/api/adminSurvey/surveyUpdate/${surveyId}`,
-      this.token,
+      this.getToken(),
       'PUT',
       surveyData,
     )
@@ -217,7 +252,7 @@ class BackendApis {
   async deploySurvey(surveyId, surveyData) {
     return await fetcher(
       `/api/adminSurvey/surveyDeploy/${surveyId}`,
-      this.token,
+      this.getToken(),
       'PUT',
       surveyData,
     )
@@ -226,7 +261,7 @@ class BackendApis {
   async getResponse(surveyId) {
     return await fetcher(
       `/api/adminSurvey/response/${surveyId}`,
-      this.token,
+      this.getToken(),
       'GET',
     )
   }
@@ -234,7 +269,7 @@ class BackendApis {
   async deleteResponse(responseId) {
     return await fetcher(
       `/api/adminSurvey/response/${responseId}`,
-      this.token,
+      this.getToken(),
       'DELETE',
     )
   }
@@ -242,7 +277,7 @@ class BackendApis {
   async downloadResponses(surveyId) {
     return await fetcher(
       `/api/adminSurvey/download/${surveyId}`,
-      this.token,
+      this.getToken(),
       'GET',
       {},
       'blob', // 응답 타입을 'blob'으로 지정

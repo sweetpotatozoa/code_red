@@ -8,7 +8,15 @@ const PrivateRoute = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        setIsAuthenticated(false)
+        setIsLoading(false)
+        return
+      }
+
       try {
+        // 토큰을 사용하여 인증 상태 확인
         const authResult = await backendApis.checkAuth()
         setIsAuthenticated(authResult.isAuthenticated)
       } catch (error) {

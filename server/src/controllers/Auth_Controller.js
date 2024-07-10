@@ -48,7 +48,6 @@ class AuthController {
   // 로그인
   async login(req, res) {
     const userInfo = req.body.input
-    console.log(userInfo)
     if (!userInfo.userName || !userInfo.password) {
       res.status(400).json({ message: 'Invalid user name or password' })
       return

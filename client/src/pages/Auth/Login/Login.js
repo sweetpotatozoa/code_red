@@ -25,7 +25,7 @@ const Login = () => {
       if (result.token) {
         alert('로그인 성공')
         localStorage.setItem('token', result.token)
-        if (result.isOnbaording) navigate('/')
+        if (result.isOnboarding) navigate('/')
         else navigate('/onboarding')
       } else {
         alert(result.message || '로그인에 실패했습니다')
