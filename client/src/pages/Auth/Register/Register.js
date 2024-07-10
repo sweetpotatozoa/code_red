@@ -46,7 +46,7 @@ const Register = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.logo}>코드레드</div>
+      <div className={styles.logo}>캐치톡</div>
       <div className={styles.form}>
         <form onSubmit={registerHandler}>
           <input
