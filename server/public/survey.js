@@ -429,11 +429,9 @@
             if (nextStepIndex < survey.steps.length) {
               const nextStep = survey.steps[nextStepIndex]
 
-              if (
-                nextStep.type === 'thank' &&
-                nextStep.isActive &&
-                !isCompleted
-              ) {
+              // thank 스텝이 비활성화된 경우 마지막 스텝 바로 전 스텝에서 isComplete 설정
+              const lastStep = nextStep.type === 'thank' && !nextStep.isActive
+              if (lastStep && !isCompleted) {
                 await updateResponse(surveyResponseId, surveyResponses, true)
                 isCompleted = true
               }
