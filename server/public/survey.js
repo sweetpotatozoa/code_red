@@ -893,6 +893,11 @@
     return className.replace(/([!"#$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g, '\\$1')
   }
 
+  function checkConnection() {
+    console.log('Survey script is successfully connected')
+    alert('설문조사 스크립트가 성공적으로 연결되었습니다!')
+  }
+
   // 초기화 함수 - 초기화 함수로, 고객 ID를 추출하고 설문조사 데이터를 가져온 후 트리거를 설정합니다.
   async function init() {
     console.log('Initializing survey script')
@@ -904,18 +909,21 @@
       const surveyData = await fetchSurvey(userId)
       if (surveyData) {
         const cleanupTriggers = setupTriggers(surveyData.data)
-
         // 페이지 언로드 시 클린업 수행
         window.addEventListener('beforeunload', () =>
           cleanupTriggers(window.activeSurveyId),
         )
-
         // 설문조사 완료 시 클린업 수행 + 닫기 버튼을 눌러서 완료할 시에도 동작
         function handleSurveyCompletion() {
           cleanupTriggers(window.activeSurveyId)
           window.removeEventListener('surveyCompleted', handleSurveyCompletion)
         }
         window.addEventListener('surveyCompleted', handleSurveyCompletion)
+
+        // 연결 상태 확인
+        if (window.location.hash === '#checkConnection') {
+          checkConnection()
+        }
 
         console.log('Survey script initialized')
       }
