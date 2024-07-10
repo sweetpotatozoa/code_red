@@ -51,7 +51,7 @@ const Login = () => {
         <form onSubmit={loginHandler}>
           <input
             type='text'
-            placeholder='아아디'
+            placeholder='아이디'
             onChange={changeHandler}
             name='userName'
             value={input.userName}
@@ -59,7 +59,7 @@ const Login = () => {
           />
           <input
             type='password'
-            placeholder='패스워드'
+            placeholder='비밀번호'
             onChange={changeHandler}
             name='password'
             value={input.password}
