@@ -401,39 +401,37 @@ class AdminSurveyController {
   }
 
   async downloadResponses(req, res) {
-    const userId = req.user.id
-    const surveyId = req.params.id
-
-    if (!userId || !isObjectId(userId)) {
-      res.status(400).json({ message: 'Invalid user id' })
-      return
-    }
-
-    if (!surveyId || !isObjectId(surveyId)) {
-      res.status(400).json({ message: 'Invalid survey id' })
-      return
-    }
-
     try {
-      const result = await AdminSurveyService.getResponsesAsCSV(
+      const userId = req.user.id
+      const surveyId = req.params.id
+
+      console.log(
+        `Attempting to generate CSV for userId: ${userId}, surveyId: ${surveyId}`,
+      )
+
+      const csvData = await AdminSurveyService.getResponsesAsCSV(
         userId,
         surveyId,
       )
 
-      if (!result) {
-        res.status(404).json({ message: 'No responses found' })
-        return
+      if (!csvData) {
+        console.log('No CSV data generated')
+        return res.status(404).json({ message: 'No responses found' })
       }
+
+      console.log(`CSV data generated successfully. Length: ${csvData.length}`)
 
       res.setHeader('Content-Type', 'text/csv')
       res.setHeader(
         'Content-Disposition',
         `attachment; filename=survey_responses_${surveyId}.csv`,
       )
-      res.status(200).send(result)
+      res.send(csvData)
     } catch (err) {
-      const { status, message } = errorHandler(err, 'downloadResponses')
-      res.status(status).json({ message })
+      console.error('Error in downloadResponses:', err)
+      res
+        .status(500)
+        .json({ message: 'Internal server error', error: err.message })
     }
   }
 }

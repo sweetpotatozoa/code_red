@@ -1,6 +1,12 @@
 const API_URI = process.env.REACT_APP_API_URI
 
-const fetcher = async (url, token, method, params = {}) => {
+const fetcher = async (
+  url,
+  token,
+  method,
+  params = {},
+  responseType = 'json',
+) => {
   const resource =
     method === 'GET' ? `${url}?${new URLSearchParams(params)}` : url
   const init = ['POST', 'PUT', 'DELETE'].includes(method)
@@ -12,12 +18,20 @@ const fetcher = async (url, token, method, params = {}) => {
   init.method = method
   init.headers['Content-Type'] = 'application/json'
   init.headers['x-access-token'] = token
+
   try {
     const res = await fetch(API_URI + resource, init)
-    const data = await res.json()
-    return data
+    if (!res.ok) {
+      const errorData = await res.json()
+      throw new Error(errorData.message || 'Network response was not ok')
+    }
+    if (responseType === 'blob') {
+      return await res.blob()
+    }
+    return await res.json()
   } catch (err) {
-    return null
+    console.error('Fetch error:', err)
+    throw err
   }
 }
 
@@ -229,6 +243,8 @@ class BackendApis {
       `/api/adminSurvey/download/${surveyId}`,
       this.token,
       'GET',
+      {},
+      'blob', // 응답 타입을 'blob'으로 지정
     )
   }
 }

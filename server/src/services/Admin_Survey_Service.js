@@ -407,10 +407,13 @@ class AdminSurveyService {
       JSON.stringify(formattedResponses, null, 2),
     )
 
-    const csvData = parser.parse(formattedResponses)
+    let csvData = parser.parse(formattedResponses)
     console.log('CSV Data (first 500 characters):', csvData.substring(0, 500))
 
-    return csvData
+    // UTF-8 BOM 추가
+    csvData = '\uFEFF' + csvData
+
+    return csvData // CSV 데이터를 반환
   }
 
   getCSVFields(responses) {

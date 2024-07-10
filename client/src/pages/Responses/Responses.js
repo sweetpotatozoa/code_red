@@ -115,24 +115,36 @@ const Responses = () => {
   }
 
   const downloadCSV = async () => {
-    setIsDownloading(true)
-    setError(null)
     try {
       const response = await BackendApis.downloadResponses(id)
 
-      const blob = new Blob([response], { type: 'text/csv;charset=utf-8;' })
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.setAttribute('download', `survey_responses_${id}.csv`)
-      document.body.appendChild(link)
-      link.click()
-      link.parentNode.removeChild(link)
+      console.log('Response type:', typeof response)
+      console.log('Response content:', response)
+
+      if (response instanceof Blob) {
+        // 응답이 Blob 형식인 경우 (기대하는 형식)
+        const url = window.URL.createObjectURL(response)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `survey_responses_${id}.csv`)
+        document.body.appendChild(link)
+        link.click()
+        link.parentNode.removeChild(link)
+      } else if (typeof response === 'object' && response !== null) {
+        // 응답이 JSON 객체인 경우 (에러 메시지 등)
+        console.error('Server returned an error:', response)
+        alert(
+          `CSV 다운로드에 실패했습니다: ${
+            response.message || '알 수 없는 오류'
+          }`,
+        )
+      } else {
+        console.error('Unexpected response format:', response)
+        alert('CSV 다운로드에 실패했습니다: 알 수 없는 응답 형식')
+      }
     } catch (error) {
       console.error('Error downloading CSV:', error)
-      setError('다운로드 중 오류가 발생했습니다.')
-    } finally {
-      setIsDownloading(false)
+      alert('CSV 다운로드 중 오류가 발생했습니다.')
     }
   }
 
