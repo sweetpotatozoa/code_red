@@ -172,7 +172,7 @@
       !Array.isArray(survey.steps) ||
       !survey.delay ||
       !survey.delay.delayType ||
-      !survey.delay.delayValue
+      survey.delay.delayValue === undefined
     ) {
       console.error(`Invalid survey structure: ${survey._id}`)
       return false
