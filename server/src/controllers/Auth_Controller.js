@@ -61,6 +61,20 @@ class AuthController {
       res.status(status).json({ message })
     }
   }
+
+  async checkAuth(req, res) {
+    try {
+      if (req.user) {
+        const userInfo = await AuthService.getUserInfo(req.user.id)
+        res.status(200).json({ isAuthenticated: true, userInfo })
+      } else {
+        res.status(401).json({ isAuthenticated: false })
+      }
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'checkAuth')
+      res.status(status).json({ message })
+    }
+  }
 }
 
 module.exports = new AuthController()

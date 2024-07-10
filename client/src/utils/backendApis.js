@@ -61,6 +61,12 @@ class BackendApis {
     return result
   }
 
+  // 인증 상태 확인 메소드
+  async checkAuth(method = 'GET', params = {}) {
+    const result = await fetcher('/api/auth/check', this.token, method, params)
+    return result
+  }
+
   //화면 설정 저장하기
   async editSurveyPosition(method = 'PUT', params = {}) {
     const result = await fetcher(

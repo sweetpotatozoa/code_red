@@ -10,4 +10,7 @@ router.post('/register', wrapAsync(AuthController.register))
 // 로그인
 router.post('/login', wrapAsync(AuthController.login))
 
+// 로그인 확인
+router.get('/check', auth, wrapAsync(AuthController.checkAuth))
+
 module.exports = router

@@ -52,7 +52,7 @@ const Register = () => {
           <input
             type='text'
             name='userName'
-            placeholder='아아디 (영문, 숫자조합 8자리 이상)'
+            placeholder='아이디 (영문, 숫자조합 8자리 이상)'
             onChange={changeHandler}
             value={input.userName}
             required
@@ -60,7 +60,7 @@ const Register = () => {
           <input
             type='password'
             name='password'
-            placeholder='패스워드 (영문, 숫자조합 8자리 이상)'
+            placeholder='비밀번호 (영문, 숫자조합 8자리 이상)'
             onChange={changeHandler}
             value={input.password}
             required

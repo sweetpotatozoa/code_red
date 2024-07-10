@@ -1,5 +1,6 @@
 import './App.css'
 import { Route, Routes } from 'react-router-dom'
+import PrivateRoute from './components/PrivateRoute'
 import Home from './pages/Home/Home'
 import Login from './pages/Auth/Login/Login'
 import Register from './pages/Auth/Register/Register'
@@ -12,14 +13,56 @@ import Edit from './pages/Edit/Edit'
 function App() {
   return (
     <Routes>
-      <Route path='/' element={<Home />} />
       <Route path='/login' element={<Login />} />
       <Route path='/register' element={<Register />} />
-      <Route path='/onboarding' element={<Onboarding />} />
-      <Route path='/responses/:id' element={<Responses />} />
-      <Route path='/summary/:id' element={<Summary />} />
-      <Route path='/templates' element={<Templates />} />
-      <Route path='/edit/:id' element={<Edit />} />
+      <Route
+        path='/'
+        element={
+          <PrivateRoute>
+            <Home />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path='/onboarding'
+        element={
+          <PrivateRoute>
+            <Onboarding />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path='/responses/:id'
+        element={
+          <PrivateRoute>
+            <Responses />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path='/summary/:id'
+        element={
+          <PrivateRoute>
+            <Summary />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path='/templates'
+        element={
+          <PrivateRoute>
+            <Templates />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path='/edit/:id'
+        element={
+          <PrivateRoute>
+            <Edit />
+          </PrivateRoute>
+        }
+      />
     </Routes>
   )
 }

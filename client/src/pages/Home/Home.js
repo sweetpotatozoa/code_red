@@ -14,6 +14,29 @@ const Home = () => {
 
   const navigate = useNavigate()
 
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        // 인증 상태 확인
+        const authResult = await backendApis.checkAuth()
+        if (!authResult || !authResult.isAuthenticated) {
+          navigate('/login')
+          return
+        }
+
+        // 인증된 경우, 데이터 로드
+        const result = await backendApis.getSurveys()
+        setSurveys(result)
+        const customerInfo = await backendApis.getUserInfo()
+        setUserInfo(customerInfo)
+      } catch (error) {
+        console.error('Error initializing data:', error)
+        navigate('/login')
+      }
+    }
+    initializeData()
+  }, [navigate])
+
   //설문조사 수정하기
   const handleEdit = (surveyId) => {
     navigate(`/edit/${surveyId}`)
@@ -82,16 +105,6 @@ const Home = () => {
   const goToSummary = (surveyId) => {
     navigate(`/summary/${surveyId}`)
   }
-
-  useEffect(() => {
-    const initializeData = async () => {
-      const result = await backendApis.getSurveys()
-      setSurveys(result)
-      const customerInfo = await backendApis.getUserInfo()
-      setUserInfo(customerInfo)
-    }
-    initializeData()
-  }, [])
 
   return (
     <div className={styles.container}>
