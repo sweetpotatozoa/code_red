@@ -1,12 +1,6 @@
 const API_URI = process.env.REACT_APP_API_URI
 
-const fetcher = async (
-  url,
-  token,
-  method,
-  params = {},
-  responseType = 'json',
-) => {
+const fetcher = async (url, token, method, params = {}) => {
   const resource =
     method === 'GET' ? `${url}?${new URLSearchParams(params)}` : url
   const init = ['POST', 'PUT', 'DELETE'].includes(method)
@@ -18,20 +12,12 @@ const fetcher = async (
   init.method = method
   init.headers['Content-Type'] = 'application/json'
   init.headers['x-access-token'] = token
-
   try {
     const res = await fetch(API_URI + resource, init)
-    if (!res.ok) {
-      const errorData = await res.json()
-      throw new Error(errorData.message || 'Network response was not ok')
-    }
-    if (responseType === 'blob') {
-      return await res.blob()
-    }
-    return await res.json()
+    const data = await res.json()
+    return data
   } catch (err) {
-    console.error('Fetch error:', err)
-    throw err
+    return null
   }
 }
 

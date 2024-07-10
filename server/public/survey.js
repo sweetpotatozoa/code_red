@@ -329,7 +329,7 @@
   }
 
   // 설문조사 스텝 표시
-  function showStep(survey, stepIndex) {
+  async function showStep(survey, stepIndex) {
     const activeSteps = survey.steps.filter((step) =>
       step.type === 'welcome' || step.type === 'thank' ? step.isActive : true,
     )
@@ -440,7 +440,7 @@
               showStep(survey, nextStepIndex)
             } else {
               const thankStep = survey.steps.find(
-                (step) => step.type === 'thank' && step.isActive,
+                (step) => step.type === 'thank',
               )
               if (thankStep) {
                 const thankStepIndex = survey.steps.findIndex(
@@ -450,7 +450,12 @@
                   await updateResponse(surveyResponseId, surveyResponses, true)
                   isCompleted = true
                 }
-                showStep(survey, thankStepIndex)
+                if (thankStep.isActive) {
+                  showStep(survey, thankStepIndex)
+                } else {
+                  closeSurvey(survey._id, true)
+                  console.log('Survey closed without active thank step')
+                }
               } else {
                 if (!isCompleted) {
                   await updateResponse(surveyResponseId, surveyResponses, true)
@@ -549,7 +554,7 @@
     window.dispatchEvent(new Event('surveyCompleted'))
 
     // 서버 응답 업데이트 (isComplete 값은 변경하지 않음)
-    if (surveyResponseId) {
+    if (surveyResponseId && !isThankStep) {
       updateResponse(surveyResponseId, surveyResponses, false)
     }
   }
