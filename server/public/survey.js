@@ -425,6 +425,7 @@
               }
             }
 
+            // 다음 스텝으로 이동
             if (nextStepIndex < survey.steps.length) {
               const nextStep = survey.steps[nextStepIndex]
 
@@ -439,6 +440,7 @@
 
               showStep(survey, nextStepIndex)
             } else {
+              // 마지막 스텝이거나 thank 스텝이 비활성화된 경우
               const thankStep = survey.steps.find(
                 (step) => step.type === 'thank',
               )
@@ -453,6 +455,7 @@
                 if (thankStep.isActive) {
                   showStep(survey, thankStepIndex)
                 } else {
+                  await updateResponse(surveyResponseId, surveyResponses, true) // thank 스텝이 비활성화된 경우에도 isComplete를 true로 설정
                   closeSurvey(survey._id, true)
                   console.log('Survey closed without active thank step')
                 }
