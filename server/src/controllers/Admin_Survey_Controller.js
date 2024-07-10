@@ -399,6 +399,31 @@ class AdminSurveyController {
       res.status(status).json({ message })
     }
   }
+
+  async downloadResponses(req, res) {
+    const userId = req.user.id;
+    const surveyId = req.params.id;
+
+    try {
+      await this.checkUserIdExist(userId);
+      await this.checkSurveyIdExist(surveyId);
+      await this.checkSurveyOwnership(userId, surveyId);
+
+      const csvData = await AdminSurveyService.getResponsesAsCSV(userId, surveyId);
+      
+      if (!csvData) {
+        return res.status(404).json({ message: "No responses found" });
+      }
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename=survey_responses_${surveyId}.csv`);
+      res.send(csvData);
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'downloadResponses');
+      res.status(status).json({ message });
+    }
+  }
+  
 }
 
 module.exports = new AdminSurveyController()

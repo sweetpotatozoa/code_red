@@ -224,9 +224,12 @@ class BackendApis {
     )
   }
 
-  async downloadResponses(method = 'GET', params = {}) {
-    const result = await fetcher('/api/download', this.token, method, params)
-    return result
+  async downloadResponses(responseId) {
+    return await fetcher(
+      `/api/adminSurvey/download/${responseId}`,
+      this.token,
+      'GET',
+    )
   }
 }
 

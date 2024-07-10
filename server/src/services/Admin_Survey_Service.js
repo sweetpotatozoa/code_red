@@ -4,6 +4,7 @@ const templatesRepo = require('../repositories/Templates_Repo')
 const ResponsesRepo = require('../repositories/Responses_Repo')
 const { v4: uuidv4 } = require('uuid')
 const mongoose = require('mongoose')
+const { Parser } = require('json2csv');
 
 class AdminSurveyService {
   //헬퍼 함수
@@ -377,6 +378,59 @@ class AdminSurveyService {
     surveyData.isDeploy = true
     return SurveysRepo.updateSurvey(surveyId, surveyData)
   }
+
+  async getResponsesAsCSV(userId, surveyId) {
+    const responses = await this.getResponses(userId, surveyId);
+    
+    if (responses.length === 0) {
+      return null;
+    }
+
+    const fields = this.getCSVFields(responses);
+    const opts = { fields };
+    const parser = new Parser(opts);
+    return parser.parse(this.formatResponsesForCSV(responses));
+  }
+
+  getCSVFields(responses) {
+    const baseFields = ['Response ID', 'Created At', 'Is Complete'];
+    const questionFields = this.getUniqueQuestions(responses);
+    return [...baseFields, ...questionFields];
+  }
+
+  getUniqueQuestions(responses) {
+    const questions = new Set();
+    responses.forEach(response => {
+      response.answers.forEach(answer => questions.add(answer.stepTitle));
+    });
+    return Array.from(questions);
+  }
+
+  formatResponsesForCSV(responses) {
+    return responses.map(response => {
+      const baseInfo = {
+        'Response ID': response._id,
+        'Created At': this.formatDate(response.createAt),
+        'Is Complete': response.isComplete ? '제출완료' : '중도이탈'
+      };
+
+      const answers = {};
+      response.answers.forEach(answer => {
+        answers[answer.stepTitle] = Array.isArray(answer.answer) 
+          ? answer.answer.map(ans => ans.value).join(', ')
+          : answer.answer.value || answer.answer;
+      });
+
+      return { ...baseInfo, ...answers };
+    });
+  }
+
+  formatDate(date) {
+    const d = new Date(date);
+    const pad = (n) => (n < 10 ? '0' + n : n);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
 }
+
 
 module.exports = new AdminSurveyService()

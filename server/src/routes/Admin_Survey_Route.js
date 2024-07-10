@@ -117,16 +117,11 @@ router.get(
 )
 
 // 설문조사 응답 다운로드
-router.get(
-  '/download/:id',
-  auth,
-  wrapAsync(async (req, res) => {
-    const result = await AdminSurveyController.downloadResponse(
-      req.params.id,
-      req.user.id,
-    ) //각 설문조사 아이디, userId saved in jwt added by auth middleware
-    return res.status(result.status).send(result)
-  }),
+  router.get(
+    '/download/:id',
+    fakeAuth,
+    wrapAsync(AdminSurveyController.downloadResponses),
+  ),
 
   // 설문조사 응답 요약
   router.get(
@@ -134,6 +129,6 @@ router.get(
     fakeAuth,
     wrapAsync(AdminSurveyController.getSurveySummary),
   ),
-)
+
 
 module.exports = router

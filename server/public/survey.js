@@ -503,7 +503,7 @@
           }
         </div>
         <div class="survey-progress">
-            <p class="powered-by">Powered by <span class="logo">CodeRed</span></p>
+            <p class="powered-by">Powered by <span class="logo">CatchTalk</span></p>
             <div class="background-bar">
               <div class="progress-bar"></div>
             </div>

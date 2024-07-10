@@ -302,7 +302,7 @@ const SurveyPreview = ({
           <div className={styles.buttonContainer}>{renderButton(step)}</div>
           <div className={styles.footer}>
             <div className={styles.waterMark}>
-              powered by <span className={styles.logo}>CodeRed</span>
+              powered by <span className={styles.logo}>CatchTalk</span>
             </div>
             <div className={styles.backgroundBar}>
               <div
