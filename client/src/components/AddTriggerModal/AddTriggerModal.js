@@ -195,7 +195,7 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
         <div className={styles.modalButtons}>
           <div
             className={styles.modalButton}
-            style={{ backgroundColor: '#E2E8F0', color: '#ffffff' }}
+            style={{ backgroundColor: '#e5ebf3', color: '#6C7B90' }}
             onClick={() => setIsAddTrigger(false)}
           >
             취소

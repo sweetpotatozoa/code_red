@@ -10,7 +10,7 @@
 .sideBar {
   display: flex;
   flex-direction: column;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e5ebf3;
   border-top-right-radius: 30px;
   border-bottom-right-radius: 30px;
   height: 732px;
@@ -70,6 +70,7 @@
   padding: 32px 16px;
   justify-content: right;
 }
+
 .setting {
   font-size: 14px;
   font-weight: bold;
@@ -115,7 +116,7 @@
   display: flex;
   font-size: 14px;
   font-weight: bold;
-  color: #11192c;
+  color: #1c0f24;
   margin-bottom: 16px;
   position: relative;
   padding-left: 16px;
@@ -174,7 +175,7 @@
 .surveyDelete {
   position: absolute;
   right: 76px;
-  background-color: #11192c;
+  background-color: #1c0f24;
   padding: 8px 16px;
   border-radius: 5px;
   color: #ffffff;
@@ -204,7 +205,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #e5ebf3;
+  background-color: #ccc;
   transition: 0.4s;
   border-radius: 34px;
 }
@@ -277,7 +278,7 @@ select {
   padding: 8px 16px;
   font-size: 14px;
   font-weight: bold;
-  background-color: #11192c;
+  background-color: #1c0f24;
   color: #ffffff;
   border-radius: 5px;
   height: 34px;
@@ -290,7 +291,7 @@ select {
   font-size: 14px;
   font-weight: bold;
   background-color: #e5ebf3;
-  color: #11192c;
+  color: #1c0f24;
   border-radius: 5px;
   height: 34px;
   cursor: pointer;

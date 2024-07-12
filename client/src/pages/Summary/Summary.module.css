@@ -2,7 +2,7 @@
   display: flex;
   align-items: flex-start;
   width: 100%;
-  background-color: #f8fafc;
+  background-color: #f9fafc;
   min-width: 1420px;
   overflow-x: auto;
 }
@@ -10,7 +10,7 @@
 .sideBar {
   display: flex;
   flex-direction: column;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e5ebf3;
   border-top-right-radius: 30px;
   border-bottom-right-radius: 30px;
   height: 732px;
@@ -34,7 +34,7 @@
   padding: 16px;
   font-size: 18px;
   font-weight: bold;
-  background-color: #f8fafc;
+  background-color: #f9fafc;
   border-right: 8px solid #9a4dff;
 }
 
@@ -74,7 +74,7 @@
   font-size: 14px;
   font-weight: bold;
   padding: 8px 16px;
-  background-color: #f1f5f9;
+  background-color: #e5ebf3;
   margin-left: 16px;
   border-radius: 5px;
 }
@@ -85,7 +85,7 @@
   align-items: flex-end;
   margin-right: 16px;
   padding-bottom: 16px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid #e5ebf3;
 }
 
 .title {
@@ -97,7 +97,7 @@
   padding: 8px 16px;
   font-size: 14px;
   font-weight: bold;
-  background-color: #11192c;
+  background-color: #1c0f24;
   color: #ffffff;
   border-radius: 5px;
   height: 34px;
@@ -114,7 +114,7 @@
   display: flex;
   font-size: 14px;
   font-weight: bold;
-  color: #11192c;
+  color: #1c0f24;
   margin-bottom: 16px;
   position: relative;
   padding-left: 16px;
@@ -136,7 +136,7 @@
   background-color: #ffffff;
   margin-bottom: 16px;
   border-radius: 10px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e5ebf3;
   box-shadow: 1px 3px 10px rgba(0, 0, 0, 0.1);
   position: relative;
   font-size: 16px;
@@ -163,7 +163,7 @@
 .surveyEdit {
   position: absolute;
   right: 150px;
-  background-color: #f1f5f9;
+  background-color: #e5ebf3;
   padding: 8px 16px;
   border-radius: 5px;
   cursor: pointer;
@@ -172,7 +172,7 @@
 .surveyDelete {
   position: absolute;
   right: 76px;
-  background-color: #11192c;
+  background-color: #1c0f24;
   padding: 8px 16px;
   border-radius: 5px;
   color: #ffffff;
@@ -280,7 +280,7 @@ input:checked + .slider:before {
   cursor: pointer;
   font-weight: bold;
   border-bottom: 3px solid #9a4dff;
-  color: #11192c;
+  color: #1c0f24;
 }
 
 .surveySettingBox {
@@ -293,6 +293,7 @@ input:checked + .slider:before {
   display: flex;
   flex-direction: column;
   padding: 32px 16px;
+  padding-left: 0;
 }
 
 .summaries {
@@ -306,7 +307,7 @@ input:checked + .slider:before {
   padding: 16px;
   background-color: #ffffff;
   border-radius: 10px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e5ebf3;
   box-shadow: 1px 3px 10px rgba(0, 0, 0, 0.1);
   width: 220px;
 }
@@ -337,7 +338,7 @@ input:checked + .slider:before {
   padding: 8px 16px;
   font-size: 14px;
   font-weight: bold;
-  background-color: #11192c;
+  background-color: #1c0f24;
   color: #ffffff;
   border-radius: 5px;
   height: 34px;
@@ -355,7 +356,7 @@ input:checked + .slider:before {
   padding: 16px;
   background-color: #ffffff;
   border-radius: 10px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e5ebf3;
   box-shadow: 1px 3px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 16px;
 }
@@ -370,7 +371,7 @@ input:checked + .slider:before {
   padding: 8px 16px;
   font-size: 14px;
   font-weight: bold;
-  background-color: #11192c;
+  background-color: #1c0f24;
   color: #ffffff;
   border-radius: 5px;
   height: 34px;
@@ -382,7 +383,7 @@ input:checked + .slider:before {
   padding: 8px 16px;
   font-size: 14px;
   font-weight: bold;
-  background-color: #f1f5f9;
+  background-color: #e5ebf3;
   color: #11192c;
   border-radius: 5px;
   height: 34px;

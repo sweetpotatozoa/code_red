@@ -39,7 +39,7 @@
   justify-content: space-between;
   padding: 5px;
   margin-bottom: 16px;
-  background-color: #e2e8f0;
+  background-color: #e5ebf3;
   border-radius: 5px;
 }
 
@@ -55,12 +55,12 @@
 }
 
 .type:hover {
-  background-color: #141d2f;
+  background-color: #1c0f24;
   color: #ffffff;
   cursor: pointer;
 }
 
 .selected {
-  background-color: #141d2f;
+  background-color: #1c0f24;
   color: #ffffff;
 }
