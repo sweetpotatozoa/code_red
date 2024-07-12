@@ -104,7 +104,7 @@ const SurveyPreview = ({
         className={styles.closeButton}
         onClick={() => setShowContainer(false)}
       >
-        <img src='/images/close.png' alt='close' />
+        <img src='/images/close.svg' alt='close' />
       </div>
     )
   }
