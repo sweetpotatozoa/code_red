@@ -7,7 +7,7 @@
 .container {
   position: absolute;
   width: 384px;
-  background-color: #f8fafc;
+  background-color: #f9fafc;
   border-radius: 10px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   transition:
@@ -23,7 +23,6 @@
   right: 16px;
   transform: translate(0, 0);
   opacity: 1;
-  z-index: 2;
 }
 
 .exit {
@@ -31,7 +30,6 @@
   right: 16px;
   transform: translateY(100%);
   opacity: 0;
-  z-index: 1;
 }
 
 .next {
@@ -39,7 +37,6 @@
   right: 8px;
   transform: translate(2%, 2%) scale(0.9);
   opacity: 0.8;
-  z-index: 1;
   max-height: 270px;
 }
 
@@ -57,7 +54,7 @@
 
 .description {
   font-size: 14px;
-  color: #344156;
+  color: #1c0f24;
   margin-bottom: 16px;
 }
 
@@ -86,7 +83,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #64738b;
+  background-color: #6c7b90;
   color: white;
   font-size: 16px;
   font-weight: bold;
@@ -107,14 +104,14 @@
   height: 8px;
   width: 100%;
   margin-top: 16px;
-  background-color: #e1e7ef;
+  background-color: #e5ebf3;
   border-radius: 8px;
 }
 
 .progressBar {
   height: 20px;
   width: 0;
-  background-color: #64738b;
+  background-color: #6c7b90;
   line-height: 20px;
   border-radius: 25px;
   height: 8px;
@@ -132,7 +129,7 @@
   display: flex;
   align-items: center;
   padding: 16px;
-  border: 1px solid #ccc;
+  border: 1px solid #e5ebf3;
   border-radius: 5px;
   background-color: #fff;
   cursor: pointer;
@@ -144,7 +141,7 @@
 }
 
 .optionLabel:hover {
-  background-color: #f9f9f9;
+  background-color: #e5ebf3;
 }
 
 .optionLabel input {
@@ -162,7 +159,7 @@
   width: 100%;
   padding: 8px;
   min-height: 100px;
-  border: 1px solid #ccc;
+  border: 1px solid #e5ebf3;
   border-radius: 5px;
   resize: none; /* 사용자가 크기를 조정하지 못하게 함 */
   overflow-y: auto; /* 내용이 많을 때 스크롤바 표시 */
@@ -173,7 +170,7 @@
 .link {
   width: 100%;
   padding: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid #e5ebf3;
   border-radius: 5px;
   display: flex;
   justify-content: center;
@@ -191,7 +188,7 @@
 
 /* 호버 효과 */
 .starInputContainer:hover .starOptionLabel .star {
-  color: #ccc;
+  color: #e5ebf3;
 }
 
 .starInputContainer .starOptionLabel:hover .star,

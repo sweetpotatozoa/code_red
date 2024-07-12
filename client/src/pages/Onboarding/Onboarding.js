@@ -53,7 +53,7 @@ const Onboarding = () => {
     <div className={styles.container}>
       <div className={styles.top}>
         <div className={styles.logo}>
-          <img src='/images/logo.png' />
+          <img src='/images/logo.svg' />
         </div>
         <div className={styles.status}>
           <div className={styles.progressBar}>

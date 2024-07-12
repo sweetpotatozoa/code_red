@@ -2,7 +2,7 @@
   display: flex;
   align-items: flex-start;
   width: 100%;
-  background-color: #f8fafc;
+  background-color: #f9fafc;
   min-width: 1420px;
   overflow-x: auto;
 }
@@ -10,7 +10,7 @@
 .sideBar {
   display: flex;
   flex-direction: column;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e5ebf3;
   border-top-right-radius: 30px;
   border-bottom-right-radius: 30px;
   height: 732px;
@@ -34,7 +34,7 @@
   padding: 16px;
   font-size: 18px;
   font-weight: bold;
-  background-color: #f8fafc;
+  background-color: #f9fafc;
   border-right: 8px solid #9a4dff;
 }
 
@@ -70,11 +70,12 @@
   padding: 32px 16px;
   justify-content: right;
 }
+
 .setting {
   font-size: 14px;
   font-weight: bold;
   padding: 8px 16px;
-  background-color: #f1f5f9;
+  background-color: #e5ebf3;
   margin-left: 16px;
   border-radius: 5px;
 }
@@ -85,7 +86,7 @@
   align-items: flex-end;
   margin-right: 16px;
   padding-bottom: 16px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid #e5ebf3;
 }
 
 .title {
@@ -136,7 +137,7 @@
   background-color: #ffffff;
   margin-bottom: 16px;
   border-radius: 10px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e5ebf3;
   box-shadow: 1px 3px 10px rgba(0, 0, 0, 0.1);
   position: relative;
   font-size: 16px;
@@ -158,15 +159,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.surveyEdit {
-  position: absolute;
-  right: 150px;
-  background-color: #f1f5f9;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
 }
 
 .surveyDelete {
@@ -306,7 +298,7 @@ input:checked + .slider:before {
   padding: 16px;
   background-color: #ffffff;
   border-radius: 10px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e5ebf3;
   box-shadow: 1px 3px 10px rgba(0, 0, 0, 0.1);
   width: 220px;
 }
@@ -370,7 +362,7 @@ input:checked + .slider:before {
   padding: 8px 16px;
   font-size: 14px;
   font-weight: bold;
-  background-color: #f1f5f9;
+  background-color: #e5ebf3;
   color: #11192c;
   border-radius: 5px;
   height: 34px;
@@ -383,7 +375,7 @@ input:checked + .slider:before {
   align-items: center;
   padding: 16px 0;
   padding-bottom: 32px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid #e5ebf3;
   font-size: 18px;
   font-weight: bold;
 }

@@ -1,7 +1,7 @@
 .progressBar {
   width: 100%;
   height: 20px;
-  background-color: #ddd;
+  background-color: #e5ebf3;
   border-radius: 10px;
   overflow: hidden;
   margin-top: 8px;
@@ -9,7 +9,7 @@
 
 .progressValue {
   height: 100%;
-  background-color: #4caf50;
+  background-color: #9a4dff;
   transition: width 0.3s ease-in-out;
   border-radius: 10px;
 }
@@ -20,7 +20,7 @@
   padding: 16px;
   background-color: #ffffff;
   border-radius: 10px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e5ebf3;
   box-shadow: 1px 3px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 16px;
 }
@@ -52,7 +52,7 @@
   justify-content: space-between;
   margin-bottom: 16px;
   padding: 16px;
-  background-color: #f1f3f6;
+  background-color: #f2f3f6;
   border-radius: 10px;
   margin-bottom: 8px;
 }

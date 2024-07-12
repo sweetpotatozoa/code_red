@@ -2,7 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  color: #334155;
+  color: #1c0f24;
 }
 
 body {
@@ -16,5 +16,9 @@ body {
 
 a {
   text-decoration: none;
-  color: #334155;
+  color: #1c0f24;
+}
+
+button {
+  border: none;
 }

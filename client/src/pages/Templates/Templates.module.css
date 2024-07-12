@@ -2,7 +2,7 @@
   display: flex;
   align-items: flex-start;
   width: 100%;
-  background-color: #f8fafc;
+  background-color: #f9fafc;
   min-width: 1420px;
   height: 732px;
   overflow-x: auto;
@@ -14,14 +14,14 @@
   padding: 16px;
   width: 100%;
   display: flex;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e5ebf3;
 }
 
 .bigButton {
   font-size: 16px;
   font-weight: bold;
-  background-color: #e2e8f0;
-  color: #6b7b90;
+  background-color: #e5ebf3;
+  color: #6c7b90;
   padding: 16px;
   border-radius: 5px;
   cursor: pointer;
@@ -35,7 +35,7 @@
   flex-direction: column;
   width: 700px;
   margin-right: 20px;
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid #e5ebf3;
   height: 642px;
 }
 
@@ -58,7 +58,7 @@
   flex-direction: column;
   width: 324px;
   padding: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e5ebf3;
   background-color: #ffffff;
   border-radius: 10px;
   margin-top: 16px;
@@ -84,7 +84,7 @@
 .website {
   display: flex;
   flex-direction: column;
-  background-color: #f1f3f6;
+  background-color: #f2f3f6;
   height: 518px;
   margin-right: 16px;
   margin-top: 32px;
@@ -119,11 +119,11 @@
 }
 
 .selected {
-  background-color: #f1f3f6;
+  background-color: #f2f3f6;
 }
 
 .option:hover {
-  background-color: #f1f3f6;
+  background-color: #f2f3f6;
   cursor: pointer;
 }
 

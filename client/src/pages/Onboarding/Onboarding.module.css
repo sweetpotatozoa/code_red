@@ -1,7 +1,7 @@
 .container {
   display: flex;
   width: 100%;
-  background-color: #f8fafc;
+  background-color: #f9fafc;
   min-width: 1420px;
   overflow-x: auto;
   padding: 32px 0;
@@ -15,7 +15,7 @@
   width: 1180px;
   padding: 32px;
   background-color: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e5ebf3;
   border-radius: 20px;
   align-items: center;
 }
@@ -33,19 +33,19 @@
 .progressBar {
   width: 436px;
   height: 12px;
-  background-color: #e2e8f0;
+  background-color: #e5ebf3;
   border-radius: 30px;
 }
 
 .percentBar {
   height: 12px;
-  background-color: #00c4b8;
+  background-color: #9a4dff;
   border-radius: 30px;
 }
 
 .percent {
   font-size: 18px;
   font-weight: bold;
-  color: #8e949d;
+  color: #1c0f24;
   margin-left: 16px;
 }
