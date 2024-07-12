@@ -100,7 +100,7 @@ const Templates = () => {
           <div className={styles.website}>
             <div className={styles.top}>
               <img
-                src='/images/mac.png'
+                src='/images/mac.svg'
                 className={styles.macButton}
                 alt='Mac button'
               />

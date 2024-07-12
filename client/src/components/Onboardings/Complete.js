@@ -34,7 +34,7 @@ const Complete = ({ onboardingInfo }) => {
       <div className={styles.contents2}>
         <div className={styles.complete}>
           <div>
-            <img src='/images/completeOnboarding.png'></img>
+            <img src='/images/completeOnboarding.svg'></img>
           </div>
           연결성공!
         </div>
