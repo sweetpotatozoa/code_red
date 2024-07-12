@@ -7,16 +7,24 @@ const EditingMultipleChoice = ({
   onSave,
   onCancel,
   steps,
-  showWarning,
+  showWarning: initialShowWarning,
 }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
-  const [options, setOptions] = useState(step.options || [])
-  const [localShowWarning, setLocalShowWarning] = useState(showWarning)
+  const [options, setOptions] = useState(() => {
+    return (step.options || []).map((option) => ({
+      id: option.id || uuidv4(),
+      value: option.value || '',
+    }))
+  })
+  const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
+  const [localShowWarning, setLocalShowWarning] = useState(initialShowWarning)
 
   useEffect(() => {
-    setLocalShowWarning(showWarning)
-  }, [showWarning])
+    setLocalShowWarning(
+      nextStepId !== '' && !steps.some((s) => s.id === nextStepId),
+    )
+  }, [nextStepId, steps])
 
   const handleSave = () => {
     if (title.trim() === '') {
@@ -31,7 +39,7 @@ const EditingMultipleChoice = ({
       alert('선택지를 모두 채워주세요.')
       return
     }
-    onSave({ ...step, title, description, options })
+    onSave({ ...step, title, description, options, nextStepId })
   }
 
   const deleteOptionHandler = (id) => {
@@ -39,26 +47,7 @@ const EditingMultipleChoice = ({
   }
 
   const addOptionHandler = () => {
-    setOptions([
-      ...options,
-      { id: uuidv4(), value: '새 선택지', nextStepId: '' },
-    ])
-  }
-
-  const changeOptionHandler = (id, value) => {
-    setOptions(
-      options.map((option) =>
-        option.id === id ? { ...option, value } : option,
-      ),
-    )
-  }
-
-  const nextStepHandler = (optionId, nextStepId) => {
-    setOptions(
-      options.map((option) =>
-        option.id === optionId ? { ...option, nextStepId } : option,
-      ),
-    )
+    setOptions([...options, { id: uuidv4(), value: '' }])
   }
 
   return (
@@ -86,7 +75,12 @@ const EditingMultipleChoice = ({
             className={styles.input}
             type='text'
             value={option.value}
-            onChange={(e) => changeOptionHandler(option.id, e.target.value)}
+            onChange={(e) => {
+              const newOptions = options.map((opt) =>
+                opt.id === option.id ? { ...opt, value: e.target.value } : opt,
+              )
+              setOptions(newOptions)
+            }}
             placeholder='새 선택지'
           />
           <div
@@ -101,27 +95,21 @@ const EditingMultipleChoice = ({
         선택지 추가
       </div>
       <div className={styles.title}>응답에 따른 대응</div>
-      {options.map((option) => (
-        <div key={option.id} className={styles.optionAction}>
-          <div className={styles.optionLabel}>{option.value}</div>
-          <select
-            className={styles.action}
-            value={option.nextStepId || ''}
-            onChange={(e) => nextStepHandler(option.id, e.target.value)}
-          >
-            <option value=''>다음 질문으로 이동</option>
-            {steps.map((q) => (
-              <option key={q.id} value={q.id}>
-                {q.title}
-              </option>
-            ))}
-            {!steps.some((s) => s.id === option.nextStepId) &&
-              option.nextStepId && (
-                <option value={option.nextStepId}>삭제된 선택지</option>
-              )}
-          </select>
-        </div>
-      ))}
+      <select
+        className={styles.action}
+        value={nextStepId}
+        onChange={(e) => setNextStepId(e.target.value)}
+      >
+        <option value=''>다음 질문으로 이동</option>
+        {steps.map((q) => (
+          <option key={q.id} value={q.id}>
+            {q.title}
+          </option>
+        ))}
+        {!steps.some((s) => s.id === nextStepId) && nextStepId && (
+          <option value={nextStepId}>삭제된 선택지</option>
+        )}
+      </select>
       {localShowWarning && (
         <div className={styles.warningBubble}>
           참조하고 있던 스텝이 삭제되어 변경이 필요합니다.

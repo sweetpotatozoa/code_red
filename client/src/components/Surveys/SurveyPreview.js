@@ -220,7 +220,7 @@ const SurveyPreview = ({
                     )}
                     onChange={() => handleOptionChange(option, false)}
                   />
-                  <span className={styles.star}>&#9733</span>
+                  <span className={styles.star}>★</span>
                 </label>
               ))}
             </div>

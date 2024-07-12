@@ -1,23 +1,27 @@
 import styles from './EditingQuestion.module.css'
 import { useState, useEffect } from 'react'
 
-const EditingInfo = ({ step, onSave, onCancel, steps, showWarning }) => {
+const EditingInfo = ({
+  step,
+  onSave,
+  onCancel,
+  steps,
+  showWarning: initialShowWarning,
+}) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
   const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
-  const [localShowWarning, setLocalShowWarning] = useState(showWarning)
+  const [localShowWarning, setLocalShowWarning] = useState(initialShowWarning)
 
   useEffect(() => {
-    setLocalShowWarning(showWarning)
-  }, [showWarning])
+    setLocalShowWarning(
+      nextStepId !== '' && !steps.some((s) => s.id === nextStepId),
+    )
+  }, [nextStepId, steps])
 
   const handleSave = () => {
     if (title.trim() === '') {
       alert('제목을 입력해주세요.')
-      return
-    }
-    if (description.trim() === '') {
-      alert('설명을 입력해주세요.')
       return
     }
     onSave({ ...step, title, description, nextStepId })
@@ -30,18 +34,18 @@ const EditingInfo = ({ step, onSave, onCancel, steps, showWarning }) => {
         type='text'
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder='제목을 입력하세요.'
+        placeholder='질문을 입력하세요.'
         className={styles.input}
       />
       <div className={styles.title}>설명</div>
-      <textarea
+      <input
+        className={styles.input}
+        type='text'
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        placeholder='설명을 입력하세요.'
-        className={styles.textarea}
-        rows={4}
+        placeholder='설명 (선택사항)'
       />
-      <div className={styles.title}>다음 스텝</div>
+      <div className={styles.title}>응답에 따른 대응</div>
       <select
         className={styles.action}
         value={nextStepId}
