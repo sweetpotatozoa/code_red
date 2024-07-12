@@ -35,7 +35,7 @@
   font-size: 18px;
   font-weight: bold;
   background-color: #f8fafc;
-  border-right: 8px solid #ff5926;
+  border-right: 8px solid #9a4dff;
 }
 
 .user {
@@ -220,7 +220,7 @@
 }
 
 input:checked + .slider {
-  background-color: #ff6130;
+  background-color: #9a4dff;
 }
 
 input:checked + .slider:before {
@@ -279,7 +279,7 @@ input:checked + .slider:before {
   padding: 16px;
   cursor: pointer;
   font-weight: bold;
-  border-bottom: 3px solid #ff5926;
+  border-bottom: 3px solid #9a4dff;
   color: #11192c;
 }
 
@@ -419,4 +419,5 @@ input:checked + .slider:before {
 
 .logo {
   cursor: pointer;
+  margin-left: 0px;
 }

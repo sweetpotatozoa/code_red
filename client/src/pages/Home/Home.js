@@ -109,7 +109,7 @@ const Home = () => {
   return (
     <div className={styles.container}>
       <div className={styles.sideBar}>
-        <img src='/images/logo.png' className={styles.logo}></img>
+        <img src='/images/logo.svg' className={styles.logo}></img>
         <div className={styles.navBar}>
           <div className={styles.nav}>설문조사</div>
         </div>

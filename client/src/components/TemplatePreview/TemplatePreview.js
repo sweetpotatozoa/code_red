@@ -11,6 +11,7 @@ const TemplatePreview = ({
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [selectedOptions, setSelectedOptions] = useState([])
 
+  // 템플릿 선택에 따른 초기 세팅
   useEffect(() => {
     if (selectedTemplate && currentStepId) {
       const currentStep = selectedTemplate.steps.find(
@@ -21,11 +22,22 @@ const TemplatePreview = ({
         currentStep.type === 'welcome' &&
         !currentStep.isActive
       ) {
-        // welcome 타입이고 isActive가 false일 때 다음 스텝으로 자동 이동
         handleNextStep()
       }
     }
+    console.log('currentStepId:', currentStepId)
   }, [currentStepId, selectedTemplate])
+
+  useEffect(() => {
+    // Show the container when a new template is selected
+    if (selectedTemplate) {
+      setShowContainer(true)
+    }
+  }, [selectedTemplate, setShowContainer])
+
+  useEffect(() => {
+    console.log('showContainer changed:', showContainer)
+  }, [showContainer])
 
   const handleOptionChange = (option, isMultiple) => {
     setSelectedOptions((prevOptions) => {
@@ -52,7 +64,13 @@ const TemplatePreview = ({
         (step) => step.id === currentStepId,
       )
 
-      if (!currentStepData) return
+      if (!currentStepData) {
+        console.error(
+          'No currentStepData found for currentStepId:',
+          currentStepId,
+        )
+        return
+      }
 
       let nextStepId
 
@@ -68,6 +86,9 @@ const TemplatePreview = ({
         nextStepId = currentStepData.nextStepId
       }
 
+      console.log('currentStepData:', currentStepData)
+      console.log('nextStepId:', nextStepId)
+
       if (nextStepId) {
         setIsTransitioning(true)
         setTimeout(() => {
@@ -76,12 +97,12 @@ const TemplatePreview = ({
           setIsTransitioning(false)
         }, 400)
       } else {
+        console.log('No nextStepId found, hiding container')
         setShowContainer(false)
       }
     }
   }
 
-  // 상단 닫기 버튼 랜더링
   const renderCloseButton = () => {
     return (
       <div
@@ -251,7 +272,7 @@ const TemplatePreview = ({
       )
     } else if (step.type === 'link') {
       return (
-        <a href={step.url} target='_blank'>
+        <a href={step.url} target='_blank' rel='noreferrer'>
           <div className={styles.button} onClick={handleNextStep}>
             링크로 이동
           </div>
@@ -268,6 +289,8 @@ const TemplatePreview = ({
 
   const renderContainer = (step) => {
     if (!step) return null
+
+    console.log('Rendering step:', step)
 
     return (
       <div
@@ -315,6 +338,13 @@ const TemplatePreview = ({
     !currentStepId ||
     !showContainer
   ) {
+    console.log('selectedTemplate:', selectedTemplate)
+    console.log(
+      'selectedTemplate.steps:',
+      selectedTemplate ? selectedTemplate.steps : 'undefined',
+    )
+    console.log('currentStepId:', currentStepId)
+    console.log('showContainer:', showContainer)
     return null
   }
 
@@ -322,7 +352,8 @@ const TemplatePreview = ({
     (step) => step.id === currentStepId,
   )
 
-  // welcome 타입이고 isActive가 false인 경우 다음 스텝을 찾음
+  console.log('Current Step:', currentStep)
+
   let displayStep = currentStep
   if (currentStep?.type === 'welcome' && !currentStep?.isActive) {
     displayStep = selectedTemplate.steps.find(
@@ -330,15 +361,11 @@ const TemplatePreview = ({
     )
   }
 
-  const nextStepId = displayStep?.nextStepId
-  const nextStep = nextStepId
-    ? selectedTemplate.steps.find((step) => step.id === nextStepId)
-    : null
+  console.log('Display Step:', displayStep)
 
   return (
     <div className={styles.previewContainer}>
       {displayStep && renderContainer(displayStep)}
-      {nextStep && renderContainer(nextStep)}
     </div>
   )
 }

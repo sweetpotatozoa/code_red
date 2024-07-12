@@ -103,7 +103,7 @@ const Summary = () => {
     <div className={styles.container}>
       <div className={styles.sideBar}>
         <img
-          src='/images/logo.png'
+          src='/images/logo.svg'
           className={styles.logo}
           onClick={goToHome}
         />
