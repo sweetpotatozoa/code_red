@@ -1,7 +1,7 @@
 import styles from './Login.module.css'
 import { useNavigate } from 'react-router-dom'
 import backendApis from '../../../utils/backendApis'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -42,6 +42,10 @@ const Login = () => {
       [name]: value,
     })
   }
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (token) localStorage.removeItem('token')
+  }, [])
 
   return (
     <div className={styles.container}>
