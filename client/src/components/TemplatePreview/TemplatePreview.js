@@ -8,7 +8,6 @@ const TemplatePreview = ({
   showContainer,
   setShowContainer,
 }) => {
-  const [isTransitioning, setIsTransitioning] = useState(false)
   const [selectedOptions, setSelectedOptions] = useState([])
 
   // 템플릿 선택에 따른 초기 세팅
@@ -62,7 +61,7 @@ const TemplatePreview = ({
   }
 
   const handleNextStep = () => {
-    if (selectedTemplate && !isTransitioning) {
+    if (selectedTemplate) {
       const currentStepData = selectedTemplate.steps.find(
         (step) => step.id === currentStepId,
       )
@@ -70,8 +69,6 @@ const TemplatePreview = ({
       if (!currentStepData) {
         return
       }
-
-      let nextStepId
 
       if (
         (currentStepData.type === 'singleChoice' ||
@@ -82,6 +79,8 @@ const TemplatePreview = ({
         // 옵션이 선택되지 않은 경우 아무 동작도 하지 않음
         return
       }
+
+      let nextStepId
 
       if (
         currentStepData.type === 'welcome' ||
@@ -105,12 +104,8 @@ const TemplatePreview = ({
       }
 
       if (nextStepId) {
-        setIsTransitioning(true)
-        setTimeout(() => {
-          setCurrentStepId(nextStepId)
-          setSelectedOptions([])
-          setIsTransitioning(false)
-        }, 0) // Transition delay를 제거하여 바로 다음 스텝으로 이동
+        setCurrentStepId(nextStepId)
+        setSelectedOptions([])
       } else {
         setShowContainer(false)
       }
@@ -288,7 +283,7 @@ const TemplatePreview = ({
       return (
         <a href={step.url} target='_blank' rel='noreferrer'>
           <div className={styles.button} onClick={handleNextStep}>
-            링크로 이동
+            {step.buttonText}
           </div>
         </a>
       )
@@ -308,11 +303,7 @@ const TemplatePreview = ({
       <div
         key={step.id}
         className={`${styles.container} ${
-          step.id === currentStepId
-            ? isTransitioning
-              ? styles.exit
-              : styles.current
-            : styles.next
+          step.id === currentStepId ? styles.current : styles.next
         }`}
       >
         {renderCloseButton()}
