@@ -84,7 +84,8 @@ const SurveyPreview = ({
         }
       }
 
-      if (nextStepId) {
+      // nextStepId가 빈 문자열이 아닌 경우에만 다음 스텝으로 이동
+      if (nextStepId !== '') {
         setIsTransitioning(true)
         setTimeout(() => {
           setCurrentStepId(nextStepId)
@@ -200,7 +201,7 @@ const SurveyPreview = ({
             <div className={styles.title}>{step.title}</div>
             <div className={styles.description}>{step.description}</div>
             <div className={styles.starInputContainer}>
-              {step.options.map((option) => (
+              {[...step.options].reverse().map((option) => (
                 <label
                   key={option.id}
                   className={`${styles.starOptionLabel} ${
@@ -220,7 +221,7 @@ const SurveyPreview = ({
                     )}
                     onChange={() => handleOptionChange(option, false)}
                   />
-                  <span className={styles.star}>&#9733</span>
+                  <span className={styles.star}>★</span>
                 </label>
               ))}
             </div>
@@ -266,12 +267,24 @@ const SurveyPreview = ({
         </div>
       )
     } else if (step.type === 'link') {
+      const handleLinkClick = () => {
+        // URL이 프로토콜을 포함하고 있지 않다면 추가
+        const url =
+          step.url.startsWith('http://') || step.url.startsWith('https://')
+            ? step.url
+            : `https://${step.url}`
+
+        // 새 창에서 URL 열기
+        window.open(url, '_blank', 'noopener,noreferrer')
+
+        // 다음 스텝으로 이동
+        handleNextStep()
+      }
+
       return (
-        <a href={step.url} target='_blank' rel='noopener noreferrer'>
-          <div className={styles.button} onClick={handleNextStep}>
-            링크로 이동
-          </div>
-        </a>
+        <div className={styles.button} onClick={handleLinkClick}>
+          {step.buttonText || '링크로 이동'}
+        </div>
       )
     } else {
       return (

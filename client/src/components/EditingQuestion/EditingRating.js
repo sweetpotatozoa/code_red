@@ -6,15 +6,17 @@ const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
   const [options, setOptions] = useState(() => {
-    // 기존 옵션이 있으면 사용하고, 없으면 기본 5개 별점 옵션 생성
-    return (
-      step.options ||
-      Array.from({ length: 5 }, (_, index) => ({
-        id: uuidv4(),
-        value: index + 1,
-        nextStepId: '',
-      }))
-    )
+    return step.options && step.options.length === 5
+      ? step.options.map((option, index) => ({
+          ...option,
+          value: index + 1,
+          nextStepId: option.nextStepId || '',
+        }))
+      : Array.from({ length: 5 }, (_, index) => ({
+          id: uuidv4(),
+          value: index + 1,
+          nextStepId: '',
+        }))
   })
   const [localShowWarning, setLocalShowWarning] = useState(showWarning)
 
@@ -27,7 +29,13 @@ const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
       alert('제목을 입력해주세요.')
       return
     }
-    onSave({ ...step, title, description, options })
+    // 모든 옵션 정보를 저장 (nextStepId 포함)
+    onSave({
+      ...step,
+      title,
+      description,
+      options,
+    })
   }
 
   const nextStepHandler = (optionId, nextStepId) => {
@@ -66,7 +74,7 @@ const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
           <div className={styles.optionLabel}>{option.value}점</div>
           <select
             className={styles.action}
-            value={option.nextStepId || ''}
+            value={option.nextStepId}
             onChange={(e) => nextStepHandler(option.id, e.target.value)}
           >
             <option value=''>다음 질문으로 이동</option>
