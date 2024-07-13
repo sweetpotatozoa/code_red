@@ -217,21 +217,6 @@
         case 'singleChoice':
         case 'multipleChoice':
         case 'rating':
-          if (step.value === undefined) {
-            console.error(
-              `Survey ${survey._id}: Missing 'value' in ${step.type} step ${step.id}`,
-            )
-            return false
-          }
-          if (
-            typeof step.value !== 'string' &&
-            typeof step.value !== 'number'
-          ) {
-            console.error(
-              `Survey ${survey._id}: 'value' must be a string or number in ${step.type} step ${step.id}`,
-            )
-            return false
-          }
           if (!Array.isArray(step.options)) {
             console.error(
               `Survey ${survey._id}: 'options' must be an array in ${step.type} step ${step.id}`,
