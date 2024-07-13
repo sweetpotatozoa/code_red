@@ -909,13 +909,26 @@
   }
 
   // 이스케이프 처리 함수 정의
-  function escapeClassName(className) {
-    return className
-      .split(' ')
-      .map(
-        (cls) =>
-          '.' + cls.replace(/([!"#$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g, '\\$1'),
+  function escapeClassName(selectorString) {
+    // ID 선택자(#)로 시작하는 경우
+    if (selectorString.startsWith('#')) {
+      return selectorString.replace(
+        /([!"$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g,
+        '\\$1',
       )
+    }
+
+    // 클래스 선택자의 경우
+    return selectorString
+      .split(' ')
+      .map((className) => {
+        // 이미 .으로 시작하는 경우 그대로 두고, 아니면 .을 추가
+        const prefix = className.startsWith('.') ? '' : '.'
+        return (
+          prefix +
+          className.replace(/([!"#$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g, '\\$1')
+        )
+      })
       .join('')
   }
 
