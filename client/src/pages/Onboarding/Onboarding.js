@@ -17,9 +17,6 @@ const Onboarding = () => {
     isOnboarding: false,
   })
 
-  console.log(onboardingInfo)
-  console.log(currentStep)
-
   //랜더링
   const renderStep = () => {
     switch (currentStep) {

@@ -44,13 +44,12 @@
 .customInput {
   border: none;
   font-size: 18px;
-  padding: 0;
-  margin: 0;
-  width: 100%;
+  padding: 8px;
+  padding-left: 0;
   background: transparent;
   outline: none; /* 포커스 시 기본 아웃라인 제거 */
-  padding: 8px 0;
   line-height: 1.5;
+  height: 36px; /* Adjust height to ensure text is not cut off */
 }
 
 .form label input {
