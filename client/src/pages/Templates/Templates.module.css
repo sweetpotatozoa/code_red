@@ -119,11 +119,11 @@
 }
 
 .selected {
-  background-color: #f2f3f6;
+  background-color: #f1f3f6;
 }
 
 .option:hover {
-  background-color: #f2f3f6;
+  background-color: #f1f3f6;
   cursor: pointer;
 }
 

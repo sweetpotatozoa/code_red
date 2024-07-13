@@ -22,11 +22,18 @@ const TemplatePreview = ({
         currentStep.type === 'welcome' &&
         !currentStep.isActive
       ) {
-        handleNextStep()
+        const currentIndex = selectedTemplate.steps.findIndex(
+          (step) => step.id === currentStepId,
+        )
+        const nextStepId = selectedTemplate.steps[currentIndex + 1]?.id
+        if (nextStepId) {
+          setCurrentStepId(nextStepId)
+        } else {
+          setShowContainer(false)
+        }
       }
     }
-    console.log('currentStepId:', currentStepId)
-  }, [currentStepId, selectedTemplate])
+  }, [currentStepId, selectedTemplate, setCurrentStepId, setShowContainer])
 
   useEffect(() => {
     // Show the container when a new template is selected
@@ -34,10 +41,6 @@ const TemplatePreview = ({
       setShowContainer(true)
     }
   }, [selectedTemplate, setShowContainer])
-
-  useEffect(() => {
-    console.log('showContainer changed:', showContainer)
-  }, [showContainer])
 
   const handleOptionChange = (option, isMultiple) => {
     setSelectedOptions((prevOptions) => {
@@ -65,16 +68,31 @@ const TemplatePreview = ({
       )
 
       if (!currentStepData) {
-        console.error(
-          'No currentStepData found for currentStepId:',
-          currentStepId,
-        )
         return
       }
 
       let nextStepId
 
       if (
+        (currentStepData.type === 'singleChoice' ||
+          currentStepData.type === 'rating' ||
+          currentStepData.type === 'multipleChoice') &&
+        selectedOptions.length === 0
+      ) {
+        // 옵션이 선택되지 않은 경우 아무 동작도 하지 않음
+        return
+      }
+
+      if (
+        currentStepData.type === 'welcome' ||
+        currentStepData.type === 'thank'
+      ) {
+        // welcome 스텝의 경우, 다음 스텝으로 이동
+        const currentIndex = selectedTemplate.steps.findIndex(
+          (step) => step.id === currentStepId,
+        )
+        nextStepId = selectedTemplate.steps[currentIndex + 1]?.id || ''
+      } else if (
         (currentStepData.type === 'singleChoice' ||
           currentStepData.type === 'rating') &&
         selectedOptions.length > 0
@@ -86,18 +104,14 @@ const TemplatePreview = ({
         nextStepId = currentStepData.nextStepId
       }
 
-      console.log('currentStepData:', currentStepData)
-      console.log('nextStepId:', nextStepId)
-
       if (nextStepId) {
         setIsTransitioning(true)
         setTimeout(() => {
           setCurrentStepId(nextStepId)
           setSelectedOptions([])
           setIsTransitioning(false)
-        }, 400)
+        }, 0) // Transition delay를 제거하여 바로 다음 스텝으로 이동
       } else {
-        console.log('No nextStepId found, hiding container')
         setShowContainer(false)
       }
     }
@@ -266,7 +280,7 @@ const TemplatePreview = ({
       )
     } else if (step.type === 'thank') {
       return (
-        <div className={styles.button} onClick={handleNextStep}>
+        <div className={styles.button} onClick={() => setShowContainer(false)}>
           닫기
         </div>
       )
@@ -289,8 +303,6 @@ const TemplatePreview = ({
 
   const renderContainer = (step) => {
     if (!step) return null
-
-    console.log('Rendering step:', step)
 
     return (
       <div
@@ -338,13 +350,6 @@ const TemplatePreview = ({
     !currentStepId ||
     !showContainer
   ) {
-    console.log('selectedTemplate:', selectedTemplate)
-    console.log(
-      'selectedTemplate.steps:',
-      selectedTemplate ? selectedTemplate.steps : 'undefined',
-    )
-    console.log('currentStepId:', currentStepId)
-    console.log('showContainer:', showContainer)
     return null
   }
 
@@ -352,16 +357,14 @@ const TemplatePreview = ({
     (step) => step.id === currentStepId,
   )
 
-  console.log('Current Step:', currentStep)
-
   let displayStep = currentStep
   if (currentStep?.type === 'welcome' && !currentStep?.isActive) {
-    displayStep = selectedTemplate.steps.find(
-      (step) => step.id === currentStep.nextStepId,
+    const currentIndex = selectedTemplate.steps.findIndex(
+      (step) => step.id === currentStepId,
     )
+    displayStep = selectedTemplate.steps[currentIndex + 1]
+    setCurrentStepId(displayStep.id)
   }
-
-  console.log('Display Step:', displayStep)
 
   return (
     <div className={styles.previewContainer}>

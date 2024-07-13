@@ -211,6 +211,7 @@
 
 .star {
   font-size: 50px;
+  color: #e5ebf3;
   cursor: pointer;
 }
 
@@ -219,4 +220,5 @@
   justify-content: flex-end;
   width: 100%;
   cursor: pointer;
+  margin-bottom: 16px;
 }
