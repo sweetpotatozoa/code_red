@@ -815,15 +815,19 @@
         if (trigger.type === 'click' && isCorrectPage(trigger)) {
           if (trigger.clickType === 'css') {
             const escapedSelector = escapeClassName(trigger.clickValue)
-            const button = document.querySelector(escapedSelector)
-            if (button) {
-              button.addEventListener('click', showSurvey)
-              console.log(`Click trigger set for ${trigger.clickValue}`)
-              cleanupFunctions.set(escapedSelector, () =>
-                button.removeEventListener('click', showSurvey),
-              )
+            if (escapedSelector) {
+              const button = document.querySelector(escapedSelector)
+              if (button) {
+                button.addEventListener('click', showSurvey)
+                console.log(`Click trigger set for ${trigger.clickValue}`)
+                cleanupFunctions.set(escapedSelector, () =>
+                  button.removeEventListener('click', showSurvey),
+                )
+              } else {
+                console.log(`Click not found: ${trigger.clickValue}`)
+              }
             } else {
-              console.log(`Click not found: ${trigger.clickValue}`)
+              console.log(`Invalid selector: ${trigger.clickValue}`)
             }
           } else if (trigger.clickType === 'text') {
             const elements = document.querySelectorAll('button')
@@ -908,6 +912,9 @@
 
   // 이스케이프 처리 함수 정의
   function escapeClassName(className) {
+    if (!className || className === '.' || className === '#') {
+      return null
+    }
     return className.replace(/([!"#$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g, '\\$1')
   }
 
