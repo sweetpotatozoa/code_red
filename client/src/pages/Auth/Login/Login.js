@@ -1,7 +1,7 @@
 import styles from './Login.module.css'
 import { useNavigate } from 'react-router-dom'
 import backendApis from '../../../utils/backendApis'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -23,7 +23,6 @@ const Login = () => {
     try {
       const result = await backendApis.login('POST', { input })
       if (result.token) {
-        alert('로그인 성공')
         localStorage.setItem('token', result.token)
         if (result.isOnboarding) navigate('/')
         else navigate('/onboarding')
@@ -43,6 +42,10 @@ const Login = () => {
       [name]: value,
     })
   }
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (token) localStorage.removeItem('token')
+  }, [])
 
   return (
     <div className={styles.container}>

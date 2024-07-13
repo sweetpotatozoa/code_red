@@ -29,7 +29,7 @@ const Complete = ({ onboardingInfo }) => {
     <div className={styles.container}>
       <div className={styles.title}>연결이 완료되었어요!</div>
       <div className={styles.description}>
-        이제 원하는 설문조사만 붙이면 끝이에요
+        이제 원하는 설문조사만 만들면 끝이에요
       </div>
       <div className={styles.contents2}>
         <div className={styles.complete}>

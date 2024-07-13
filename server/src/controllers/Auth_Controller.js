@@ -49,15 +49,18 @@ class AuthController {
   async login(req, res) {
     const userInfo = req.body.input
     if (!userInfo.userName || !userInfo.password) {
-      res.status(400).json({ message: 'Invalid user name or password' })
+      res
+        .status(400)
+        .json({ message: '아이디 혹은 비밀번호가 잘못되었습니다.' })
       return
     }
     try {
       const result = await AuthService.login(userInfo)
       res.status(200).json(result)
     } catch (err) {
-      const { status, message } = errorHandler(err, 'login')
-      res.status(status).json({ message })
+      res
+        .status(400)
+        .json({ message: '아이디 혹은 비밀번호가 잘못되었습니다.' })
     }
   }
 
