@@ -207,15 +207,9 @@
         )
         return false
       }
-      if (step.nextStepId === undefined) {
-        console.error(
-          `Survey ${survey._id}: Missing 'nextStepId' in step ${step.id}`,
-        )
-        return false
-      }
+
       switch (step.type) {
         case 'singleChoice':
-        case 'multipleChoice':
         case 'rating':
           if (!Array.isArray(step.options)) {
             console.error(
@@ -244,11 +238,45 @@
             }
           }
           break
+        case 'multipleChoice':
+          if (!Array.isArray(step.options)) {
+            console.error(
+              `Survey ${survey._id}: 'options' must be an array in ${step.type} step ${step.id}`,
+            )
+            return false
+          }
+          for (let option of step.options) {
+            if (!option.id) {
+              console.error(
+                `Survey ${survey._id}: Missing 'id' in option of step ${step.id}`,
+              )
+              return false
+            }
+            if (option.value === undefined) {
+              console.error(
+                `Survey ${survey._id}: Missing 'value' in option ${option.id} of step ${step.id}`,
+              )
+              return false
+            }
+          }
+          if (step.nextStepId === undefined) {
+            console.error(
+              `Survey ${survey._id}: Missing 'nextStepId' in multipleChoice step ${step.id}`,
+            )
+            return false
+          }
+          break
         case 'welcome':
         case 'thank':
         case 'link':
         case 'freeText':
         case 'info':
+          if (step.nextStepId === undefined) {
+            console.error(
+              `Survey ${survey._id}: Missing 'nextStepId' in step ${step.id}`,
+            )
+            return false
+          }
           break
         default:
           console.error(
