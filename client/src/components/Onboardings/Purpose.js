@@ -43,7 +43,7 @@ const Purpose = ({ setCurrentStep, setOnboardingInfo }) => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.title}>당신의 역할은 무엇인가요?</div>
+      <div className={styles.title}>당신의 목적은 무엇인가요?</div>
       <div className={styles.description}>
         저희가 맞춤형 서비스를 제공할 수 있도록 도와주세요.
       </div>
