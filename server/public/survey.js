@@ -828,27 +828,22 @@
               console.log(`Click not found: ${trigger.clickValue}`)
             }
           } else if (trigger.clickType === 'text') {
-            const elements = document.querySelectorAll('*')
+            const elements = document.querySelectorAll('*') // 모든 HTML 요소 선택
             let found = false
             elements.forEach((element) => {
-              const elementText = element.textContent || ''
-              if (elementText.includes(trigger.clickValue)) {
+              if (
+                element.textContent &&
+                element.textContent.trim() === trigger.clickValue
+              ) {
                 const eventListener = function (event) {
-                  let target = event.target
-                  while (target != null) {
-                    if (
-                      (target.textContent || '').includes(trigger.clickValue)
-                    ) {
-                      showSurvey()
-                      console.log(
-                        `Inner Text trigger activated for "${
-                          trigger.clickValue
-                        }" on ${element.tagName.toLowerCase()}`,
-                      )
-                      found = true
-                      break
-                    }
-                    target = target.parentElement
+                  if (event.target.textContent.trim() === trigger.clickValue) {
+                    showSurvey()
+                    console.log(
+                      `Text trigger activated for "${
+                        trigger.clickValue
+                      }" on ${element.tagName.toLowerCase()}`,
+                    )
+                    found = true
                   }
                 }
                 element.addEventListener('click', eventListener)
@@ -858,7 +853,7 @@
               }
             })
             if (!found) {
-              console.log(`Inner Text not found: ${trigger.clickValue}`)
+              console.log(`Text not found: ${trigger.clickValue}`)
             }
           }
         }
