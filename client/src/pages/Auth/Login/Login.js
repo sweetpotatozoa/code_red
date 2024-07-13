@@ -23,7 +23,6 @@ const Login = () => {
     try {
       const result = await backendApis.login('POST', { input })
       if (result.token) {
-        alert('로그인 성공')
         localStorage.setItem('token', result.token)
         if (result.isOnboarding) navigate('/')
         else navigate('/onboarding')
