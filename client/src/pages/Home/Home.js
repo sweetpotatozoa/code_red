@@ -26,7 +26,7 @@ const Home = () => {
 
         // 인증된 경우, 데이터 로드
         const result = await backendApis.getSurveys()
-        setSurveys(result)
+        setSurveys(Array.isArray(result) ? result : [])
         const customerInfo = await backendApis.getUserInfo()
         setUserInfo(customerInfo)
       } catch (error) {
@@ -149,53 +149,59 @@ const Home = () => {
             <div className={styles.description3}>배포상태</div>
           </div>
 
-          {surveys.map((survey) => (
-            <div
-              key={survey._id}
-              className={styles.surveyBox}
-              onClick={() => goToSummary(survey._id)}
-            >
-              <div className={styles.surveyTitle}>{survey.title}</div>
-              <div className={styles.surveyDate}>{survey.updateAt}</div>
-              <div className={styles.surveyStatus}>
-                <div className={styles.toggle}>
-                  {survey.isDeploy ? 'On' : 'Off'}
-                </div>
-                <label
-                  className={styles.switch}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <input
-                    type='checkbox'
-                    checked={survey.isDeploy}
-                    onChange={(e) => {
-                      surveyDeployHandler(survey._id)
-                      e.stopPropagation()
-                    }}
-                  />
-                  <span className={`${styles.slider} ${styles.round}`}></span>
-                </label>
-              </div>
-              <div
-                className={styles.surveyEdit}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleEdit(survey._id)
-                }}
-              >
-                수정
-              </div>
-              <div
-                className={styles.surveyDelete}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  surveyDeleteHandler(survey._id)
-                }}
-              >
-                삭제
-              </div>
+          {surveys.length === 0 ? (
+            <div className={styles.noSurvey}>
+              아직 만든 설문조사가 없습니다.
             </div>
-          ))}
+          ) : (
+            surveys.map((survey) => (
+              <div
+                key={survey._id}
+                className={styles.surveyBox}
+                onClick={() => goToSummary(survey._id)}
+              >
+                <div className={styles.surveyTitle}>{survey.title}</div>
+                <div className={styles.surveyDate}>{survey.updateAt}</div>
+                <div className={styles.surveyStatus}>
+                  <div className={styles.toggle}>
+                    {survey.isDeploy ? 'On' : 'Off'}
+                  </div>
+                  <label
+                    className={styles.switch}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <input
+                      type='checkbox'
+                      checked={survey.isDeploy}
+                      onChange={(e) => {
+                        surveyDeployHandler(survey._id)
+                        e.stopPropagation()
+                      }}
+                    />
+                    <span className={`${styles.slider} ${styles.round}`}></span>
+                  </label>
+                </div>
+                <div
+                  className={styles.surveyEdit}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleEdit(survey._id)
+                  }}
+                >
+                  수정
+                </div>
+                <div
+                  className={styles.surveyDelete}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    surveyDeleteHandler(survey._id)
+                  }}
+                >
+                  삭제
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
       {isSetting && (
