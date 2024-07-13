@@ -828,22 +828,27 @@
               console.log(`Click not found: ${trigger.clickValue}`)
             }
           } else if (trigger.clickType === 'text') {
-            const elements = document.querySelectorAll('*') // 모든 HTML 요소 선택
+            const elements = document.querySelectorAll('*')
             let found = false
             elements.forEach((element) => {
-              if (
-                element.innerText &&
-                element.innerText.includes(trigger.clickValue)
-              ) {
+              const elementText = element.textContent || ''
+              if (elementText.includes(trigger.clickValue)) {
                 const eventListener = function (event) {
-                  if (event.target.innerText.includes(trigger.clickValue)) {
-                    showSurvey()
-                    console.log(
-                      `Inner Text trigger activated for "${
-                        trigger.clickValue
-                      }" on ${element.tagName.toLowerCase()}`,
-                    )
-                    found = true
+                  let target = event.target
+                  while (target != null) {
+                    if (
+                      (target.textContent || '').includes(trigger.clickValue)
+                    ) {
+                      showSurvey()
+                      console.log(
+                        `Inner Text trigger activated for "${
+                          trigger.clickValue
+                        }" on ${element.tagName.toLowerCase()}`,
+                      )
+                      found = true
+                      break
+                    }
+                    target = target.parentElement
                   }
                 }
                 element.addEventListener('click', eventListener)
