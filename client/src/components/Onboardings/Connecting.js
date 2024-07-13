@@ -124,6 +124,10 @@ const Connecting = ({ setCurrentStep, setOnboardingInfo }) => {
           아래 스크립트를 여러분의 서비스 <b>html</b> 코드 안에 있는
           <b>&lt;head&gt;</b> 코드에 넣어주세요.
         </div>
+        <div className={styles.info}>
+          삽입이 완료되었다면 고객님의 웹사이트 주소 뒤에 #checkConnection을
+          붙여 접속해주세요. <br /> ex) www.yoursite.com/#checkConnection
+        </div>
         {!loading && (
           <SyntaxHighlighter language='javascript' style={prism}>
             {scriptCode}
