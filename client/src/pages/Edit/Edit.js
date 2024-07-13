@@ -77,6 +77,18 @@ const Edit = () => {
       alert(`${stepNumbers}번 스텝의 '응답에 따른 대응'을 수정해주세요.`)
       return
     }
+    if (!survey.steps || survey.steps.length === 0) {
+      alert('설문조사에 질문을 추가해주세요.')
+      return
+    }
+    if (!survey.triggers || survey.triggers.length === 0) {
+      alert('설문조사에 트리거를 추가해주세요.')
+      return
+    }
+    if (!survey.delays) {
+      alert('설문조사에 발동주기를 추가해주세요.')
+      return
+    }
 
     try {
       await BackendApis.updateSurvey(id, survey)
@@ -92,6 +104,18 @@ const Edit = () => {
         .map((index) => index)
         .join(', ')
       alert(`${stepNumbers}번 스텝의 '응답에 따른 대응'을 수정해주세요.`)
+      return
+    }
+    if (!survey.steps || survey.steps.length === 0) {
+      alert('설문조사에 질문을 추가해주세요.')
+      return
+    }
+    if (!survey.triggers || survey.triggers.length === 0) {
+      alert('설문조사에 트리거를 추가해주세요.')
+      return
+    }
+    if (!survey.delays) {
+      alert('설문조사에 발동주기를 추가해주세요.')
       return
     }
 
