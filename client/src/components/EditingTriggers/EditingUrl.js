@@ -61,6 +61,7 @@ const EditingUrl = ({
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         placeholder='URL을 입력하세요.'
+        className={styles.input}
       />
       <div className={styles.bottom}>
         <div className={styles.leftBtn} onClick={TriggerEditCancel}>
