@@ -678,9 +678,12 @@
   }
 
   // Debounce와 조건 체크를 포함한 showSurvey 함수
-  const showSurvey = debounce((survey) => {
-    if (window.activeSurveyId === null && canShowSurvey(survey)) {
-      loadSurvey(survey)
+  const showSurvey = debounce((surveyList) => {
+    for (let survey of surveyList) {
+      if (window.activeSurveyId === null && canShowSurvey(survey)) {
+        loadSurvey(survey)
+        break
+      }
     }
   }, 200)
 
@@ -714,7 +717,7 @@
           // #checkConnection 특별 케이스 처리
           if (trigger.url === '#checkConnection') {
             if (currentUrl.hash === '#checkConnection') {
-              showSurvey(survey)
+              showSurvey([survey])
             }
             return
           }
@@ -725,7 +728,7 @@
             currentUrl.pathname === triggerUrl.pathname ||
             (currentUrl.pathname === '/' && triggerUrl.pathname === '')
           ) {
-            showSurvey(survey)
+            showSurvey([survey])
           }
         }
       })
@@ -800,69 +803,30 @@
     const cleanupFunctions = new Map()
 
     try {
-      sortedTriggers.forEach(([key, surveyList]) => {
-        const trigger = JSON.parse(key)
-
-        const showSurvey = debounce(() => {
-          for (let survey of surveyList) {
-            if (window.activeSurveyId === null && canShowSurvey(survey)) {
-              loadSurvey(survey)
-              break
-            }
-          }
-        }, 200)
-
-        if (trigger.type === 'click' && isCorrectPage(trigger)) {
-          if (trigger.clickType === 'css') {
-            const escapedSelector = escapeClassName(trigger.clickValue)
-            const elements = document.querySelectorAll(escapedSelector)
-            if (elements.length > 0) {
-              elements.forEach((element) => {
-                element.addEventListener('click', showSurvey)
-                console.log(`Click trigger set for ${trigger.clickValue}`)
-                cleanupFunctions.set(escapedSelector, () =>
-                  element.removeEventListener('click', showSurvey),
-                )
-              })
-            } else {
-              console.log(`Click not found: ${trigger.clickValue}`)
-            }
-          } else if (trigger.clickType === 'text') {
-            const elements = document.querySelectorAll('*') // 모든 HTML 요소 선택
-            let found = false
-            elements.forEach((element) => {
-              if (
-                element.textContent &&
-                element.textContent.trim() === trigger.clickValue
-              ) {
-                const eventListener = function (event) {
-                  if (event.target.textContent.trim() === trigger.clickValue) {
-                    showSurvey()
-                    console.log(
-                      `Text trigger activated for "${
-                        trigger.clickValue
-                      }" on ${element.tagName.toLowerCase()}`,
-                    )
-                    found = true
-                  }
-                }
-                element.addEventListener('click', eventListener)
-                cleanupFunctions.set(element, () =>
-                  element.removeEventListener('click', eventListener),
-                )
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList') {
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                checkAndSetupTriggers(node, sortedTriggers, cleanupFunctions)
               }
             })
-            if (!found) {
-              console.log(`Text not found: ${trigger.clickValue}`)
-            }
           }
-        }
+        })
+      })
+
+      observer.observe(document.body, { childList: true, subtree: true })
+
+      checkAndSetupTriggers(document.body, sortedTriggers, cleanupFunctions)
+
+      sortedTriggers.forEach(([key, surveyList]) => {
+        const trigger = JSON.parse(key)
 
         if (trigger.type === 'exit' && isCorrectPage(trigger)) {
           const handleExitIntent = (event) => {
             console.log('Exit Intent detected')
             if (event.clientY <= 0) {
-              showSurvey()
+              showSurvey(surveyList)
             }
           }
           document.addEventListener('mouseleave', handleExitIntent)
@@ -873,7 +837,7 @@
         }
 
         if (trigger.type === 'firstVisit' && isCorrectPage(trigger)) {
-          showSurvey()
+          showSurvey(surveyList)
           console.log(`First Visit trigger set`)
         }
 
@@ -890,7 +854,7 @@
             console.log(`Scroll Percentage: ${scrollPercentage}`)
             if (scrollPercentage >= 0.01) {
               console.log('Scroll trigger activated')
-              showSurvey()
+              showSurvey(surveyList)
             }
           }
           const debouncedHandleScroll = debounce(handleScroll, 200)
@@ -909,6 +873,74 @@
       cleanupFunctions.forEach((cleanup) => cleanup())
       cleanupFunctions.clear()
     }
+  }
+
+  // 새로 추가된 함수: 트리거 설정을 확인하고 설정하는 함수
+  function checkAndSetupTriggers(element, sortedTriggers, cleanupFunctions) {
+    sortedTriggers.forEach(([key, surveyList]) => {
+      const trigger = JSON.parse(key)
+
+      if (trigger.type === 'click' && isCorrectPage(trigger)) {
+        if (trigger.clickType === 'css') {
+          const escapedSelector = escapeClassName(trigger.clickValue)
+          const matchingElements = element.querySelectorAll(escapedSelector)
+          matchingElements.forEach((matchingElement) => {
+            if (!matchingElement.hasAttribute('data-survey-trigger-set')) {
+              matchingElement.addEventListener('click', () =>
+                showSurvey(surveyList),
+              )
+              matchingElement.setAttribute('data-survey-trigger-set', 'true')
+              console.log(`Click trigger set for ${trigger.clickValue}`)
+              cleanupFunctions.set(matchingElement, () =>
+                matchingElement.removeEventListener('click', () =>
+                  showSurvey(surveyList),
+                ),
+              )
+            }
+          })
+        } else if (trigger.clickType === 'text') {
+          const textNodes = getTextNodes(element)
+          textNodes.forEach((textNode) => {
+            if (textNode.textContent.trim() === trigger.clickValue) {
+              const parentElement = textNode.parentElement
+              if (!parentElement.hasAttribute('data-survey-trigger-set')) {
+                const eventListener = (event) => {
+                  if (event.target.textContent.trim() === trigger.clickValue) {
+                    showSurvey(surveyList)
+                    console.log(
+                      `Text trigger activated for "${
+                        trigger.clickValue
+                      }" on ${parentElement.tagName.toLowerCase()}`,
+                    )
+                  }
+                }
+                parentElement.addEventListener('click', eventListener)
+                parentElement.setAttribute('data-survey-trigger-set', 'true')
+                cleanupFunctions.set(parentElement, () =>
+                  parentElement.removeEventListener('click', eventListener),
+                )
+              }
+            }
+          })
+        }
+      }
+    })
+  }
+
+  // 새로 추가된 함수: 텍스트 노드를 찾는 헬퍼 함수
+  function getTextNodes(element) {
+    const textNodes = []
+    const walker = document.createTreeWalker(
+      element,
+      NodeFilter.SHOW_TEXT,
+      null,
+      false,
+    )
+    let node
+    while ((node = walker.nextNode())) {
+      textNodes.push(node)
+    }
+    return textNodes
   }
 
   // 이스케이프 처리 함수 정의
