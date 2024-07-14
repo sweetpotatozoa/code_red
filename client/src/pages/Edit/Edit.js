@@ -173,6 +173,20 @@ const Edit = () => {
           </div>
         </div>
         <div className={styles.headerPart}>
+          {survey && (
+            <div
+              className={`${styles.isDeploy} ${
+                survey.isDeploy ? styles.greenText : styles.redText
+              }`}
+            >
+              게시상태
+              <div
+                className={`${styles.isDeployCircle} ${
+                  survey.isDeploy ? styles.greenCircle : styles.redCircle
+                }`}
+              ></div>
+            </div>
+          )}
           <div className={styles.bigButton} onClick={handleSave}>
             저장하기
           </div>
