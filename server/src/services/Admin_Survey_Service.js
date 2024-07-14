@@ -365,6 +365,8 @@ class AdminSurveyService {
     await this.checkSurveyIdExist(surveyId)
     await this.checkSurveyOwnership(userId, surveyId)
 
+    surveyData.isDeploy = false
+
     return SurveysRepo.updateSurvey(surveyId, surveyData)
   }
 

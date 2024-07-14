@@ -6,6 +6,7 @@ import SurveyPreview from '../../components/Surveys/SurveyPreview'
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import BackendApis from '../../utils/backendApis'
+import { set } from 'date-fns'
 
 const Edit = () => {
   const { id } = useParams()
@@ -93,6 +94,7 @@ const Edit = () => {
     try {
       await BackendApis.updateSurvey(id, survey)
       alert('설문조사가 성공적으로 저장되었습니다.')
+      setSurvey({ ...survey, isDeploy: false })
     } catch (err) {
       alert('설문조사 저장에 실패했습니다.')
     }
