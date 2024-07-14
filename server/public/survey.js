@@ -805,19 +805,43 @@
     try {
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
-          if (mutation.type === 'childList') {
+          if (
+            mutation.type === 'attributes' &&
+            mutation.attributeName === 'class'
+          ) {
+            checkAndSetupTriggers(
+              mutation.target,
+              sortedTriggers,
+              cleanupFunctions,
+            )
+          } else if (mutation.type === 'childList') {
             mutation.addedNodes.forEach((node) => {
               if (node.nodeType === Node.ELEMENT_NODE) {
                 checkAndSetupTriggers(node, sortedTriggers, cleanupFunctions)
+                node
+                  .querySelectorAll('*')
+                  .forEach((el) =>
+                    checkAndSetupTriggers(el, sortedTriggers, cleanupFunctions),
+                  )
               }
             })
           }
         })
       })
 
-      observer.observe(document.body, { childList: true, subtree: true })
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class'],
+      })
 
-      checkAndSetupTriggers(document.body, sortedTriggers, cleanupFunctions)
+      // 초기 설정
+      document
+        .querySelectorAll('*')
+        .forEach((el) =>
+          checkAndSetupTriggers(el, sortedTriggers, cleanupFunctions),
+        )
 
       sortedTriggers.forEach(([key, surveyList]) => {
         const trigger = JSON.parse(key)
@@ -875,7 +899,7 @@
     }
   }
 
-  // 새로 추가된 함수: 트리거 설정을 확인하고 설정하는 함수
+  // 트리거 설정을 확인하고 설정하는 함수
   function checkAndSetupTriggers(element, sortedTriggers, cleanupFunctions) {
     sortedTriggers.forEach(([key, surveyList]) => {
       const trigger = JSON.parse(key)
@@ -883,21 +907,18 @@
       if (trigger.type === 'click' && isCorrectPage(trigger)) {
         if (trigger.clickType === 'css') {
           const escapedSelector = escapeClassName(trigger.clickValue)
-          const matchingElements = element.querySelectorAll(escapedSelector)
-          matchingElements.forEach((matchingElement) => {
-            if (!matchingElement.hasAttribute('data-survey-trigger-set')) {
-              matchingElement.addEventListener('click', () =>
-                showSurvey(surveyList),
-              )
-              matchingElement.setAttribute('data-survey-trigger-set', 'true')
-              console.log(`Click trigger set for ${trigger.clickValue}`)
-              cleanupFunctions.set(matchingElement, () =>
-                matchingElement.removeEventListener('click', () =>
-                  showSurvey(surveyList),
-                ),
-              )
-            }
-          })
+          if (
+            element.matches(escapedSelector) &&
+            !element.hasAttribute('data-survey-trigger-set')
+          ) {
+            const clickHandler = () => showSurvey(surveyList)
+            element.addEventListener('click', clickHandler)
+            element.setAttribute('data-survey-trigger-set', 'true')
+            console.log(`Click trigger set for ${trigger.clickValue}`)
+            cleanupFunctions.set(element, () =>
+              element.removeEventListener('click', clickHandler),
+            )
+          }
         } else if (trigger.clickType === 'text') {
           const textNodes = getTextNodes(element)
           textNodes.forEach((textNode) => {
@@ -927,7 +948,7 @@
     })
   }
 
-  // 새로 추가된 함수: 텍스트 노드를 찾는 헬퍼 함수
+  // 텍스트 노드를 찾는 헬퍼 함수
   function getTextNodes(element) {
     const textNodes = []
     const walker = document.createTreeWalker(
