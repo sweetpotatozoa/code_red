@@ -183,6 +183,10 @@ const Edit = () => {
     }
   }, [handleBeforeUnload])
 
+  const handleTitleChange = (e) => {
+    setSurvey({ ...survey, title: e.target.value })
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -190,9 +194,11 @@ const Edit = () => {
           <div className={styles.bigButton} onClick={goBack}>
             ◀︎ 메인으로
           </div>
-          <div className={styles.title}>
-            {survey ? survey.title : '설문조사 제목'}
-          </div>
+          <input
+            className={styles.titleInput}
+            value={survey ? survey.title : '설문조사 제목'}
+            onChange={handleTitleChange}
+          ></input>
         </div>
         <div className={styles.headerPart}>
           {survey && (
