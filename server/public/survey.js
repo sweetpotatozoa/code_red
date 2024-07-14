@@ -8,6 +8,7 @@
   let surveyResponses = []
   let activeSurveys = new Set()
   let surveys = []
+  const triggeredElements = new WeakMap()
 
   // 1. Helper Functions
 
@@ -909,22 +910,23 @@
           const escapedSelector = escapeClassName(trigger.clickValue)
           if (
             element.matches(escapedSelector) &&
-            !element.hasAttribute('data-survey-trigger-set')
+            !triggeredElements.has(element)
           ) {
             const clickHandler = () => showSurvey(surveyList)
             element.addEventListener('click', clickHandler)
-            element.setAttribute('data-survey-trigger-set', 'true')
+            triggeredElements.set(element, true)
             console.log(`Click trigger set for ${trigger.clickValue}`)
-            cleanupFunctions.set(element, () =>
-              element.removeEventListener('click', clickHandler),
-            )
+            cleanupFunctions.set(element, () => {
+              element.removeEventListener('click', clickHandler)
+              triggeredElements.delete(element)
+            })
           }
         } else if (trigger.clickType === 'text') {
           const textNodes = getTextNodes(element)
           textNodes.forEach((textNode) => {
             if (textNode.textContent.trim() === trigger.clickValue) {
               const parentElement = textNode.parentElement
-              if (!parentElement.hasAttribute('data-survey-trigger-set')) {
+              if (!triggeredElements.has(parentElement)) {
                 const eventListener = (event) => {
                   if (event.target.textContent.trim() === trigger.clickValue) {
                     showSurvey(surveyList)
@@ -936,10 +938,11 @@
                   }
                 }
                 parentElement.addEventListener('click', eventListener)
-                parentElement.setAttribute('data-survey-trigger-set', 'true')
-                cleanupFunctions.set(parentElement, () =>
-                  parentElement.removeEventListener('click', eventListener),
-                )
+                triggeredElements.set(parentElement, true)
+                cleanupFunctions.set(parentElement, () => {
+                  parentElement.removeEventListener('click', eventListener)
+                  triggeredElements.delete(parentElement)
+                })
               }
             }
           })
