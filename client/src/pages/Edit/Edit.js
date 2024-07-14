@@ -66,7 +66,7 @@ const Edit = () => {
   }
 
   const goBack = () => {
-    navigate(-1)
+    navigate('/')
   }
 
   const handleSave = async () => {
@@ -163,7 +163,7 @@ const Edit = () => {
       <div className={styles.header}>
         <div className={styles.headerPart}>
           <div className={styles.bigButton} onClick={goBack}>
-            ◀︎ 뒤로가기
+            ◀︎ 메인으로
           </div>
           <div className={styles.title}>
             {survey ? survey.title : '설문조사 제목'}

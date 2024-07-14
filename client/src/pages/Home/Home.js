@@ -14,6 +14,10 @@ const Home = () => {
 
   const navigate = useNavigate()
 
+  const goToHome = () => {
+    navigate('/')
+  }
+
   useEffect(() => {
     const initializeData = async () => {
       try {
@@ -109,9 +113,15 @@ const Home = () => {
   return (
     <div className={styles.container}>
       <div className={styles.sideBar}>
-        <img src='/images/logo.svg' className={styles.logo}></img>
+        <img
+          src='/images/logo.svg'
+          className={styles.logo}
+          onClick={goToHome}
+        ></img>
         <div className={styles.navBar}>
-          <div className={styles.nav}>설문조사</div>
+          <div className={styles.nav} onClick={goToHome}>
+            설문조사
+          </div>
         </div>
         <div className={styles.user}>
           <div className={styles.welcome}>
@@ -129,7 +139,7 @@ const Home = () => {
       </div>
       <div className={styles.main}>
         <div className={styles.basicSetting}>
-          <div className={styles.setting}>
+          <div className={styles.connect}>
             연결상태 {userInfo.isConnect ? '정상' : '비정상'}
           </div>
           <a href='https://www.naver.com/' target='_blank'>

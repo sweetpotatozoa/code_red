@@ -183,7 +183,6 @@ class AdminSurveyController {
 
   // 설문조사 응답 요약 가져오기
   async getSurveySummary(req, res) {
-    console.log('getSurveySummary')
     try {
       const userId = req.user.id
       const { surveyId } = req.params

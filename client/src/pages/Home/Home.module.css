@@ -23,6 +23,7 @@
   margin: 32px 0px;
   width: 140px;
   height: 43px;
+  cursor: pointer;
 }
 
 .navBar {
@@ -36,6 +37,7 @@
   font-weight: bold;
   background-color: #f9fafc;
   border-right: 8px solid #9a4dff;
+  cursor: pointer;
 }
 
 .user {
@@ -76,6 +78,14 @@
   font-weight: bold;
   padding: 8px 16px;
   background-color: #e5ebf3;
+  margin-left: 16px;
+  border-radius: 5px;
+}
+
+.connect {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 8px 16px;
   margin-left: 16px;
   border-radius: 5px;
 }
