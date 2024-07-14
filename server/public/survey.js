@@ -909,16 +909,11 @@
           const escapedSelector = escapeClassName(trigger.clickValue)
           if (
             element.matches(escapedSelector) &&
-            !element.hasAttribute('data-external-survey-trigger')
+            !element.hasAttribute('data-survey-trigger-set')
           ) {
             const clickHandler = () => showSurvey(surveyList)
             element.addEventListener('click', clickHandler)
-            if (typeof window !== 'undefined') {
-              // 클라이언트 측에서만 속성 추가
-              requestAnimationFrame(() => {
-                element.setAttribute('data-external-survey-trigger', 'true')
-              })
-            }
+            element.setAttribute('data-survey-trigger-set', 'true')
             console.log(`Click trigger set for ${trigger.clickValue}`)
             cleanupFunctions.set(element, () =>
               element.removeEventListener('click', clickHandler),
@@ -929,7 +924,7 @@
           textNodes.forEach((textNode) => {
             if (textNode.textContent.trim() === trigger.clickValue) {
               const parentElement = textNode.parentElement
-              if (!parentElement.hasAttribute('data-external-survey-trigger')) {
+              if (!parentElement.hasAttribute('data-survey-trigger-set')) {
                 const eventListener = (event) => {
                   if (event.target.textContent.trim() === trigger.clickValue) {
                     showSurvey(surveyList)
@@ -941,15 +936,7 @@
                   }
                 }
                 parentElement.addEventListener('click', eventListener)
-                if (typeof window !== 'undefined') {
-                  // 클라이언트 측에서만 속성 추가
-                  requestAnimationFrame(() => {
-                    parentElement.setAttribute(
-                      'data-external-survey-trigger',
-                      'true',
-                    )
-                  })
-                }
+                parentElement.setAttribute('data-survey-trigger-set', 'true')
                 cleanupFunctions.set(parentElement, () =>
                   parentElement.removeEventListener('click', eventListener),
                 )
