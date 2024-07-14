@@ -909,11 +909,11 @@
           const escapedSelector = escapeClassName(trigger.clickValue)
           if (
             element.matches(escapedSelector) &&
-            !element.hasAttribute('data-survey-trigger-set')
+            !element.hasAttribute('data-external-survey-trigger')
           ) {
             const clickHandler = () => showSurvey(surveyList)
             element.addEventListener('click', clickHandler)
-            element.setAttribute('data-survey-trigger-set', 'true')
+            element.setAttribute('data-external-survey-trigger', 'true')
             console.log(`Click trigger set for ${trigger.clickValue}`)
             cleanupFunctions.set(element, () =>
               element.removeEventListener('click', clickHandler),
@@ -924,7 +924,7 @@
           textNodes.forEach((textNode) => {
             if (textNode.textContent.trim() === trigger.clickValue) {
               const parentElement = textNode.parentElement
-              if (!parentElement.hasAttribute('data-survey-trigger-set')) {
+              if (!parentElement.hasAttribute('data-external-survey-trigger')) {
                 const eventListener = (event) => {
                   if (event.target.textContent.trim() === trigger.clickValue) {
                     showSurvey(surveyList)
@@ -936,7 +936,10 @@
                   }
                 }
                 parentElement.addEventListener('click', eventListener)
-                parentElement.setAttribute('data-survey-trigger-set', 'true')
+                parentElement.setAttribute(
+                  'data-external-survey-trigger',
+                  'true',
+                )
                 cleanupFunctions.set(parentElement, () =>
                   parentElement.removeEventListener('click', eventListener),
                 )
