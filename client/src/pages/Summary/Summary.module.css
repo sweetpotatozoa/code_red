@@ -36,6 +36,7 @@
   font-weight: bold;
   background-color: #f9fafc;
   border-right: 8px solid #9a4dff;
+  cursor: pointer;
 }
 
 .user {

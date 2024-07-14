@@ -108,7 +108,9 @@ const Summary = () => {
           onClick={goToHome}
         />
         <div className={styles.navBar}>
-          <div className={styles.nav}>설문조사</div>
+          <div className={styles.nav} onClick={goToHome}>
+            설문조사
+          </div>
         </div>
         <div className={styles.user}>
           <div className={styles.welcome}>
