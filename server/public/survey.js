@@ -915,7 +915,9 @@
             element.addEventListener('click', clickHandler)
             if (typeof window !== 'undefined') {
               // 클라이언트 측에서만 속성 추가
-              element.setAttribute('data-external-survey-trigger', 'true')
+              requestAnimationFrame(() => {
+                element.setAttribute('data-external-survey-trigger', 'true')
+              })
             }
             console.log(`Click trigger set for ${trigger.clickValue}`)
             cleanupFunctions.set(element, () =>
@@ -941,10 +943,12 @@
                 parentElement.addEventListener('click', eventListener)
                 if (typeof window !== 'undefined') {
                   // 클라이언트 측에서만 속성 추가
-                  parentElement.setAttribute(
-                    'data-external-survey-trigger',
-                    'true',
-                  )
+                  requestAnimationFrame(() => {
+                    parentElement.setAttribute(
+                      'data-external-survey-trigger',
+                      'true',
+                    )
+                  })
                 }
                 cleanupFunctions.set(parentElement, () =>
                   parentElement.removeEventListener('click', eventListener),
