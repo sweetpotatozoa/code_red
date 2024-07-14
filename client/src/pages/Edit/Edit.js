@@ -1,12 +1,12 @@
+import { useState, useEffect, useCallback } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import usePrompt from '../../utils/usePrompt'
+import BackendApis from '../../utils/backendApis'
 import styles from './Edit.module.css'
 import Surveys from '../../components/Surveys/Surveys'
 import Triggers from '../../components/Triggers/Triggers'
 import Delay from '../../components/Delay/Delay'
 import SurveyPreview from '../../components/Surveys/SurveyPreview'
-import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import BackendApis from '../../utils/backendApis'
-import { set } from 'date-fns'
 
 const Edit = () => {
   const { id } = useParams()
@@ -18,6 +18,9 @@ const Edit = () => {
   const [mode, setMode] = useState('surveys')
   const [currentStepId, setCurrentStepId] = useState(null)
   const [showPreviewContainer, setShowPreviewContainer] = useState(true)
+
+  const message =
+    '저장하지 않은 내용은 사라질 수 있습니다. 정말 나가시겠습니까?'
 
   useEffect(() => {
     const fetchSurvey = async () => {
@@ -67,7 +70,9 @@ const Edit = () => {
   }
 
   const goBack = () => {
-    navigate('/')
+    if (window.confirm(message)) {
+      navigate('/')
+    }
   }
 
   const handleSave = async () => {
@@ -160,6 +165,23 @@ const Edit = () => {
       setShowPreviewContainer(true)
     }
   }
+
+  const handleBeforeUnload = useCallback(
+    (event) => {
+      event.preventDefault()
+      event.returnValue = message
+    },
+    [message],
+  )
+
+  usePrompt(message, true)
+
+  useEffect(() => {
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [handleBeforeUnload])
 
   return (
     <div className={styles.container}>
