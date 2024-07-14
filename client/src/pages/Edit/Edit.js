@@ -85,7 +85,7 @@ const Edit = () => {
       alert('설문조사에 트리거를 추가해주세요.')
       return
     }
-    if (!survey.delays) {
+    if (!survey.delay) {
       alert('설문조사에 발동주기를 추가해주세요.')
       return
     }
@@ -114,13 +114,14 @@ const Edit = () => {
       alert('설문조사에 트리거를 추가해주세요.')
       return
     }
-    if (!survey.delays) {
+    if (!survey.delay) {
       alert('설문조사에 발동주기를 추가해주세요.')
       return
     }
 
     try {
       await BackendApis.deploySurvey(id, survey)
+      setSurvey({ ...survey, isDeploy: true })
       alert('설문조사가 성공적으로 배포되었습니다.')
     } catch (err) {
       alert('설문조사 배포에 실패했습니다.')
@@ -174,7 +175,7 @@ const Edit = () => {
             저장하기
           </div>
           <div className={styles.bigButtonBlack} onClick={handleDeploy}>
-            배포하기
+            게시하기
           </div>
         </div>
       </div>
