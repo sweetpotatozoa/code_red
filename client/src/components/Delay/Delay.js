@@ -165,6 +165,15 @@ const Delays = ({ survey, setSurvey }) => {
                 초
               </label>
             </div>
+            <div className={styles.explainTitle} style={{ marginTop: '16px' }}>
+              * 발동주기 설정이란?
+            </div>
+            <div className={styles.explainContent}>
+              설문조사가 지나치게 자주 뜨는 것을 방지하기 위해 설정합니다.
+              <br />
+              예를 들어, 발동주기 유형이 "항상"이어도 발동주기 설정을 1일로 하면
+              하루에 1번만 뜹니다.
+            </div>
           </>
         )}
       </div>
