@@ -6,7 +6,6 @@
   let currentStep = 0
   let surveyResponseId = null
   let surveyResponses = []
-  let activeSurveys = new Set()
   let surveys = []
   const triggeredElements = new WeakMap()
 
@@ -125,7 +124,7 @@
           },
           body: JSON.stringify({
             answers,
-            completeAt: isComplete ? new Date().toISOString() : null,
+            completeAt: isComplete ? new Date() : null,
             isComplete,
           }),
         },
@@ -989,11 +988,6 @@
         )
       })
       .join('')
-  }
-
-  function checkConnection() {
-    console.log('Survey script is successfully connected')
-    alert('설문조사 스크립트가 성공적으로 연결되었습니다!')
   }
 
   // 초기화 함수 - 초기화 함수로, 고객 ID를 추출하고 설문조사 데이터를 가져온 후 트리거를 설정합니다.
