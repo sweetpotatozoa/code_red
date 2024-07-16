@@ -121,13 +121,14 @@ const Connecting = ({ setCurrentStep, setOnboardingInfo }) => {
       <div className={styles.contents}>
         <div className={styles.waiting}>{getStatusMessage()}</div>
         <div className={styles.info}>
-          아래 스크립트를 여러분의 서비스 <b>html</b> 코드 안에 있는
-          <b>&lt;head&gt;</b> 코드에 넣어주세요.
+          아래 스크립트를 여러분의 웹사이트 <b>HTML</b> 파일의{' '}
+          <b>&lt;head&gt;</b> 태그 내부에 삽입해주세요.
         </div>
         <div className={styles.info}>
-          삽입이 완료되었다면 고객님의 웹사이트 주소 뒤에 #checkConnection을
-          붙여 접속해주세요. <br /> ex) www.yoursite.com/#checkConnection
+          삽입이 완료되었다면 고객님의 웹사이트 주소 뒤에{' '}
+          <b>#checkConnection</b>을 붙여 접속해주세요. <br />
         </div>
+        <div className={styles.info}>ex) www.yoursite.com/#checkConnection</div>
         {!loading && (
           <SyntaxHighlighter language='javascript' style={prism}>
             {scriptCode}
