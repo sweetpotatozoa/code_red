@@ -124,7 +124,7 @@
           },
           body: JSON.stringify({
             answers,
-            completeAt: isComplete ? new Date().toISOString() : null,
+            completeAt: isComplete ? new Date() : null,
             isComplete,
           }),
         },

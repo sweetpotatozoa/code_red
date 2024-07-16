@@ -119,7 +119,7 @@ class SurveysRepo {
 
   // 설문조사 업데이트
   async updateSurvey(surveyId, surveyData) {
-    const currentDate = new Date().toISOString()
+    const currentDate = new Date()
     const { _id, ...updateData } = surveyData // _id 필드 제거
     const result = await this.collection.findOneAndUpdate(
       { _id: new ObjectId(surveyId) },
