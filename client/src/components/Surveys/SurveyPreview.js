@@ -8,7 +8,6 @@ const SurveyPreview = ({
   showContainer,
   setShowContainer,
 }) => {
-  const [isTransitioning, setIsTransitioning] = useState(false)
   const [selectedOptions, setSelectedOptions] = useState([])
   const [survey, setSurvey] = useState(selectedTemplate)
 
@@ -24,7 +23,6 @@ const SurveyPreview = ({
         currentStep.type === 'welcome' &&
         !currentStep.isActive
       ) {
-        // welcome 타입이고 isActive가 false일 때 다음 스텝으로 자동 이동
         handleNextStep()
       }
     }
@@ -43,14 +41,13 @@ const SurveyPreview = ({
           return [...prevOptions, option]
         }
       } else {
-        // SingleChoice, rating의 경우 항상 하나의 옵션만 선택
         return [option]
       }
     })
   }
 
   const handleNextStep = () => {
-    if (survey && !isTransitioning) {
+    if (survey) {
       const currentStepIndex = survey.steps.findIndex(
         (step) => step.id === currentStepId,
       )
@@ -58,7 +55,7 @@ const SurveyPreview = ({
 
       if (!currentStepData) return
 
-      let nextStepId
+      let nextStepId = ''
 
       if (
         (currentStepData.type === 'singleChoice' ||
@@ -73,32 +70,24 @@ const SurveyPreview = ({
       }
 
       if (nextStepId === '') {
-        // 다음 인덱스의 스텝으로 이동
         const nextStepIndex = currentStepIndex + 1
         if (nextStepIndex < survey.steps.length) {
           nextStepId = survey.steps[nextStepIndex].id
         } else {
-          // 마지막 스텝인 경우 설문 종료
           setShowContainer(false)
           return
         }
       }
 
-      // nextStepId가 빈 문자열이 아닌 경우에만 다음 스텝으로 이동
       if (nextStepId !== '') {
-        setIsTransitioning(true)
-        setTimeout(() => {
-          setCurrentStepId(nextStepId)
-          setSelectedOptions([])
-          setIsTransitioning(false)
-        }, 400)
+        setCurrentStepId(nextStepId)
+        setSelectedOptions([])
       } else {
         setShowContainer(false)
       }
     }
   }
 
-  // 상단 닫기 버튼 랜더링
   const renderCloseButton = () => {
     return (
       <div
@@ -268,16 +257,12 @@ const SurveyPreview = ({
       )
     } else if (step.type === 'link') {
       const handleLinkClick = () => {
-        // URL이 프로토콜을 포함하고 있지 않다면 추가
         const url =
           step.url.startsWith('http://') || step.url.startsWith('https://')
             ? step.url
             : `https://${step.url}`
 
-        // 새 창에서 URL 열기
         window.open(url, '_blank', 'noopener,noreferrer')
-
-        // 다음 스텝으로 이동
         handleNextStep()
       }
 
@@ -299,16 +284,7 @@ const SurveyPreview = ({
     if (!step) return null
 
     return (
-      <div
-        key={step.id}
-        className={`${styles.container} ${
-          step.id === currentStepId
-            ? isTransitioning
-              ? styles.exit
-              : styles.current
-            : styles.next
-        }`}
-      >
+      <div key={step.id} className={styles.container}>
         {renderCloseButton()}
         <div className={styles.step}>
           {renderStepContent(step)}
@@ -341,7 +317,6 @@ const SurveyPreview = ({
 
   const currentStep = survey.steps.find((step) => step.id === currentStepId)
 
-  // welcome 타입이고 isActive가 false인 경우 다음 스텝을 찾음
   let displayStep = currentStep
   if (currentStep?.type === 'welcome' && !currentStep?.isActive) {
     displayStep = survey.steps.find(
@@ -349,15 +324,9 @@ const SurveyPreview = ({
     )
   }
 
-  const nextStepId = displayStep?.nextStepId
-  const nextStep = nextStepId
-    ? survey.steps.find((step) => step.id === nextStepId)
-    : null
-
   return (
     <div className={styles.previewContainer}>
       {displayStep && renderContainer(displayStep)}
-      {nextStep && renderContainer(nextStep)}
     </div>
   )
 }
