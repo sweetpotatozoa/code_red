@@ -1,16 +1,23 @@
 import styles from './EditingQuestion.module.css'
 import { useState } from 'react'
 
-const EditingThank = ({ step, onSave, onCancel }) => {
+const EditingThank = ({ step, updateStep }) => {
+  // 로컬 상태 설정
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
 
-  const handleSave = () => {
-    if (title.trim() === '') {
-      alert('제목을 입력해주세요.')
-      return
-    }
-    onSave({ ...step, title, description })
+  // 제목 변경 시 상태 업데이트
+  const handleTitleChange = (e) => {
+    const newTitle = e.target.value
+    setTitle(newTitle)
+    updateStep({ ...step, title: newTitle })
+  }
+
+  // 설명 변경 시 상태 업데이트
+  const handleDescriptionChange = (e) => {
+    const newDescription = e.target.value
+    setDescription(newDescription)
+    updateStep({ ...step, description: newDescription })
   }
 
   return (
@@ -20,7 +27,7 @@ const EditingThank = ({ step, onSave, onCancel }) => {
         className={styles.input}
         type='text'
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={handleTitleChange}
         placeholder='질문을 입력하세요.'
       />
       <div className={styles.title}>설명</div>
@@ -28,17 +35,9 @@ const EditingThank = ({ step, onSave, onCancel }) => {
         className={styles.input}
         type='text'
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        onChange={handleDescriptionChange}
         placeholder='설명 (선택사항)'
       />
-      <div className={styles.bottom}>
-        <div className={styles.leftBtn} onClick={onCancel}>
-          취소
-        </div>
-        <div onClick={handleSave} className={styles.button}>
-          저장
-        </div>
-      </div>
     </div>
   )
 }

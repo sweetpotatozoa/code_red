@@ -18,6 +18,20 @@ const Edit = () => {
   const [mode, setMode] = useState('surveys')
   const [currentStepId, setCurrentStepId] = useState(null)
   const [showPreviewContainer, setShowPreviewContainer] = useState(true)
+  const [editingStepId, setEditingStepId] = useState(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (editingStepId && !event.target.closest(`.${styles.editing}`)) {
+        setEditingStepId(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [editingStepId])
 
   const message =
     '저장하지 않은 내용은 사라질 수 있습니다. 정말 나가시겠습니까?'
@@ -148,6 +162,8 @@ const Edit = () => {
             setSurvey={setSurvey}
             invalidSteps={invalidSteps}
             setInvalidSteps={setInvalidSteps}
+            editingStepId={editingStepId}
+            setEditingStepId={setEditingStepId}
           />
         )
       case 'triggers':
