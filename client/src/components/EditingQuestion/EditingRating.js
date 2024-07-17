@@ -2,7 +2,8 @@ import styles from './EditingQuestion.module.css'
 import { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
+const EditingRating = ({ step, updateStep, steps, showWarning }) => {
+  // 로컬 상태 설정
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
   const [options, setOptions] = useState(() => {
@@ -18,33 +19,41 @@ const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
           nextStepId: '',
         }))
   })
-  const [localShowWarning, setLocalShowWarning] = useState(showWarning)
 
-  useEffect(() => {
-    setLocalShowWarning(showWarning)
-  }, [showWarning])
-
-  const handleSave = () => {
-    if (title.trim() === '') {
-      alert('제목을 입력해주세요.')
-      return
-    }
-    // 모든 옵션 정보를 저장 (nextStepId 포함)
-    onSave({
-      ...step,
-      title,
-      description,
-      options,
-    })
+  // 제목 변경 시 상태 업데이트
+  const handleTitleChange = (e) => {
+    const newTitle = e.target.value
+    setTitle(newTitle)
+    updateStep({ ...step, title: newTitle })
   }
 
-  const nextStepHandler = (optionId, nextStepId) => {
-    setOptions(
-      options.map((option) =>
-        option.id === optionId ? { ...option, nextStepId } : option,
-      ),
+  // 설명 변경 시 상태 업데이트
+  const handleDescriptionChange = (e) => {
+    const newDescription = e.target.value
+    setDescription(newDescription)
+    updateStep({ ...step, description: newDescription })
+  }
+
+  // 다음 스텝 변경 시 상태 업데이트
+  const handleNextStepChange = (optionId, nextStepId) => {
+    const newOptions = options.map((option) =>
+      option.id === optionId ? { ...option, nextStepId } : option,
     )
+    setOptions(newOptions)
+    updateStep({ ...step, options: newOptions })
   }
+
+  // nextStepId 변경 시 유효성 검사 업데이트
+  useEffect(() => {
+    options.forEach((option) => {
+      if (
+        option.nextStepId !== '' &&
+        !steps.some((s) => s.id === option.nextStepId)
+      ) {
+        updateStep({ ...step, options })
+      }
+    })
+  }, [options, steps, step, updateStep])
 
   return (
     <div>
@@ -53,7 +62,7 @@ const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
         className={styles.input}
         type='text'
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={handleTitleChange}
         placeholder='질문을 입력하세요.'
       />
       <div className={styles.title}>설명</div>
@@ -61,7 +70,7 @@ const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
         className={styles.input}
         type='text'
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        onChange={handleDescriptionChange}
         placeholder='설명 (선택사항)'
       />
       <div className={styles.title}>
@@ -75,7 +84,7 @@ const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
           <select
             className={styles.action}
             value={option.nextStepId}
-            onChange={(e) => nextStepHandler(option.id, e.target.value)}
+            onChange={(e) => handleNextStepChange(option.id, e.target.value)}
           >
             <option value=''>다음 질문으로 이동</option>
             {steps.map((q) => (
@@ -90,19 +99,11 @@ const EditingRating = ({ step, onSave, onCancel, steps, showWarning }) => {
           </select>
         </div>
       ))}
-      {localShowWarning && (
+      {showWarning && (
         <div className={styles.warningBubble}>
           참조하고 있던 스텝이 삭제되어 변경이 필요합니다.
         </div>
       )}
-      <div className={styles.bottom}>
-        <div className={styles.leftBtn} onClick={onCancel}>
-          취소
-        </div>
-        <div onClick={handleSave} className={styles.button}>
-          저장
-        </div>
-      </div>
     </div>
   )
 }

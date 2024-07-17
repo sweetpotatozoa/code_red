@@ -10,11 +10,18 @@ import EditingInfo from '../EditingQuestion/EditingInfo'
 import EditingWelcome from '../EditingQuestion/EditingWelcome'
 import EditingThank from '../EditingQuestion/EditingThank'
 
-const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
+const Surveys = ({
+  survey,
+  setSurvey,
+  invalidSteps,
+  setInvalidSteps,
+  editingStepId,
+  setEditingStepId,
+}) => {
   if (!survey || !survey.steps) return null
 
+  // 상태 변수
   const [isAddStep, setIsAddStep] = useState(false)
-  const [editingStepId, setEditingStepId] = useState(null)
   const stepRefs = useRef({})
 
   const stepTypeText = {
@@ -28,6 +35,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
     freeText: '주관식',
   }
 
+  // 주어진 단계 ID로 스크롤
   const scrollToStep = useCallback((stepId) => {
     const stepElement = stepRefs.current[stepId]
     if (stepElement) {
@@ -35,16 +43,19 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
     }
   }, [])
 
+  // 편집 중인 단계가 변경될 때 해당 단계로 스크롤
   useEffect(() => {
     if (editingStepId) {
       scrollToStep(editingStepId)
     }
   }, [editingStepId, scrollToStep])
 
+  // 설문 단계의 유효성을 검사
   useEffect(() => {
     validateSteps()
   }, [survey.steps])
 
+  // 설문 단계의 유효성을 확인하고, 잘못된 단계를 invalidSteps에 저장
   const validateSteps = () => {
     const invalid = {}
     survey.steps.forEach((step, index) => {
@@ -68,20 +79,16 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
     setInvalidSteps(invalid)
   }
 
-  const handleSaveStep = (updatedStep) => {
+  // 업데이트된 단계를 저장하고 유효성을 재검사
+  const updateStep = (updatedStep) => {
     const updatedSteps = survey.steps.map((step) =>
       step.id === updatedStep.id ? updatedStep : step,
     )
     setSurvey({ ...survey, steps: updatedSteps })
     validateSteps()
-    const nextInvalidStepId = Object.keys(invalidSteps)[0]
-    if (nextInvalidStepId) {
-      setEditingStepId(nextInvalidStepId)
-    } else {
-      setEditingStepId(null)
-    }
   }
 
+  // 주어진 ID의 단계를 삭제
   const deleteHandler = (id) => {
     const stepToDelete = survey.steps.find((step) => step.id === id)
     if (stepToDelete.type === 'welcome' || stepToDelete.type === 'thank') {
@@ -118,6 +125,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
     }
   }
 
+  // 새로운 단계를 추가
   const addStepHandler = (type) => {
     const newStep = {
       id: uuidv4(),
@@ -151,6 +159,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
     setTimeout(() => scrollToStep(newStep.id), 100)
   }
 
+  // 단계 추가 모달 창을 렌더링
   const AddStepModal = () => {
     if (!isAddStep) return null
     const stepTypes = [
@@ -189,6 +198,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
     )
   }
 
+  // 단계의 활성화 상태를 토글
   const toggleHandler = (id) => {
     const updatedSteps = survey.steps.map((step) =>
       step.id === id ? { ...step, isActive: !step.isActive } : step,
@@ -196,19 +206,19 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
     setSurvey({ ...survey, steps: updatedSteps })
   }
 
-  const toggleEditMode = (stepId) => {
+  // 편집 모드를 토글
+  const toggleEditMode = (stepId, event) => {
+    if (event) {
+      event.stopPropagation()
+    }
     if (editingStepId && editingStepId !== stepId) {
       const originalStep = survey.steps.find((q) => q.id === editingStepId)
-      handleSaveStep(originalStep)
+      updateStep(originalStep)
     }
     setEditingStepId(editingStepId === stepId ? null : stepId)
     if (stepId) {
       scrollToStep(stepId)
     }
-  }
-
-  const cancelEdit = () => {
-    setEditingStepId(null)
   }
 
   return (
@@ -237,74 +247,69 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
                   : index}
             </div>
             {editingStepId === step.id ? (
-              <div className={styles.surveyContents}>
+              <div
+                className={styles.surveyContents}
+                onClick={(e) => e.stopPropagation()}
+              >
                 {step.type === 'freeText' && (
                   <EditingFreeText
                     step={step}
-                    onSave={handleSaveStep}
-                    onCancel={cancelEdit}
+                    updateStep={updateStep}
                     steps={survey.steps}
-                    showWarning={step.id in invalidSteps}
+                    showWarning={step.id in invalidSteps} // 유효성 검사 경고 표시
                   />
                 )}
                 {step.type === 'singleChoice' && (
                   <EditingSingleChoice
                     step={step}
-                    onSave={handleSaveStep}
-                    onCancel={cancelEdit}
+                    updateStep={updateStep}
                     steps={survey.steps}
-                    showWarning={step.id in invalidSteps}
+                    showWarning={step.id in invalidSteps} // 유효성 검사 경고 표시
                   />
                 )}
                 {step.type === 'multipleChoice' && (
                   <EditingMultipleChoice
                     step={step}
-                    onSave={handleSaveStep}
-                    onCancel={cancelEdit}
+                    updateStep={updateStep}
                     steps={survey.steps}
-                    showWarning={step.id in invalidSteps}
+                    showWarning={step.id in invalidSteps} // 유효성 검사 경고 표시
                   />
                 )}
                 {step.type === 'rating' && (
                   <EditingRating
                     step={step}
-                    onSave={handleSaveStep}
-                    onCancel={cancelEdit}
+                    updateStep={updateStep}
                     steps={survey.steps}
-                    showWarning={step.id in invalidSteps}
+                    showWarning={step.id in invalidSteps} // 유효성 검사 경고 표시
                   />
                 )}
                 {step.type === 'link' && (
                   <EditingLink
                     step={step}
-                    onSave={handleSaveStep}
-                    onCancel={cancelEdit}
+                    updateStep={updateStep}
                     steps={survey.steps}
-                    showWarning={step.id in invalidSteps}
+                    showWarning={step.id in invalidSteps} // 유효성 검사 경고 표시
                   />
                 )}
                 {step.type === 'info' && (
                   <EditingInfo
                     step={step}
-                    onSave={handleSaveStep}
-                    onCancel={cancelEdit}
+                    updateStep={updateStep}
                     steps={survey.steps}
-                    showWarning={step.id in invalidSteps}
+                    showWarning={step.id in invalidSteps} // 유효성 검사 경고 표시
                   />
                 )}
                 {step.type === 'welcome' && (
                   <EditingWelcome
                     step={step}
-                    onSave={handleSaveStep}
-                    onCancel={cancelEdit}
+                    updateStep={updateStep}
                     steps={survey.steps}
                   />
                 )}
                 {step.type === 'thank' && (
                   <EditingThank
                     step={step}
-                    onSave={handleSaveStep}
-                    onCancel={cancelEdit}
+                    updateStep={updateStep}
                     steps={survey.steps}
                   />
                 )}
@@ -312,7 +317,7 @@ const Surveys = ({ survey, setSurvey, invalidSteps, setInvalidSteps }) => {
             ) : (
               <div
                 className={styles.surveyContents}
-                onClick={() => toggleEditMode(step.id)}
+                onClick={(e) => toggleEditMode(step.id, e)}
               >
                 <div className={styles.surveyStep}>{step.title}</div>
                 <div className={styles.stepType}>{stepTypeText[step.type]}</div>

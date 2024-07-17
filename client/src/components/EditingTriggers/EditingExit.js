@@ -1,51 +1,63 @@
 import styles from './EditingTriggers.module.css'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
-const EditingExit = ({
-  trigger,
-  TriggerEditCancel,
-  survey,
-  setSurvey,
-  setEditingTriggerId,
-}) => {
+const EditingExit = ({ trigger, updateTrigger, setEditingTriggerId }) => {
+  // 로컬 상태 설정
   const [title, setTitle] = useState(trigger.title)
   const [description, setDescription] = useState(trigger.description || '')
   const [pageType, setPageType] = useState(trigger.pageType)
   const [pageValue, setPageValue] = useState(trigger.pageValue || '')
 
-  // 트리거 저장 핸들러
-  const saveTrigger = () => {
-    if (!title) {
-      alert('제목을 입력해주세요!')
-      return
-    }
-    if (pageType === 'specific' && !pageValue) {
-      alert('페이지 URL을 입력해주세요!')
-      return
-    }
-
-    const updatedTrigger = {
-      ...trigger,
-      title: title,
-      description: description,
-      pageType: pageType,
-      pageValue: pageValue,
-    }
-    const updatedTriggers = survey.triggers.map((t) =>
-      t.id === updatedTrigger.id ? updatedTrigger : t,
-    )
-    const updatedSurvey = { ...survey, triggers: updatedTriggers }
-    setSurvey(updatedSurvey)
-    setEditingTriggerId(null)
+  // 제목 변경 시 상태 업데이트
+  const handleTitleChange = (e) => {
+    const newTitle = e.target.value
+    setTitle(newTitle)
+    updateTrigger({ ...trigger, title: newTitle })
   }
 
+  // 설명 변경 시 상태 업데이트
+  const handleDescriptionChange = (e) => {
+    const newDescription = e.target.value
+    setDescription(newDescription)
+    updateTrigger({ ...trigger, description: newDescription })
+  }
+
+  // 페이지 타입 변경 시 상태 업데이트
+  const handlePageTypeChange = (newPageType) => {
+    setPageType(newPageType)
+    updateTrigger({ ...trigger, pageType: newPageType })
+  }
+
+  // 페이지 값 변경 시 상태 업데이트
+  const handlePageValueChange = (e) => {
+    const newPageValue = e.target.value
+    setPageValue(newPageValue)
+    updateTrigger({ ...trigger, pageValue: newPageValue })
+  }
+
+  // 외부 클릭을 감지하여 편집 모드를 닫기 위한 레퍼런스 설정
+  const editorRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (editorRef.current && !editorRef.current.contains(event.target)) {
+        setEditingTriggerId(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [setEditingTriggerId])
+
   return (
-    <div>
+    <div ref={editorRef}>
       <div className={styles.title}>제목</div>
       <input
         type='text'
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={handleTitleChange}
         placeholder='질문을 입력하세요.'
         className={styles.input}
       />
@@ -53,7 +65,7 @@ const EditingExit = ({
       <input
         type='text'
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        onChange={handleDescriptionChange}
         placeholder='설명 (선택사항)'
         className={styles.input}
       />
@@ -63,7 +75,7 @@ const EditingExit = ({
           className={`${styles.type} ${
             pageType === 'all' ? styles.selected : ''
           }`}
-          onClick={() => setPageType('all')}
+          onClick={() => handlePageTypeChange('all')}
         >
           모든 페이지
         </div>
@@ -71,7 +83,7 @@ const EditingExit = ({
           className={`${styles.type} ${
             pageType === 'specific' ? styles.selected : ''
           }`}
-          onClick={() => setPageType('specific')}
+          onClick={() => handlePageTypeChange('specific')}
         >
           특정 페이지
         </div>
@@ -83,19 +95,11 @@ const EditingExit = ({
             className={styles.input}
             type='text'
             value={pageValue}
-            onChange={(e) => setPageValue(e.target.value)}
+            onChange={handlePageValueChange}
             placeholder='특정 페이지 URL을 입력하세요.'
           />
         </>
       )}
-      <div className={styles.bottom}>
-        <div className={styles.leftBtn} onClick={TriggerEditCancel}>
-          취소
-        </div>
-        <div className={styles.button} onClick={saveTrigger}>
-          저장
-        </div>
-      </div>
     </div>
   )
 }
