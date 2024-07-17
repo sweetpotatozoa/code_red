@@ -142,7 +142,7 @@ const TemplatePreview = ({
             <div className={styles.title}>{step.title}</div>
             <div className={styles.description}>{step.description}</div>
             <div className={styles.inputContainer}>
-              <textarea placeholder='Enter text' className={styles.typingBox} />
+              <textarea className={styles.typingBox} />
             </div>
           </>
         )
@@ -312,7 +312,7 @@ const TemplatePreview = ({
           <div className={styles.buttonContainer}>{renderButton(step)}</div>
           <div className={styles.footer}>
             <div className={styles.waterMark}>
-              powered by <span className={styles.logo}>CatchTalk</span>
+              Powered by <span className={styles.logo}>CatchTalk</span>
             </div>
             <div className={styles.backgroundBar}>
               <div

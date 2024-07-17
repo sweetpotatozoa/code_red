@@ -134,14 +134,25 @@ const Surveys = ({
       type: type,
     }
 
-    if (['singleChoice', 'multipleChoice', 'rating'].includes(type)) {
+    if (['singleChoice', 'rating'].includes(type)) {
       newStep.options = [
-        { id: uuidv4(), value: '옵션1' },
-        { id: uuidv4(), value: '옵션2' },
-        { id: uuidv4(), value: '옵션3' },
-        { id: uuidv4(), value: '옵션4' },
-        { id: uuidv4(), value: '옵션5' },
+        { id: uuidv4(), value: '옵션1', nextStepId: '' },
+        { id: uuidv4(), value: '옵션2', nextStepId: '' },
+        { id: uuidv4(), value: '옵션3', nextStepId: '' },
+        { id: uuidv4(), value: '옵션4', nextStepId: '' },
+        { id: uuidv4(), value: '옵션5', nextStepId: '' },
       ]
+    } else if (['multipleChoice', 'link', 'info', 'freeText'].includes(type)) {
+      newStep.nextStepId = '' // 기본적으로 빈 문자열 설정
+      if (type === 'multipleChoice') {
+        newStep.options = [
+          { id: uuidv4(), value: '옵션1' },
+          { id: uuidv4(), value: '옵션2' },
+          { id: uuidv4(), value: '옵션3' },
+          { id: uuidv4(), value: '옵션4' },
+          { id: uuidv4(), value: '옵션5' },
+        ]
+      }
     }
 
     const updatedSteps = [...survey.steps]
