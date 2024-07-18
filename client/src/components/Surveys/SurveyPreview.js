@@ -118,7 +118,7 @@ const SurveyPreview = ({
             <div className={styles.title}>{step.title}</div>
             <div className={styles.description}>{step.description}</div>
             <div className={styles.inputContainer}>
-              <textarea placeholder='Enter text' className={styles.typingBox} />
+              <textarea className={styles.typingBox} />
             </div>
           </>
         )
