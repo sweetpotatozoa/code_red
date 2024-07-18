@@ -82,71 +82,68 @@ const Triggers = ({ survey, setSurvey }) => {
       <div className={styles.triggerList}>
         {survey.triggers &&
           survey.triggers.map((trigger) => (
-            <div key={trigger.id} className={styles.triggerWrapper}>
-              <div
-                className={`${styles.trigger} ${
-                  editingTriggerId === trigger.id ? styles.editing : ''
-                }`}
-                ref={(el) => (triggerRefs.current[trigger.id] = el)}
-              >
-                {editingTriggerId === trigger.id ? (
-                  <div
-                    className={styles.triggerContent}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {trigger.type === 'firstVisit' && (
-                      <EditingFirstVisit
-                        trigger={trigger}
-                        updateTrigger={updateTrigger}
-                        setEditingTriggerId={setEditingTriggerId} // 전달
-                      />
-                    )}
-                    {trigger.type === 'url' && (
-                      <EditingUrl
-                        trigger={trigger}
-                        updateTrigger={updateTrigger}
-                        setEditingTriggerId={setEditingTriggerId} // 전달
-                      />
-                    )}
-                    {trigger.type === 'click' && (
-                      <EditingClick
-                        trigger={trigger}
-                        updateTrigger={updateTrigger}
-                        setEditingTriggerId={setEditingTriggerId} // 전달
-                      />
-                    )}
-                    {trigger.type === 'exit' && (
-                      <EditingExit
-                        trigger={trigger}
-                        updateTrigger={updateTrigger}
-                        setEditingTriggerId={setEditingTriggerId} // 전달
-                      />
-                    )}
-                    {trigger.type === 'scroll' && (
-                      <EditingScroll
-                        trigger={trigger}
-                        updateTrigger={updateTrigger}
-                        setEditingTriggerId={setEditingTriggerId} // 전달
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <div
-                    className={styles.triggerContent}
-                    onClick={(e) => toggleEditMode(trigger.id, e)}
-                  >
-                    <div className={styles.triggerTitle}>{trigger.title}</div>
-                    <div className={styles.triggerDescription}>
-                      {getTriggerTypeInKorean(trigger.type)}
-                    </div>
-                  </div>
-                )}
+            <div
+              key={trigger.id}
+              className={styles.trigger}
+              ref={(el) => (triggerRefs.current[trigger.id] = el)}
+            >
+              {editingTriggerId === trigger.id ? (
                 <div
-                  className={styles.triggerDelete}
-                  onClick={(e) => deleteTriggerHandler(trigger.id, e)}
+                  className={styles.triggerContent}
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  삭제
+                  {trigger.type === 'firstVisit' && (
+                    <EditingFirstVisit
+                      trigger={trigger}
+                      updateTrigger={updateTrigger}
+                      setEditingTriggerId={setEditingTriggerId} // 전달
+                    />
+                  )}
+                  {trigger.type === 'url' && (
+                    <EditingUrl
+                      trigger={trigger}
+                      updateTrigger={updateTrigger}
+                      setEditingTriggerId={setEditingTriggerId} // 전달
+                    />
+                  )}
+                  {trigger.type === 'click' && (
+                    <EditingClick
+                      trigger={trigger}
+                      updateTrigger={updateTrigger}
+                      setEditingTriggerId={setEditingTriggerId} // 전달
+                    />
+                  )}
+                  {trigger.type === 'exit' && (
+                    <EditingExit
+                      trigger={trigger}
+                      updateTrigger={updateTrigger}
+                      setEditingTriggerId={setEditingTriggerId} // 전달
+                    />
+                  )}
+                  {trigger.type === 'scroll' && (
+                    <EditingScroll
+                      trigger={trigger}
+                      updateTrigger={updateTrigger}
+                      setEditingTriggerId={setEditingTriggerId} // 전달
+                    />
+                  )}
                 </div>
+              ) : (
+                <div
+                  className={styles.triggerContent}
+                  onClick={(e) => toggleEditMode(trigger.id, e)}
+                >
+                  <div className={styles.triggerTitle}>{trigger.title}</div>
+                  <div className={styles.triggerDescription}>
+                    {getTriggerTypeInKorean(trigger.type)}
+                  </div>
+                </div>
+              )}
+              <div
+                className={styles.triggerDelete}
+                onClick={(e) => deleteTriggerHandler(trigger.id, e)}
+              >
+                삭제
               </div>
             </div>
           ))}

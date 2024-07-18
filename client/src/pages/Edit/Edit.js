@@ -21,6 +21,7 @@ const Edit = () => {
   const [editingStepId, setEditingStepId] = useState(null)
 
   useEffect(() => {
+    // 외부 클릭 핸들러를 설정하여 편집 상태를 해제
     const handleClickOutside = (event) => {
       if (editingStepId && !event.target.closest(`.${styles.editing}`)) {
         setEditingStepId(null)
@@ -37,6 +38,7 @@ const Edit = () => {
     '저장하지 않은 내용은 사라질 수 있습니다. 정말 나가시겠습니까?'
 
   useEffect(() => {
+    // 설문조사 데이터를 불러오는 함수
     const fetchSurvey = async () => {
       try {
         const data = await BackendApis.editSurvey(id)
@@ -55,11 +57,13 @@ const Edit = () => {
   }, [id])
 
   useEffect(() => {
+    // survey 상태가 변경될 때마다 validateSteps 함수 실행
     if (survey) {
       validateSteps()
     }
   }, [survey])
 
+  // 스텝 유효성 검사 함수
   const validateSteps = () => {
     const invalid = {}
     survey.steps.forEach((step, index) => {
