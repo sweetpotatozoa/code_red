@@ -283,6 +283,11 @@ const SurveyPreview = ({
   const renderContainer = (step) => {
     if (!step) return null
 
+    // welcome 또는 thank 스텝이 비활성 상태인 경우 null 반환
+    if ((step.type === 'welcome' || step.type === 'thank') && !step.isActive) {
+      return null
+    }
+
     return (
       <div key={step.id} className={styles.container}>
         {renderCloseButton()}
@@ -311,22 +316,47 @@ const SurveyPreview = ({
     )
   }
 
-  if (!survey || !survey.steps || !currentStepId || !showContainer) {
+  // 유효한 스텝이 있는지 확인하는 함수
+  const hasValidStep = (steps) => {
+    return steps.some((step) => {
+      if (step.type === 'welcome' || step.type === 'thank') {
+        return step.isActive
+      }
+      return true
+    })
+  }
+
+  if (
+    !survey ||
+    !survey.steps ||
+    !currentStepId ||
+    !showContainer ||
+    !hasValidStep(survey.steps)
+  ) {
     return null
   }
 
-  const currentStep = survey.steps.find((step) => step.id === currentStepId)
+  let displayStep = survey.steps.find((step) => step.id === currentStepId)
 
-  let displayStep = currentStep
-  if (currentStep?.type === 'welcome' && !currentStep?.isActive) {
+  // welcome 스텝이 비활성이면 다음 유효한 스텝 찾기
+  while (
+    displayStep &&
+    (displayStep.type === 'welcome' || displayStep.type === 'thank') &&
+    !displayStep.isActive
+  ) {
     displayStep = survey.steps.find(
-      (step) => step.id === currentStep.nextStepId,
+      (step) => step.id === displayStep.nextStepId,
     )
+  }
+
+  // 유효한 스텝이 없으면 null 반환
+  if (!displayStep) {
+    return null
   }
 
   return (
     <div className={styles.previewContainer}>
-      {displayStep && renderContainer(displayStep)}
+      {renderContainer(displayStep)}
     </div>
   )
 }
