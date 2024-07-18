@@ -1,12 +1,7 @@
 import styles from './EditingTriggers.module.css'
 import { useState, useEffect, useRef } from 'react'
 
-const EditingFirstVisit = ({
-  trigger,
-  updateTrigger,
-  setEditingTriggerId,
-  deleteTriggerHandler,
-}) => {
+const EditingFirstVisit = ({ trigger, updateTrigger, setEditingTriggerId }) => {
   // 로컬 상태 설정
   const [title, setTitle] = useState(trigger.title)
   const [description, setDescription] = useState(trigger.description || '')
@@ -105,12 +100,6 @@ const EditingFirstVisit = ({
           />
         </>
       )}
-      <div
-        className={styles.triggerDelete}
-        onClick={(e) => deleteTriggerHandler(trigger.id, e)}
-      >
-        삭제
-      </div>
     </div>
   )
 }

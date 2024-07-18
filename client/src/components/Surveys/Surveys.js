@@ -20,7 +20,6 @@ const Surveys = ({
 }) => {
   if (!survey || !survey.steps) return null
 
-  // 상태 변수
   const [isAddStep, setIsAddStep] = useState(false)
   const stepRefs = useRef({})
 
@@ -35,7 +34,6 @@ const Surveys = ({
     freeText: '주관식',
   }
 
-  // 주어진 단계 ID로 스크롤
   const scrollToStep = useCallback((stepId) => {
     const stepElement = stepRefs.current[stepId]
     if (stepElement) {
@@ -43,20 +41,13 @@ const Surveys = ({
     }
   }, [])
 
-  // 편집 중인 단계가 변경될 때 해당 단계로 스크롤
   useEffect(() => {
     if (editingStepId) {
       scrollToStep(editingStepId)
     }
   }, [editingStepId, scrollToStep])
 
-  // 설문 단계의 유효성을 검사
-  useEffect(() => {
-    validateSteps()
-  }, [survey.steps])
-
-  // 설문 단계의 유효성을 확인하고, 잘못된 단계를 invalidSteps에 저장
-  const validateSteps = () => {
+  const validateSteps = useCallback(() => {
     const invalid = {}
     survey.steps.forEach((step, index) => {
       if (
@@ -77,18 +68,30 @@ const Surveys = ({
       }
     })
     setInvalidSteps(invalid)
-  }
+    return invalid
+  }, [survey.steps, setInvalidSteps])
 
-  // 업데이트된 단계를 저장하고 유효성을 재검사
+  useEffect(() => {
+    validateSteps()
+  }, [survey.steps, validateSteps])
+
   const updateStep = (updatedStep) => {
     const updatedSteps = survey.steps.map((step) =>
       step.id === updatedStep.id ? updatedStep : step,
     )
     setSurvey({ ...survey, steps: updatedSteps })
-    validateSteps()
+
+    // 유효성 검사 후 첫 번째 유효하지 않은 스텝으로 스크롤 및 편집 모드 설정
+    setTimeout(() => {
+      const invalid = validateSteps()
+      const firstInvalidStepId = Object.keys(invalid)[0]
+      if (firstInvalidStepId) {
+        setEditingStepId(firstInvalidStepId)
+        scrollToStep(firstInvalidStepId)
+      }
+    }, 0)
   }
 
-  // 주어진 ID의 단계를 삭제
   const deleteHandler = (id) => {
     const stepToDelete = survey.steps.find((step) => step.id === id)
     if (stepToDelete.type === 'welcome' || stepToDelete.type === 'thank') {
@@ -118,14 +121,17 @@ const Surveys = ({
 
     setSurvey({ ...survey, steps: updatedSteps })
     setInvalidSteps(invalidSteps)
-    const nextInvalidStepId = Object.keys(invalidSteps)[0]
-    if (nextInvalidStepId) {
-      setEditingStepId(nextInvalidStepId)
-      scrollToStep(nextInvalidStepId)
-    }
+
+    // 유효성 검사 후 첫 번째 유효하지 않은 스텝으로 스크롤 및 편집 모드 설정
+    setTimeout(() => {
+      const firstInvalidStepId = Object.keys(invalidSteps)[0]
+      if (firstInvalidStepId) {
+        setEditingStepId(firstInvalidStepId)
+        scrollToStep(firstInvalidStepId)
+      }
+    }, 0)
   }
 
-  // 새로운 단계를 추가
   const addStepHandler = (type) => {
     const newStep = {
       id: uuidv4(),
@@ -159,7 +165,6 @@ const Surveys = ({
     setTimeout(() => scrollToStep(newStep.id), 100)
   }
 
-  // 단계 추가 모달 창을 렌더링
   const AddStepModal = () => {
     if (!isAddStep) return null
     const stepTypes = [
@@ -198,7 +203,6 @@ const Surveys = ({
     )
   }
 
-  // 단계의 활성화 상태를 토글
   const toggleHandler = (id) => {
     const updatedSteps = survey.steps.map((step) =>
       step.id === id ? { ...step, isActive: !step.isActive } : step,
@@ -206,7 +210,6 @@ const Surveys = ({
     setSurvey({ ...survey, steps: updatedSteps })
   }
 
-  // 편집 모드를 토글
   const toggleEditMode = (stepId, event) => {
     if (event) {
       event.stopPropagation()
