@@ -474,39 +474,94 @@
   }
 
   function generateStepHTML(step, buttonText) {
-    return `
-      <div class="survey-step">
-        <div class="survey-header">
-          <button type="button" id="closeSurvey" class="close-button">
-            <img src="${API_URI}/images/close.svg" alt="close" class="close-icon">
-          </button>
-        </div>
-        <div class="content-wrapper">
-          <div class="text-content">
-            ${step.title ? `<h3 class="survey-title">${step.title}</h3>` : ''}
-            ${
-              step.description
-                ? `<p class="survey-description">${step.description}</p>`
-                : ''
-            }
-          </div>
-          <div class="input-content">
-            ${generateStepContent(step)}
-          </div>
-          ${
-            buttonText
-              ? `<div class="button-container"><button type="button" id="nextStepButton" class="submit-button">${buttonText}</button></div>`
-              : ''
-          }
-        </div>
-        <div class="survey-progress">
-          <p class="powered-by">Powered by <span class="logo">CatchTalk</span></p>
-          <div class="background-bar">
-            <div class="progress-bar"></div>
-          </div>
-        </div>
-      </div>
-    `
+    const surveyStep = document.createElement('div')
+    surveyStep.className = 'survey-step'
+
+    const surveyHeader = document.createElement('div')
+    surveyHeader.className = 'survey-header'
+
+    const closeButton = document.createElement('button')
+    closeButton.type = 'button'
+    closeButton.id = 'closeSurvey'
+    closeButton.className = 'close-button'
+
+    const closeIcon = document.createElement('img')
+    closeIcon.src = `${API_URI}/images/close.svg`
+    closeIcon.alt = 'close'
+    closeIcon.className = 'close-icon'
+
+    closeButton.appendChild(closeIcon)
+    surveyHeader.appendChild(closeButton)
+
+    const contentWrapper = document.createElement('div')
+    contentWrapper.className = 'content-wrapper'
+
+    const textContent = document.createElement('div')
+    textContent.className = 'text-content'
+
+    if (step.title) {
+      const title = document.createElement('h3')
+      title.className = 'survey-title'
+      title.textContent = step.title
+      textContent.appendChild(title)
+    }
+
+    if (step.description) {
+      const description = document.createElement('p')
+      description.className = 'survey-description'
+      description.textContent = step.description
+      textContent.appendChild(description)
+    }
+
+    const inputContent = document.createElement('div')
+    inputContent.className = 'input-content'
+    inputContent.appendChild(generateStepContent(step))
+
+    contentWrapper.appendChild(textContent)
+    contentWrapper.appendChild(inputContent)
+
+    if (buttonText) {
+      const buttonContainer = document.createElement('div')
+      buttonContainer.className = 'button-container'
+
+      const nextButton = document.createElement('button')
+      nextButton.type = 'button'
+      nextButton.id = 'nextStepButton'
+      nextButton.className = 'submit-button'
+      nextButton.textContent = buttonText
+
+      buttonContainer.appendChild(nextButton)
+      contentWrapper.appendChild(buttonContainer)
+    }
+
+    const surveyProgress = document.createElement('div')
+    surveyProgress.className = 'survey-progress'
+
+    const poweredBy = document.createElement('p')
+    poweredBy.className = 'powered-by'
+    poweredBy.textContent = 'Powered by '
+
+    const logo = document.createElement('span')
+    logo.className = 'logo'
+    logo.textContent = 'CatchTalk'
+
+    poweredBy.appendChild(logo)
+
+    const backgroundBar = document.createElement('div')
+    backgroundBar.className = 'background-bar'
+
+    const progressBar = document.createElement('div')
+    progressBar.className = 'progress-bar'
+
+    backgroundBar.appendChild(progressBar)
+    surveyProgress.appendChild(poweredBy)
+    surveyProgress.appendChild(backgroundBar)
+
+    surveyStep.appendChild(surveyHeader)
+    surveyStep.appendChild(contentWrapper)
+    surveyStep.appendChild(surveyProgress)
+
+    return surveyStep
   }
 
   function updateProgressBar(currentStepId, steps) {
@@ -554,52 +609,79 @@
   function generateStepContent(step) {
     switch (step.type) {
       case 'welcome':
-        return ''
+        return document.createDocumentFragment()
+
       case 'singleChoice':
       case 'multipleChoice':
-        return `
-          <div class="inputContainer">
-            ${step.options
-              .map(
-                (option) => `
-              <label class="optionLabel">
-                <input type="${
-                  step.type === 'singleChoice' ? 'radio' : 'checkbox'
-                }"
-                      name="${step.type}"
-                      value="${option.value}"
-                      id="${step.type}-${option.id}"
-                      onchange="this.closest('.optionLabel').classList.toggle('checked', this.checked)">
-                <span>${option.value}</span>
-              </label>
-            `,
-              )
-              .join('')}
-          </div>
-        `
+        const inputContainer = document.createElement('div')
+        inputContainer.className = 'inputContainer'
+
+        step.options.forEach((option) => {
+          const label = document.createElement('label')
+          label.className = 'optionLabel'
+
+          const input = document.createElement('input')
+          input.type = step.type === 'singleChoice' ? 'radio' : 'checkbox'
+          input.name = step.type
+          input.value = option.value
+          input.id = `${step.type}-${option.id}`
+          input.onchange = function () {
+            this.closest('.optionLabel').classList.toggle(
+              'checked',
+              this.checked,
+            )
+          }
+
+          const span = document.createElement('span')
+          span.textContent = option.value
+
+          label.appendChild(input)
+          label.appendChild(span)
+          inputContainer.appendChild(label)
+        })
+
+        return inputContainer
+
       case 'rating':
-        return `
-          <div class="starInputContainer">
-            ${[5, 4, 3, 2, 1]
-              .map(
-                (value) => `
-              <label class="starOptionLabel" for="rating-${value}">
-                <input type="radio" name="rating" value="${value}" id="rating-${value}">
-                <span class="star">&#9733;</span>
-              </label>
-            `,
-              )
-              .join('')}
-          </div>
-        `
+        const starInputContainer = document.createElement('div')
+        starInputContainer.className = 'starInputContainer'
+        ;[5, 4, 3, 2, 1].forEach((value) => {
+          const label = document.createElement('label')
+          label.className = 'starOptionLabel'
+          label.htmlFor = `rating-${value}`
+
+          const input = document.createElement('input')
+          input.type = 'radio'
+          input.name = 'rating'
+          input.value = value
+          input.id = `rating-${value}`
+
+          const star = document.createElement('span')
+          star.className = 'star'
+          star.innerHTML = '&#9733;'
+
+          label.appendChild(input)
+          label.appendChild(star)
+          starInputContainer.appendChild(label)
+        })
+
+        return starInputContainer
+
       case 'freeText':
-        return `<textarea name="response" id="response" rows="4" cols="50"></textarea>`
+        const textarea = document.createElement('textarea')
+        textarea.name = 'response'
+        textarea.id = 'response'
+        textarea.rows = 4
+        textarea.cols = 50
+        return textarea
+
       case 'link':
       case 'info':
       case 'thank':
-        return ''
+        return document.createDocumentFragment()
+
       default:
-        return ''
+        return document.createDocumentFragment()
     }
   }
 
