@@ -344,6 +344,7 @@
       return
     }
 
+    // 기존 HTML을 제거하고 새로 생성된 요소를 추가합니다.
     surveyContainer.innerHTML = ''
     surveyContainer.appendChild(generateStepHTML(step))
 
@@ -483,6 +484,7 @@
     const surveyStep = document.createElement('div')
     surveyStep.className = 'survey-step'
 
+    // Survey Header
     const surveyHeader = document.createElement('div')
     surveyHeader.className = 'survey-header'
 
@@ -500,6 +502,7 @@
     surveyHeader.appendChild(closeButton)
     surveyStep.appendChild(surveyHeader)
 
+    // Content Wrapper
     const contentWrapper = document.createElement('div')
     contentWrapper.className = 'content-wrapper'
 
@@ -522,11 +525,13 @@
 
     contentWrapper.appendChild(textContent)
 
+    // Input Content
     const inputContent = document.createElement('div')
     inputContent.className = 'input-content'
     inputContent.innerHTML = generateStepContent(step)
     contentWrapper.appendChild(inputContent)
 
+    // Button Container
     const buttonText = getButtonText(step)
     if (buttonText) {
       const buttonContainer = document.createElement('div')
@@ -543,6 +548,8 @@
     }
 
     surveyStep.appendChild(contentWrapper)
+
+    // Survey Progress
     const surveyProgress = document.createElement('div')
     surveyProgress.className = 'survey-progress'
 
@@ -561,7 +568,7 @@
 
     surveyStep.appendChild(surveyProgress)
 
-    return surveyStep.outerHTML
+    return surveyStep
   }
 
   function updateProgressBar(currentStepId, steps) {
