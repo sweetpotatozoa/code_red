@@ -615,7 +615,7 @@
   // 설문조사 스텝 콘텐츠 생성
   function generateStepContent(step) {
     const inputContainer = document.createElement('div')
-    inputContainer.className = 'inputContainer'
+    inputContainer.className = 'starInputContainer'
 
     switch (step.type) {
       case 'singleChoice':
@@ -646,7 +646,7 @@
         starContainer.className = 'starInputContainer'
 
         // 별 개수에 따라 동적으로 생성
-        step.options.reverse().forEach((option) => {
+        step.options.reverse().forEach((option, index) => {
           const label = document.createElement('label')
           label.className = 'starOptionLabel'
           label.htmlFor = `rating-${option.id}`
@@ -659,7 +659,7 @@
           input.onchange = function () {
             const allLabels = starContainer.querySelectorAll('.starOptionLabel')
             allLabels.forEach((lbl, idx) => {
-              if (idx <= option.value - 1) {
+              if (idx <= index) {
                 lbl.classList.add('checked')
               } else {
                 lbl.classList.remove('checked')
