@@ -658,7 +658,7 @@
 
           const span = document.createElement('span')
           span.className = 'star'
-          span.innerHTML = '&#9733;'
+          span.innerHTML = '★'
 
           label.appendChild(input)
           label.appendChild(span)
