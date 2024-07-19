@@ -968,9 +968,7 @@
 
   // 이스케이프 처리 함수 정의
   function escapeClassName(selectorString) {
-    console.log('Original selector:', JSON.stringify(selectorString)) // 원본 문자열 로깅
-
-    // 선택자가 ID(#)로 시작하는 경우
+    // ID 선택자(#)로 시작하는 경우
     if (selectorString.startsWith('#')) {
       return selectorString.replace(
         /([!"$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g,
@@ -979,22 +977,17 @@
     }
 
     // 클래스 선택자의 경우
-    const processed = selectorString
-      .split(/(\s+)/) // 공백을 기준으로 분할하되, 공백도 배열에 포함
-      .map((part, index, array) => {
-        if (part.trim() === '') {
-          return part // 공백을 그대로 유지
-        }
-        // 클래스 이름에 대한 처리
-        const prefix = part.startsWith('.') ? '' : '.'
+    return selectorString
+      .split(' ')
+      .map((className) => {
+        // 이미 .으로 시작하는 경우 그대로 두고, 아니면 .을 추가
+        const prefix = className.startsWith('.') ? '' : '.'
         return (
-          prefix + part.replace(/([!"#$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g, '\\$1')
+          prefix +
+          className.replace(/([!"#$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g, '\\$1')
         )
       })
-      .join('') // 공백을 포함하여 모든 부분을 다시 결합
-
-    console.log('Processed selector:', JSON.stringify(processed)) // 처리된 문자열 로깅
-    return processed
+      .join('')
   }
 
   // 초기화 함수 - 초기화 함수로, 고객 ID를 추출하고 설문조사 데이터를 가져온 후 트리거를 설정합니다.
