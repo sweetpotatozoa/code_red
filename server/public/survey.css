@@ -128,7 +128,7 @@
 
 .starInputContainer {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-bottom: 32px;
   width: 100%;
@@ -140,6 +140,8 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  margin-bottom: 0px;
+  font-size: 50px;
 }
 
 .starInputContainer:hover .starOptionLabel .star {
@@ -178,7 +180,7 @@ textarea {
   overflow-y: auto;
   word-wrap: break-word;
   white-space: pre-wrap;
-  margin: 0 0 5px 0;
+  margin: 0 0 8px 0;
   box-sizing: border-box;
 }
 

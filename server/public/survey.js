@@ -589,7 +589,7 @@
       case 'link':
         return step.buttonText || '링크로 이동'
       case 'thank':
-        return ''
+        return '닫기'
       default:
         return '다음'
     }
