@@ -510,7 +510,7 @@
     textContent.className = 'text-content'
 
     if (step.title) {
-      const title = document.createElement('h3')
+      const title = document.createElement('p')
       title.className = 'survey-title'
       title.textContent = step.title
       textContent.appendChild(title)
