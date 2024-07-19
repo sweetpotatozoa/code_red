@@ -59,7 +59,7 @@ const EditingUrl = ({ trigger, updateTrigger, setEditingTriggerId }) => {
         type='text'
         value={description}
         onChange={handleDescriptionChange}
-        placeholder='설명 (선택사항)'
+        placeholder='설명을 입력하세요.'
         className={styles.input}
       />
       <div className={styles.title}>URL</div>

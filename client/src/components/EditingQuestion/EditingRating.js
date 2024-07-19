@@ -75,7 +75,7 @@ const EditingRating = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={title}
         onChange={handleTitleChange}
-        placeholder='질문을 입력하세요.'
+        placeholder='제목을 입력하세요..'
       />
       <div className={styles.title}>설명</div>
       <input
@@ -83,7 +83,7 @@ const EditingRating = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={description}
         onChange={handleDescriptionChange}
-        placeholder='설명 (선택사항)'
+        placeholder='설명을 입력하세요.'
       />
       <div className={styles.title}>
         *별점의 경우 5점 기준 '매우 동의함', 1점 기준 '전혀 동의하지 않음'으로

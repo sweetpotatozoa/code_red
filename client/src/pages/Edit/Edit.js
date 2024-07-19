@@ -252,7 +252,7 @@ const Edit = () => {
               }`}
               onClick={() => setMode('surveys')}
             >
-              질문 구성
+              스텝 구성
             </div>
             <div
               className={`${styles.setting} ${

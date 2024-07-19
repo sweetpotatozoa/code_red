@@ -257,10 +257,13 @@ const SurveyPreview = ({
       )
     } else if (step.type === 'link') {
       const handleLinkClick = () => {
+        const defaultUrl = 'https://example.com'
         const url =
-          step.url.startsWith('http://') || step.url.startsWith('https://')
-            ? step.url
-            : `https://${step.url}`
+          step.url && step.url.trim() !== ''
+            ? step.url.startsWith('http://') || step.url.startsWith('https://')
+              ? step.url
+              : `https://${step.url}`
+            : defaultUrl
 
         window.open(url, '_blank', 'noopener,noreferrer')
         handleNextStep()

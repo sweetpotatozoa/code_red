@@ -87,7 +87,7 @@ const Surveys = ({
     console.log('Initial validation:', invalid)
   }, [survey.steps, validateSteps])
 
-  //invalidSteps 객체가 변경될 때마다 첫 번째 유효하지 않은 스텝으로 스크롤
+  // invalidSteps가 변경될 때마다 첫 번째 유효하지 않은 스텝으로 이동
   useEffect(() => {
     if (Object.keys(invalidSteps).length > 0) {
       const firstInvalidStepId = Object.keys(invalidSteps)[0]
@@ -143,7 +143,7 @@ const Surveys = ({
   const addStepHandler = (type) => {
     const newStep = {
       id: uuidv4(),
-      title: '새 질문',
+      title: '새 스텝',
       description: '',
       type: type,
     }
@@ -184,7 +184,7 @@ const Surveys = ({
     setTimeout(() => scrollToStep(newStep.id), 100)
   }
 
-  // 추가할 질문 유형 선택 모달
+  // 추가할 스텝 유형 선택 모달
   const AddStepModal = () => {
     if (!isAddStep) return null
     const stepTypes = [
@@ -198,7 +198,7 @@ const Surveys = ({
     return (
       <div className={styles.modal}>
         <div className={styles.modalContent}>
-          <div className={styles.modalTitle}>추가할 질문 유형 선택</div>
+          <div className={styles.modalTitle}>추가할 스텝 유형 선택</div>
           <div className={styles.modalTypes}>
             {stepTypes.map((type) => (
               <div
@@ -380,7 +380,7 @@ const Surveys = ({
           className={styles.addSurveyButton}
           onClick={() => setIsAddStep(true)}
         >
-          새 질문 추가 +
+          새 스텝 추가 +
         </div>
       </div>
       {AddStepModal()}
