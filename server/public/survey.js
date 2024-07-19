@@ -344,9 +344,8 @@
       return
     }
 
-    const buttonText = step.type === 'thank' ? '닫기' : getButtonText(step)
-
-    surveyContainer.innerHTML = generateStepHTML(step, buttonText)
+    surveyContainer.innerHTML = ''
+    surveyContainer.appendChild(generateStepHTML(step))
 
     document.getElementById('closeSurvey').onclick = () => {
       closeSurvey(survey._id, step.type === 'thank')
@@ -398,10 +397,17 @@
             }
 
             if (step.type === 'link') {
-              window.open(
-                step.url.startsWith('http') ? step.url : `https://${step.url}`,
-                '_blank',
-              )
+              if (step.url) {
+                window.open(
+                  step.url.startsWith('http')
+                    ? step.url
+                    : `https://${step.url}`,
+                  '_blank',
+                )
+              } else {
+                console.error('링크 URL이 존재하지 않습니다.')
+                return
+              }
             }
 
             let nextStepId
@@ -473,7 +479,7 @@
     updateProgressBar(step.id, survey.steps)
   }
 
-  function generateStepHTML(step, buttonText) {
+  function generateStepHTML(step) {
     const surveyStep = document.createElement('div')
     surveyStep.className = 'survey-step'
 
@@ -492,6 +498,7 @@
 
     closeButton.appendChild(closeIcon)
     surveyHeader.appendChild(closeButton)
+    surveyStep.appendChild(surveyHeader)
 
     const contentWrapper = document.createElement('div')
     contentWrapper.className = 'content-wrapper'
@@ -513,13 +520,14 @@
       textContent.appendChild(description)
     }
 
+    contentWrapper.appendChild(textContent)
+
     const inputContent = document.createElement('div')
     inputContent.className = 'input-content'
-    inputContent.appendChild(generateStepContent(step))
-
-    contentWrapper.appendChild(textContent)
+    inputContent.innerHTML = generateStepContent(step)
     contentWrapper.appendChild(inputContent)
 
+    const buttonText = getButtonText(step)
     if (buttonText) {
       const buttonContainer = document.createElement('div')
       buttonContainer.className = 'button-container'
@@ -534,34 +542,26 @@
       contentWrapper.appendChild(buttonContainer)
     }
 
+    surveyStep.appendChild(contentWrapper)
     const surveyProgress = document.createElement('div')
     surveyProgress.className = 'survey-progress'
 
     const poweredBy = document.createElement('p')
     poweredBy.className = 'powered-by'
-    poweredBy.textContent = 'Powered by '
-
-    const logo = document.createElement('span')
-    logo.className = 'logo'
-    logo.textContent = 'CatchTalk'
-
-    poweredBy.appendChild(logo)
+    poweredBy.innerHTML = 'Powered by <span class="logo">CatchTalk</span>'
+    surveyProgress.appendChild(poweredBy)
 
     const backgroundBar = document.createElement('div')
     backgroundBar.className = 'background-bar'
 
     const progressBar = document.createElement('div')
     progressBar.className = 'progress-bar'
-
     backgroundBar.appendChild(progressBar)
-    surveyProgress.appendChild(poweredBy)
     surveyProgress.appendChild(backgroundBar)
 
-    surveyStep.appendChild(surveyHeader)
-    surveyStep.appendChild(contentWrapper)
     surveyStep.appendChild(surveyProgress)
 
-    return surveyStep
+    return surveyStep.outerHTML
   }
 
   function updateProgressBar(currentStepId, steps) {
@@ -607,15 +607,12 @@
 
   // 설문조사 스텝 콘텐츠 생성
   function generateStepContent(step) {
-    switch (step.type) {
-      case 'welcome':
-        return document.createDocumentFragment()
+    const inputContainer = document.createElement('div')
+    inputContainer.className = 'inputContainer'
 
+    switch (step.type) {
       case 'singleChoice':
       case 'multipleChoice':
-        const inputContainer = document.createElement('div')
-        inputContainer.className = 'inputContainer'
-
         step.options.forEach((option) => {
           const label = document.createElement('label')
           label.className = 'optionLabel'
@@ -626,10 +623,7 @@
           input.value = option.value
           input.id = `${step.type}-${option.id}`
           input.onchange = function () {
-            this.closest('.optionLabel').classList.toggle(
-              'checked',
-              this.checked,
-            )
+            label.classList.toggle('checked', input.checked)
           }
 
           const span = document.createElement('span')
@@ -639,12 +633,10 @@
           label.appendChild(span)
           inputContainer.appendChild(label)
         })
-
-        return inputContainer
-
+        break
       case 'rating':
-        const starInputContainer = document.createElement('div')
-        starInputContainer.className = 'starInputContainer'
+        const starContainer = document.createElement('div')
+        starContainer.className = 'starInputContainer'
         ;[5, 4, 3, 2, 1].forEach((value) => {
           const label = document.createElement('label')
           label.className = 'starOptionLabel'
@@ -656,33 +648,35 @@
           input.value = value
           input.id = `rating-${value}`
 
-          const star = document.createElement('span')
-          star.className = 'star'
-          star.innerHTML = '&#9733;'
+          const span = document.createElement('span')
+          span.className = 'star'
+          span.innerHTML = '&#9733;'
 
           label.appendChild(input)
-          label.appendChild(star)
-          starInputContainer.appendChild(label)
+          label.appendChild(span)
+          starContainer.appendChild(label)
         })
 
-        return starInputContainer
-
+        inputContainer.appendChild(starContainer)
+        break
       case 'freeText':
         const textarea = document.createElement('textarea')
         textarea.name = 'response'
         textarea.id = 'response'
         textarea.rows = 4
         textarea.cols = 50
-        return textarea
-
+        inputContainer.appendChild(textarea)
+        break
+      case 'welcome':
       case 'link':
       case 'info':
       case 'thank':
-        return document.createDocumentFragment()
-
+        break
       default:
-        return document.createDocumentFragment()
+        break
     }
+
+    return inputContainer.innerHTML
   }
 
   // 응답 추출
