@@ -614,83 +614,62 @@
 
   // 설문조사 스텝 콘텐츠 생성
   function generateStepContent(step) {
-    const inputContainer = document.createElement('div')
-    inputContainer.className = 'input-content'
-
     switch (step.type) {
       case 'singleChoice':
       case 'multipleChoice':
+        const optionContainer = document.createElement('div')
+        optionContainer.className = 'optionContainer'
         step.options.forEach((option) => {
           const label = document.createElement('label')
           label.className = 'optionLabel'
-
           const input = document.createElement('input')
           input.type = step.type === 'singleChoice' ? 'radio' : 'checkbox'
           input.name = step.type
           input.value = option.value
           input.id = `${step.type}-${option.id}`
-          input.onchange = function () {
-            label.classList.toggle('checked', input.checked)
-          }
-
           const span = document.createElement('span')
           span.textContent = option.value
-
           label.appendChild(input)
           label.appendChild(span)
-          inputContainer.appendChild(label)
+          optionContainer.appendChild(label)
         })
-        return inputContainer
+        return optionContainer
+
       case 'rating':
         const starContainer = document.createElement('div')
         starContainer.className = 'starInputContainer'
-
-        // 별 개수에 따라 동적으로 생성
-        step.options.reverse().forEach((option, index) => {
+        ;[...step.options].reverse().forEach((option) => {
           const label = document.createElement('label')
           label.className = 'starOptionLabel'
-          label.htmlFor = `rating-${option.id}`
-
           const input = document.createElement('input')
           input.type = 'radio'
           input.name = 'rating'
           input.value = option.value
           input.id = `rating-${option.id}`
-          input.onchange = function () {
-            const allLabels = starContainer.querySelectorAll('.starOptionLabel')
-            allLabels.forEach((lbl, idx) => {
-              if (idx <= index) {
-                lbl.classList.add('checked')
-              } else {
-                lbl.classList.remove('checked')
-              }
-            })
-          }
-
-          const span = document.createElement('span')
-          span.className = 'star'
-          span.innerHTML = '★'
-
+          const star = document.createElement('span')
+          star.className = 'star'
+          star.textContent = '★'
           label.appendChild(input)
-          label.appendChild(span)
+          label.appendChild(star)
           starContainer.appendChild(label)
         })
+        return starContainer
 
-        inputContainer.appendChild(starContainer)
-        return inputContainer
       case 'freeText':
         const textarea = document.createElement('textarea')
         textarea.name = 'response'
         textarea.id = 'response'
         textarea.rows = 4
         textarea.cols = 50
-        inputContainer.appendChild(textarea)
-        return inputContainer
+        textarea.className = 'freeTextArea'
+        return textarea
+
       case 'welcome':
       case 'link':
       case 'info':
       case 'thank':
         return null
+
       default:
         return null
     }
