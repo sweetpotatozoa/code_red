@@ -128,22 +128,33 @@
 
 .starInputContainer {
   display: flex;
-  justify-content: space-between; /* 별들 사이에 공간을 균등하게 분배 */
+  justify-content: flex-end; /* 오른쪽부터 채우기 */
   align-items: center;
   margin-bottom: 16px;
   width: 100%;
-  flex-direction: row-reverse;
-  padding: 0 10px; /* 컨테이너 좌우에 약간의 패딩 추가 */
 }
 
 .starOptionLabel {
   display: flex;
-  justify-content: center;
   align-items: center;
-  cursor: pointer;
-  padding: 5px; /* 라벨 내부에 패딩 추가 */
+  justify-content: center;
+  width: 50px; /* star의 font-size와 동일하게 설정 */
+  height: 50px; /* star의 font-size와 동일하게 설정 */
+  margin-left: 24px; /* star 간의 간격 */
 }
 
+.starOptionLabel:first-child {
+  margin-left: 0; /* 첫 번째 star는 왼쪽 마진 제거 */
+}
+
+.star {
+  font-size: 50px;
+  color: #e5ebf3;
+  cursor: pointer;
+  line-height: 1; /* 텍스트 세로 정렬을 위해 추가 */
+}
+
+/* 호버 및 체크 스타일은 그대로 유지 */
 .starInputContainer:hover .starOptionLabel .star {
   color: #e5ebf3;
 }
