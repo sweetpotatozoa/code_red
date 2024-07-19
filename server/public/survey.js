@@ -615,7 +615,7 @@
   // 설문조사 스텝 콘텐츠 생성
   function generateStepContent(step) {
     const inputContainer = document.createElement('div')
-    inputContainer.className = 'starInputContainer'
+    inputContainer.className = 'input-content'
 
     switch (step.type) {
       case 'singleChoice':
