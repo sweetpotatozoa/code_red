@@ -102,7 +102,7 @@
 
 .inputContainer {
   display: flex;
-  margin-bottom: 16px;
+  margin-bottom: 5px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
