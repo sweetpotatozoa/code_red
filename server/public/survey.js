@@ -656,6 +656,16 @@
           input.name = 'rating'
           input.value = option.value
           input.id = `rating-${option.id}`
+          input.onchange = function () {
+            const allLabels = starContainer.querySelectorAll('.starOptionLabel')
+            allLabels.forEach((lbl, idx) => {
+              if (idx <= option.value - 1) {
+                lbl.classList.add('checked')
+              } else {
+                lbl.classList.remove('checked')
+              }
+            })
+          }
 
           const span = document.createElement('span')
           span.className = 'star'

@@ -141,10 +141,6 @@
   flex-direction: row-reverse;
 }
 
-.starOptionLabel input {
-  display: none;
-}
-
 .starInputContainer:hover .starOptionLabel .star {
   color: #e5ebf3;
 }
@@ -157,6 +153,10 @@
 .starInputContainer .starOptionLabel.checked .star,
 .starInputContainer .starOptionLabel.checked ~ .starOptionLabel .star {
   color: #ffca28;
+}
+
+.starOptionLabel input {
+  display: none;
 }
 
 .star {
