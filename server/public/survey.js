@@ -899,73 +899,6 @@
     }
   }
 
-  // 트리거 설정을 확인하고 설정하는 함수
-  function checkAndSetupTriggers(element, sortedTriggers, cleanupFunctions) {
-    sortedTriggers.forEach(([key, surveyList]) => {
-      const trigger = JSON.parse(key)
-
-      if (trigger.type === 'click' && isCorrectPage(trigger)) {
-        if (trigger.clickType === 'css') {
-          const escapedSelector = escapeClassName(trigger.clickValue)
-          if (
-            element.matches(escapedSelector) &&
-            !triggeredElements.has(element)
-          ) {
-            const clickHandler = () => showSurvey(surveyList)
-            element.addEventListener('click', clickHandler)
-            triggeredElements.set(element, true)
-            console.log(`Click trigger set for ${trigger.clickValue}`)
-            cleanupFunctions.set(element, () => {
-              element.removeEventListener('click', clickHandler)
-              triggeredElements.delete(element)
-            })
-          }
-        } else if (trigger.clickType === 'text') {
-          const textNodes = getTextNodes(element)
-          textNodes.forEach((textNode) => {
-            if (textNode.textContent.trim() === trigger.clickValue) {
-              const parentElement = textNode.parentElement
-              if (!triggeredElements.has(parentElement)) {
-                const eventListener = (event) => {
-                  if (event.target.textContent.trim() === trigger.clickValue) {
-                    showSurvey(surveyList)
-                    console.log(
-                      `Text trigger activated for "${
-                        trigger.clickValue
-                      }" on ${parentElement.tagName.toLowerCase()}`,
-                    )
-                  }
-                }
-                parentElement.addEventListener('click', eventListener)
-                triggeredElements.set(parentElement, true)
-                cleanupFunctions.set(parentElement, () => {
-                  parentElement.removeEventListener('click', eventListener)
-                  triggeredElements.delete(parentElement)
-                })
-              }
-            }
-          })
-        }
-      }
-    })
-  }
-
-  // 텍스트 노드를 찾는 헬퍼 함수
-  function getTextNodes(element) {
-    const textNodes = []
-    const walker = document.createTreeWalker(
-      element,
-      NodeFilter.SHOW_TEXT,
-      null,
-      false,
-    )
-    let node
-    while ((node = walker.nextNode())) {
-      textNodes.push(node)
-    }
-    return textNodes
-  }
-
   // 이스케이프 처리 함수 정의
   if (typeof CSS.escape !== 'function') {
     CSS.escape = function (value) {
@@ -1032,6 +965,77 @@
         }
       })
       .join(' ')
+  }
+  // 트리거 설정을 확인하고 설정하는 함수
+  function checkAndSetupTriggers(element, sortedTriggers, cleanupFunctions) {
+    sortedTriggers.forEach(([key, surveyList]) => {
+      const trigger = JSON.parse(key)
+
+      if (trigger.type === 'click' && isCorrectPage(trigger)) {
+        if (trigger.clickType === 'css') {
+          const escapedSelector = escapeClassName(trigger.clickValue)
+          // 유효한 선택자인지 확인
+          try {
+            if (
+              element.matches(escapedSelector) &&
+              !triggeredElements.has(element)
+            ) {
+              const clickHandler = () => showSurvey(surveyList)
+              element.addEventListener('click', clickHandler)
+              triggeredElements.set(element, true)
+              console.log(`Click trigger set for ${trigger.clickValue}`)
+              cleanupFunctions.set(element, () => {
+                element.removeEventListener('click', clickHandler)
+                triggeredElements.delete(element)
+              })
+            }
+          } catch (error) {
+            console.error(`Invalid selector: ${escapedSelector}`, error)
+          }
+        } else if (trigger.clickType === 'text') {
+          const textNodes = getTextNodes(element)
+          textNodes.forEach((textNode) => {
+            if (textNode.textContent.trim() === trigger.clickValue) {
+              const parentElement = textNode.parentElement
+              if (!triggeredElements.has(parentElement)) {
+                const eventListener = (event) => {
+                  if (event.target.textContent.trim() === trigger.clickValue) {
+                    showSurvey(surveyList)
+                    console.log(
+                      `Text trigger activated for "${
+                        trigger.clickValue
+                      }" on ${parentElement.tagName.toLowerCase()}`,
+                    )
+                  }
+                }
+                parentElement.addEventListener('click', eventListener)
+                triggeredElements.set(parentElement, true)
+                cleanupFunctions.set(parentElement, () => {
+                  parentElement.removeEventListener('click', eventListener)
+                  triggeredElements.delete(parentElement)
+                })
+              }
+            }
+          })
+        }
+      }
+    })
+  }
+
+  // 텍스트 노드를 찾는 헬퍼 함수
+  function getTextNodes(element) {
+    const textNodes = []
+    const walker = document.createTreeWalker(
+      element,
+      NodeFilter.SHOW_TEXT,
+      null,
+      false,
+    )
+    let node
+    while ((node = walker.nextNode())) {
+      textNodes.push(node)
+    }
+    return textNodes
   }
 
   // 초기화 함수 - 초기화 함수로, 고객 ID를 추출하고 설문조사 데이터를 가져온 후 트리거를 설정합니다.
