@@ -403,22 +403,14 @@ class AdminSurveyController {
     try {
       const userId = req.user.id
       const surveyId = req.params.id
-
-      console.log(
-        `Attempting to generate CSV for userId: ${userId}, surveyId: ${surveyId}`,
-      )
-
       const csvData = await AdminSurveyService.getResponsesAsCSV(
         userId,
         surveyId,
       )
 
       if (!csvData) {
-        console.log('No CSV data generated')
         return res.status(404).json({ message: 'No responses found' })
       }
-
-      console.log(`CSV data generated successfully. Length: ${csvData.length}`)
 
       res.setHeader('Content-Type', 'text/csv')
       res.setHeader(

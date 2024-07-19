@@ -1,5 +1,5 @@
 ;(async function () {
-  console.log('Survey script loaded')
+  console.log('CatchTalk script loaded')
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
   window.activeSurveyId = null
@@ -58,7 +58,6 @@
         throw new Error('Network response was not ok')
       }
       const data = await response.json()
-      console.log('Surveys loaded:', data)
 
       const validSurveys = data.data.filter(validateSurvey)
 
@@ -155,7 +154,6 @@
       await fetch(`${API_URI}/api/appliedSurvey/${surveyId}/increment-views`, {
         method: 'POST',
       })
-      console.log('노출 카운트가 증가되었습니다.')
     } catch (error) {
       console.error('노출 카운트 증가 중 오류 발생:', error)
     }
@@ -343,7 +341,6 @@
 
     if (!step) {
       closeSurvey(survey._id, false)
-      console.log('Survey finished')
       return
     }
 
@@ -460,7 +457,6 @@
                 showStep(survey, thankStepIndex)
               } else {
                 closeSurvey(survey._id, true)
-                console.log('Survey closed without thank step')
               }
             }
           } catch (error) {
@@ -547,7 +543,6 @@
       surveyPopup.remove()
     }
     window.activeSurveyId = null
-    console.log('Survey closed')
 
     window.dispatchEvent(new Event('surveyCompleted'))
 
@@ -735,10 +730,6 @@
     })
   }
 
-  // 디버깅을 위한 로그 추가
-  console.log('Current URL:', window.location.href)
-  console.log('Surveys:', surveys)
-
   // 페이지가 특정 URL인지 확인하는 함수
   function isCorrectPage(trigger) {
     if (trigger.pageType === 'all') {
@@ -848,7 +839,6 @@
 
         if (trigger.type === 'exit' && isCorrectPage(trigger)) {
           const handleExitIntent = (event) => {
-            console.log('Exit Intent detected')
             if (event.clientY <= 0) {
               showSurvey(surveyList)
             }
@@ -875,9 +865,7 @@
           const handleScroll = () => {
             const scrollPercentage =
               (window.scrollY + window.innerHeight) / document.body.scrollHeight
-            console.log(`Scroll Percentage: ${scrollPercentage}`)
             if (scrollPercentage >= 0.01) {
-              console.log('Scroll trigger activated')
               showSurvey(surveyList)
             }
           }
@@ -999,11 +987,6 @@
                 const eventListener = (event) => {
                   if (event.target.textContent.trim() === trigger.clickValue) {
                     showSurvey(surveyList)
-                    console.log(
-                      `Text trigger activated for "${
-                        trigger.clickValue
-                      }" on ${parentElement.tagName.toLowerCase()}`,
-                    )
                   }
                 }
                 parentElement.addEventListener('click', eventListener)
@@ -1038,7 +1021,6 @@
 
   // 초기화 함수 - 초기화 함수로, 고객 ID를 추출하고 설문조사 데이터를 가져온 후 트리거를 설정합니다.
   async function init() {
-    console.log('Initializing survey script')
     const userId = getUserIdFromUrl()
     if (!userId) {
       throw new Error('User ID is not provided in the URL')
@@ -1059,8 +1041,6 @@
           window.removeEventListener('surveyCompleted', handleSurveyCompletion)
         }
         window.addEventListener('surveyCompleted', handleSurveyCompletion)
-
-        console.log('Survey script initialized')
       }
     } catch (error) {
       console.error('Error initializing survey script:', error)
@@ -1070,7 +1050,6 @@
   // 설문조사 로드 - 설문조사를 시작하고 첫 번째 스텝을 표시합니다.
   function loadSurvey(survey) {
     if (window.activeSurveyId !== null) {
-      console.log('Another survey is already active')
       return
     }
     window.activeSurveyId = survey._id
@@ -1092,7 +1071,6 @@
       await incrementViews(survey._id)
 
       showStep(survey, currentStep)
-      console.log('Survey container created and appended to body')
 
       saveSurveyData(survey._id, {
         lastShownTime: new Date().toISOString(),
