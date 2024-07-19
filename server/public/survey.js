@@ -968,7 +968,7 @@
 
   // 이스케이프 처리 함수 정의
   function escapeClassName(selectorString) {
-    // ID 선택자(#)로 시작하는 경우
+    // 선택자가 ID(#)로 시작하는 경우
     if (selectorString.startsWith('#')) {
       return selectorString.replace(
         /([!"$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g,
@@ -980,14 +980,15 @@
     return selectorString
       .split(' ')
       .map((className) => {
-        // 이미 .으로 시작하는 경우 그대로 두고, 아니면 .을 추가
+        if (className === '') return ''
+        // 모든 클래스 이름에 대해 동일한 처리 적용
         const prefix = className.startsWith('.') ? '' : '.'
         return (
           prefix +
           className.replace(/([!"#$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g, '\\$1')
         )
       })
-      .join('')
+      .join(' ')
   }
 
   // 초기화 함수 - 초기화 함수로, 고객 ID를 추출하고 설문조사 데이터를 가져온 후 트리거를 설정합니다.
