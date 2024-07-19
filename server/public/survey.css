@@ -135,6 +135,12 @@
   flex-direction: row-reverse;
 }
 
+.starOptionLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
 .starInputContainer:hover .starOptionLabel .star {
   color: #e5ebf3;
 }
