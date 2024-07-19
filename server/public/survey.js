@@ -907,10 +907,11 @@
       if (trigger.type === 'click' && isCorrectPage(trigger)) {
         if (trigger.clickType === 'css') {
           const escapedSelector = escapeClassName(trigger.clickValue)
+
+          // 현재 일치하는 요소 수 계산 및 로깅
           const matchingElements = document.querySelectorAll(escapedSelector)
           console.log(
-            `Elements matched by CSS selector "${escapedSelector}":`,
-            matchingElements.length,
+            `Click trigger for ${trigger.clickValue}. Current matching elements: ${matchingElements.length}`,
           )
 
           if (
@@ -921,7 +922,7 @@
             element.addEventListener('click', clickHandler)
             triggeredElements.set(element, true)
             console.log(
-              `Click trigger set for CSS selector: ${trigger.clickValue}`,
+              `Click trigger set for an element matching ${trigger.clickValue}`,
             )
             cleanupFunctions.set(element, () => {
               element.removeEventListener('click', clickHandler)
@@ -930,12 +931,12 @@
           }
         } else if (trigger.clickType === 'text') {
           const textNodes = getTextNodes(element)
-          let matchCount = 0
+          let matchingElements = 0
           textNodes.forEach((textNode) => {
             if (textNode.textContent.trim() === trigger.clickValue) {
-              matchCount++
               const parentElement = textNode.parentElement
               if (!triggeredElements.has(parentElement)) {
+                matchingElements++
                 const eventListener = (event) => {
                   if (event.target.textContent.trim() === trigger.clickValue) {
                     showSurvey(surveyList)
@@ -955,10 +956,11 @@
               }
             }
           })
-          console.log(
-            `Elements matched by text content "${trigger.clickValue}":`,
-            matchCount,
-          )
+          if (matchingElements > 0) {
+            console.log(
+              `Text trigger for "${trigger.clickValue}". Current matching elements: ${matchingElements}`,
+            )
+          }
         }
       }
     })
@@ -982,8 +984,6 @@
 
   // 이스케이프 처리 함수 정의
   function escapeClassName(selectorString) {
-    console.log('Original selector:', JSON.stringify(selectorString))
-
     // ID 선택자(#)로 시작하는 경우
     if (selectorString.startsWith('#')) {
       return selectorString.replace(
@@ -993,21 +993,17 @@
     }
 
     // 클래스 선택자의 경우
-    const escapedSelector = selectorString
-      .split(/\s+/)
+    return selectorString
+      .split(' ')
       .map((className) => {
-        if (className === '') return ''
+        // 이미 .으로 시작하는 경우 그대로 두고, 아니면 .을 추가
         const prefix = className.startsWith('.') ? '' : '.'
-        // '_'는 이스케이프 처리하지 않음
         return (
           prefix +
           className.replace(/([!"#$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g, '\\$1')
         )
       })
-      .join(' ')
-
-    console.log('Escaped selector:', JSON.stringify(escapedSelector))
-    return escapedSelector
+      .join('')
   }
 
   // 초기화 함수 - 초기화 함수로, 고객 ID를 추출하고 설문조사 데이터를 가져온 후 트리거를 설정합니다.
