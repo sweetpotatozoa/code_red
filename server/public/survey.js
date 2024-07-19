@@ -899,6 +899,71 @@
     }
   }
 
+  // 이스케이프 처리 함수 정의
+  if (typeof CSS.escape !== 'function') {
+    CSS.escape = function (value) {
+      return String(value)
+        .replace(
+          /[\0-\x1F\x7F-\x9F\xA0\xAD\u0600-\u0604\u070F\u17B4\u17B5\u2000-\u200F\u2028-\u202F\u2060-\u206F\uFEFF\uFFF0-\uFFF8\uD800-\uF8FF\uFDD0-\uFDEF\uFFFE\uFFFF]/g,
+          function (ch) {
+            return '\\' + ch.charCodeAt(0).toString(16) + ' '
+          },
+        )
+        .replace(/[\s\S]/g, function (ch) {
+          switch (ch) {
+            case ' ':
+            case '"':
+            case '#':
+            case '$':
+            case '%':
+            case '&':
+            case "'":
+            case '(':
+            case ')':
+            case '*':
+            case '+':
+            case ',':
+            case '.':
+            case '/':
+            case ';':
+            case '<':
+            case '=':
+            case '>':
+            case '?':
+            case '@':
+            case '[':
+            case '\\':
+            case ']':
+            case '^':
+            case '`':
+            case '{':
+            case '|':
+            case '}':
+            case '~':
+              return '\\' + ch
+            default:
+              return ch
+          }
+        })
+    }
+  }
+
+  function escapeClassName(selectorString) {
+    return selectorString
+      .trim()
+      .split(/\s+/) // 여러 개의 공백을 하나의 공백으로 줄임
+      .map((part) => {
+        if (part.startsWith('#')) {
+          return '#' + CSS.escape(part.slice(1))
+        } else if (part.startsWith('.')) {
+          return '.' + CSS.escape(part.slice(1))
+        } else {
+          return '.' + CSS.escape(part)
+        }
+      })
+      .join('') // 공백 없이 연결
+  }
+
   // 트리거 설정을 확인하고 설정하는 함수
   function checkAndSetupTriggers(element, sortedTriggers, cleanupFunctions) {
     sortedTriggers.forEach(([key, surveyList]) => {
@@ -907,18 +972,23 @@
       if (trigger.type === 'click' && isCorrectPage(trigger)) {
         if (trigger.clickType === 'css') {
           const escapedSelector = escapeClassName(trigger.clickValue)
-          if (
-            element.matches(escapedSelector) &&
-            !triggeredElements.has(element)
-          ) {
-            const clickHandler = () => showSurvey(surveyList)
-            element.addEventListener('click', clickHandler)
-            triggeredElements.set(element, true)
-            console.log(`Click trigger set for ${trigger.clickValue}`)
-            cleanupFunctions.set(element, () => {
-              element.removeEventListener('click', clickHandler)
-              triggeredElements.delete(element)
-            })
+          // 유효한 선택자인지 확인
+          try {
+            if (
+              element.matches(escapedSelector) &&
+              !triggeredElements.has(element)
+            ) {
+              const clickHandler = () => showSurvey(surveyList)
+              element.addEventListener('click', clickHandler)
+              triggeredElements.set(element, true)
+              console.log(`Click trigger set for ${trigger.clickValue}`)
+              cleanupFunctions.set(element, () => {
+                element.removeEventListener('click', clickHandler)
+                triggeredElements.delete(element)
+              })
+            }
+          } catch (error) {
+            console.error(`Invalid selector: ${escapedSelector}`, error)
           }
         } else if (trigger.clickType === 'text') {
           const textNodes = getTextNodes(element)
@@ -964,30 +1034,6 @@
       textNodes.push(node)
     }
     return textNodes
-  }
-
-  // 이스케이프 처리 함수 정의
-  function escapeClassName(selectorString) {
-    // ID 선택자(#)로 시작하는 경우
-    if (selectorString.startsWith('#')) {
-      return selectorString.replace(
-        /([!"$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g,
-        '\\$1',
-      )
-    }
-
-    // 클래스 선택자의 경우
-    return selectorString
-      .split(' ')
-      .map((className) => {
-        // 이미 .으로 시작하는 경우 그대로 두고, 아니면 .을 추가
-        const prefix = className.startsWith('.') ? '' : '.'
-        return (
-          prefix +
-          className.replace(/([!"#$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g, '\\$1')
-        )
-      })
-      .join('')
   }
 
   // 초기화 함수 - 초기화 함수로, 고객 ID를 추출하고 설문조사 데이터를 가져온 후 트리거를 설정합니다.
