@@ -525,11 +525,12 @@
 
     contentWrapper.appendChild(textContent)
 
-    // Input Content
-    const inputContent = document.createElement('div')
-    inputContent.className = 'input-content'
-    inputContent.innerHTML = generateStepContent(step)
-    contentWrapper.appendChild(inputContent)
+    // Input Content - 필요한 경우에만 생성
+    const inputContent = generateStepContent(step)
+    if (inputContent) {
+      inputContent.className = 'input-content'
+      contentWrapper.appendChild(inputContent)
+    }
 
     // Button Container
     const buttonText = getButtonText(step)
@@ -640,7 +641,7 @@
           label.appendChild(span)
           inputContainer.appendChild(label)
         })
-        break
+        return inputContainer
       case 'rating':
         const starContainer = document.createElement('div')
         starContainer.className = 'starInputContainer'
@@ -665,7 +666,7 @@
         })
 
         inputContainer.appendChild(starContainer)
-        break
+        return inputContainer
       case 'freeText':
         const textarea = document.createElement('textarea')
         textarea.name = 'response'
@@ -673,17 +674,15 @@
         textarea.rows = 4
         textarea.cols = 50
         inputContainer.appendChild(textarea)
-        break
+        return inputContainer
       case 'welcome':
       case 'link':
       case 'info':
       case 'thank':
-        break
+        return null
       default:
-        break
+        return null
     }
-
-    return inputContainer.innerHTML
   }
 
   // 응답 추출
