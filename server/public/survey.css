@@ -128,20 +128,21 @@
 
 .starInputContainer {
   display: flex;
-  justify-content: center;
+  justify-content: space-between; /* 별들 사이에 공간을 균등하게 분배 */
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
   width: 100%;
   flex-direction: row-reverse;
+  padding: 0 10px; /* 컨테이너 좌우에 약간의 패딩 추가 */
 }
 
 .starOptionLabel {
+  flex: 0 0 auto; /* 자동으로 크기 조절 */
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   cursor: pointer;
-  margin-bottom: 0px;
-  font-size: 50px;
+  padding: 5px; /* 라벨 내부에 패딩 추가 */
 }
 
 .starInputContainer:hover .starOptionLabel .star {
