@@ -967,9 +967,58 @@
   }
 
   // 이스케이프 처리 함수 정의
+  if (typeof CSS.escape !== 'function') {
+    CSS.escape = function (value) {
+      return String(value)
+        .replace(
+          /[\0-\x1F\x7F-\x9F\xA0\xAD\u0600-\u0604\u070F\u17B4\u17B5\u2000-\u200F\u2028-\u202F\u2060-\u206F\uFEFF\uFFF0-\uFFF8\uD800-\uF8FF\uFDD0-\uFDEF\uFFFE\uFFFF]/g,
+          function (ch) {
+            return '\\' + ch.charCodeAt(0).toString(16) + ' '
+          },
+        )
+        .replace(/[\s\S]/g, function (ch) {
+          switch (ch) {
+            case ' ':
+            case '"':
+            case '#':
+            case '$':
+            case '%':
+            case '&':
+            case "'":
+            case '(':
+            case ')':
+            case '*':
+            case '+':
+            case ',':
+            case '.':
+            case '/':
+            case ';':
+            case '<':
+            case '=':
+            case '>':
+            case '?':
+            case '@':
+            case '[':
+            case '\\':
+            case ']':
+            case '^':
+            case '`':
+            case '{':
+            case '|':
+            case '}':
+            case '~':
+              return '\\' + ch
+            default:
+              return ch
+          }
+        })
+    }
+  }
+
   function escapeClassName(selectorString) {
     return selectorString
-      .split(' ')
+      .trim()
+      .split(/\s+/)
       .map((part) => {
         if (part.startsWith('#')) {
           // ID 선택자
