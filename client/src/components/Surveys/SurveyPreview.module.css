@@ -41,6 +41,14 @@
   align-items: center;
 }
 
+.textInputContainer {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
 .buttonContainer {
   display: flex;
   justify-content: flex-end;
