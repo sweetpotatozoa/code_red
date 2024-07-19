@@ -951,21 +951,19 @@
   function escapeClassName(selectorString) {
     return selectorString
       .trim()
-      .split(/\s+/)
+      .split(/\s+/) // 여러 개의 공백을 하나의 공백으로 줄임
       .map((part) => {
         if (part.startsWith('#')) {
-          // ID 선택자
           return '#' + CSS.escape(part.slice(1))
         } else if (part.startsWith('.')) {
-          // 클래스 선택자
           return '.' + CSS.escape(part.slice(1))
         } else {
-          // 기타 선택자 (암시적 클래스 선택자로 처리)
           return '.' + CSS.escape(part)
         }
       })
-      .join(' ')
+      .join('') // 공백 없이 연결
   }
+
   // 트리거 설정을 확인하고 설정하는 함수
   function checkAndSetupTriggers(element, sortedTriggers, cleanupFunctions) {
     sortedTriggers.forEach(([key, surveyList]) => {
