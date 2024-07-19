@@ -1,5 +1,5 @@
 import styles from './EditingQuestion.module.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const EditingFreeText = ({ step, updateStep, steps, showWarning }) => {
   // 로컬 상태 설정
@@ -7,22 +7,33 @@ const EditingFreeText = ({ step, updateStep, steps, showWarning }) => {
   const [description, setDescription] = useState(step.description)
   const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
 
+  useEffect(() => {
+    setTitle(step.title)
+    setDescription(step.description)
+    setNextStepId(step.nextStepId || '')
+  }, [step])
+
   // 제목 변경 시 상태 업데이트
   const handleTitleChange = (e) => {
-    setTitle(e.target.value)
-    updateStep({ ...step, title: e.target.value })
+    const newTitle = e.target.value
+    setTitle(newTitle)
+    updateStep({ ...step, title: newTitle })
   }
 
   // 설명 변경 시 상태 업데이트
   const handleDescriptionChange = (e) => {
-    setDescription(e.target.value)
-    updateStep({ ...step, description: e.target.value })
+    const newDescription = e.target.value
+    setDescription(newDescription)
+    updateStep({ ...step, description: newDescription })
   }
 
   // 다음 스텝 변경 시 상태 업데이트
   const handleNextStepChange = (e) => {
-    setNextStepId(e.target.value)
-    updateStep({ ...step, nextStepId: e.target.value })
+    const newNextStepId = e.target.value
+    setNextStepId(newNextStepId)
+    if (newNextStepId !== step.nextStepId) {
+      updateStep({ ...step, nextStepId: newNextStepId })
+    }
   }
 
   return (

@@ -14,6 +14,13 @@ const EditingMultipleChoice = ({ step, updateStep, steps, showWarning }) => {
   })
   const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
 
+  useEffect(() => {
+    setTitle(step.title)
+    setDescription(step.description)
+    setOptions(step.options || [])
+    setNextStepId(step.nextStepId || '')
+  }, [step])
+
   // 제목 변경 시 상태 업데이트
   const handleTitleChange = (e) => {
     const newTitle = e.target.value
@@ -55,15 +62,10 @@ const EditingMultipleChoice = ({ step, updateStep, steps, showWarning }) => {
   const handleNextStepChange = (e) => {
     const newNextStepId = e.target.value
     setNextStepId(newNextStepId)
-    updateStep({ ...step, nextStepId: newNextStepId })
-  }
-
-  // nextStepId 변경 시 유효성 검사 업데이트
-  useEffect(() => {
-    if (nextStepId !== '' && !steps.some((s) => s.id === nextStepId)) {
-      updateStep({ ...step, nextStepId })
+    if (newNextStepId !== step.nextStepId) {
+      updateStep({ ...step, nextStepId: newNextStepId })
     }
-  }, [nextStepId, steps, step, updateStep])
+  }
 
   return (
     <div>

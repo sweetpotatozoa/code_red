@@ -47,6 +47,7 @@ const Surveys = ({
     }
   }, [editingStepId, scrollToStep])
 
+  // 유효성 검사 함수
   const validateSteps = useCallback(() => {
     const invalid = {}
     survey.steps.forEach((step, index) => {
@@ -67,31 +68,37 @@ const Surveys = ({
         })
       }
     })
+    console.log('validateSteps:', invalid)
     setInvalidSteps(invalid)
     return invalid
   }, [survey.steps, setInvalidSteps])
 
-  useEffect(() => {
-    validateSteps()
-  }, [survey.steps, validateSteps])
-
+  // 스텝 업데이트 함수
   const updateStep = (updatedStep) => {
     const updatedSteps = survey.steps.map((step) =>
       step.id === updatedStep.id ? updatedStep : step,
     )
     setSurvey({ ...survey, steps: updatedSteps })
+  }
 
-    // 유효성 검사 후 첫 번째 유효하지 않은 스텝으로 스크롤 및 편집 모드 설정
-    setTimeout(() => {
-      const invalid = validateSteps()
-      const firstInvalidStepId = Object.keys(invalid)[0]
-      if (firstInvalidStepId) {
+  // 유효성 검사 수행
+  useEffect(() => {
+    const invalid = validateSteps()
+    console.log('Initial validation:', invalid)
+  }, [survey.steps, validateSteps])
+
+  //invalidSteps 객체가 변경될 때마다 첫 번째 유효하지 않은 스텝으로 스크롤
+  useEffect(() => {
+    if (Object.keys(invalidSteps).length > 0) {
+      const firstInvalidStepId = Object.keys(invalidSteps)[0]
+      if (firstInvalidStepId && firstInvalidStepId !== editingStepId) {
         setEditingStepId(firstInvalidStepId)
         scrollToStep(firstInvalidStepId)
       }
-    }, 0)
-  }
+    }
+  }, [invalidSteps, editingStepId, scrollToStep])
 
+  // 스텝 삭제 함수
   const deleteHandler = (id) => {
     const stepToDelete = survey.steps.find((step) => step.id === id)
     if (stepToDelete.type === 'welcome' || stepToDelete.type === 'thank') {
@@ -125,13 +132,14 @@ const Surveys = ({
     // 유효성 검사 후 첫 번째 유효하지 않은 스텝으로 스크롤 및 편집 모드 설정
     setTimeout(() => {
       const firstInvalidStepId = Object.keys(invalidSteps)[0]
-      if (firstInvalidStepId) {
+      if (firstInvalidStepId && firstInvalidStepId !== editingStepId) {
         setEditingStepId(firstInvalidStepId)
         scrollToStep(firstInvalidStepId)
       }
     }, 0)
   }
 
+  // 새로운 스텝 추가 함수
   const addStepHandler = (type) => {
     const newStep = {
       id: uuidv4(),
@@ -176,6 +184,7 @@ const Surveys = ({
     setTimeout(() => scrollToStep(newStep.id), 100)
   }
 
+  // 추가할 질문 유형 선택 모달
   const AddStepModal = () => {
     if (!isAddStep) return null
     const stepTypes = [
@@ -214,6 +223,7 @@ const Surveys = ({
     )
   }
 
+  // 스텝 활성화/비활성화 토글 핸들러
   const toggleHandler = (id) => {
     const updatedSteps = survey.steps.map((step) =>
       step.id === id ? { ...step, isActive: !step.isActive } : step,
@@ -221,6 +231,7 @@ const Surveys = ({
     setSurvey({ ...survey, steps: updatedSteps })
   }
 
+  // 편집 모드 토글 핸들러
   const toggleEditMode = (stepId, event) => {
     if (event) {
       event.stopPropagation()

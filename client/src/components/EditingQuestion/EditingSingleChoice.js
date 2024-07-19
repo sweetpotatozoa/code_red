@@ -1,5 +1,5 @@
 import styles from './EditingQuestion.module.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 const EditingSingleChoice = ({ step, updateStep, steps, showWarning }) => {
@@ -7,6 +7,12 @@ const EditingSingleChoice = ({ step, updateStep, steps, showWarning }) => {
   const [title, setTitle] = useState(step.title)
   const [description, setDescription] = useState(step.description)
   const [options, setOptions] = useState(step.options || [])
+
+  useEffect(() => {
+    setTitle(step.title)
+    setDescription(step.description)
+    setOptions(step.options || [])
+  }, [step])
 
   // 제목 변경 시 상태 업데이트
   const handleTitleChange = (e) => {
@@ -56,6 +62,11 @@ const EditingSingleChoice = ({ step, updateStep, steps, showWarning }) => {
     setOptions(newOptions)
     updateStep({ ...step, options: newOptions })
   }
+
+  // 선택지 변경 시 로그
+  useEffect(() => {
+    console.log('options updated: ', options)
+  }, [options])
 
   return (
     <div>

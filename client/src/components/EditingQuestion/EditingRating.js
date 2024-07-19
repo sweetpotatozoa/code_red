@@ -20,6 +20,24 @@ const EditingRating = ({ step, updateStep, steps, showWarning }) => {
         }))
   })
 
+  useEffect(() => {
+    setTitle(step.title)
+    setDescription(step.description)
+    setOptions(() =>
+      step.options && step.options.length === 5
+        ? step.options.map((option, index) => ({
+            ...option,
+            value: index + 1,
+            nextStepId: option.nextStepId || '',
+          }))
+        : Array.from({ length: 5 }, (_, index) => ({
+            id: uuidv4(),
+            value: index + 1,
+            nextStepId: '',
+          })),
+    )
+  }, [step])
+
   // 제목 변경 시 상태 업데이트
   const handleTitleChange = (e) => {
     const newTitle = e.target.value
@@ -40,20 +58,14 @@ const EditingRating = ({ step, updateStep, steps, showWarning }) => {
       option.id === optionId ? { ...option, nextStepId } : option,
     )
     setOptions(newOptions)
-    updateStep({ ...step, options: newOptions })
+    if (
+      options.some(
+        (option) => option.id === optionId && option.nextStepId !== nextStepId,
+      )
+    ) {
+      updateStep({ ...step, options: newOptions })
+    }
   }
-
-  // nextStepId 변경 시 유효성 검사 업데이트
-  useEffect(() => {
-    options.forEach((option) => {
-      if (
-        option.nextStepId !== '' &&
-        !steps.some((s) => s.id === option.nextStepId)
-      ) {
-        updateStep({ ...step, options })
-      }
-    })
-  }, [options, steps, step, updateStep])
 
   return (
     <div>
