@@ -381,36 +381,22 @@ class AdminSurveyService {
   }
 
   async getResponsesAsCSV(userId, surveyId) {
-    console.log(
-      `getResponsesAsCSV called with userId: ${userId}, surveyId: ${surveyId}`,
-    )
-
     await this.checkUserIdExist(userId)
     await this.checkSurveyIdExist(surveyId)
     await this.checkSurveyOwnership(userId, surveyId)
 
     const responses = await ResponsesRepo.getSurveyResponses(surveyId)
-    console.log('Raw responses:', JSON.stringify(responses, null, 2))
 
     if (responses.length === 0) {
-      console.log('No responses found')
       return null
     }
 
     const fields = this.getCSVFields(responses)
-    console.log('CSV Fields:', fields)
-
     const opts = { fields }
     const parser = new Parser(opts)
 
     const formattedResponses = this.formatResponsesForCSV(responses)
-    console.log(
-      'Formatted responses:',
-      JSON.stringify(formattedResponses, null, 2),
-    )
-
     let csvData = parser.parse(formattedResponses)
-    console.log('CSV Data (first 500 characters):', csvData.substring(0, 500))
 
     // UTF-8 BOM 추가
     csvData = '\uFEFF' + csvData
@@ -422,7 +408,6 @@ class AdminSurveyService {
     const baseFields = ['Response ID', 'Created At', 'Is Complete']
     const questionFields = this.getUniqueQuestions(responses)
     const allFields = [...baseFields, ...questionFields]
-    console.log('All CSV Fields:', allFields)
     return allFields
   }
 
@@ -432,7 +417,6 @@ class AdminSurveyService {
       response.answers.forEach((answer) => questions.add(answer.stepTitle))
     })
     const uniqueQuestions = Array.from(questions)
-    console.log('Unique Questions:', uniqueQuestions)
     return uniqueQuestions
   }
 
@@ -450,10 +434,6 @@ class AdminSurveyService {
       })
 
       const formattedResponse = { ...baseInfo, ...answers }
-      console.log(
-        'Formatted Response:',
-        JSON.stringify(formattedResponse, null, 2),
-      )
       return formattedResponse
     })
   }
@@ -467,7 +447,6 @@ class AdminSurveyService {
   }
 
   formatAnswer(answer) {
-    console.log('Formatting answer:', answer)
     if (Array.isArray(answer)) {
       return answer.map((a) => this.formatSingleAnswer(a)).join(', ')
     } else {

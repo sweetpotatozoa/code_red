@@ -47,6 +47,14 @@
   margin-bottom: 16px;
 }
 
+.textInputContainer {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
 .buttonContainer {
   display: flex;
   justify-content: flex-end;
@@ -102,7 +110,7 @@
 
 .inputContainer {
   display: flex;
-  margin-bottom: 16px;
+  margin-bottom: 0px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
