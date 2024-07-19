@@ -120,93 +120,17 @@
   background-color: #e5ebf3;
 }
 
-/* 라디오 버튼 스타일 */
 .optionLabel input[type='radio'] {
   margin-right: 8px;
-  /* 기본 라디오 버튼 스타일 사용 */
 }
 
-/* 체크박스 스타일 */
 .optionLabel input[type='checkbox'] {
   margin-right: 8px;
-  /* 기본 체크박스 스타일 사용 */
 }
 
-/* 선택된 옵션 레이블 스타일 */
 .optionLabel.checked {
   background-color: #e5ebf3;
 }
-
-/* 
-  커스텀 라디오 버튼 스타일 (주석 처리)
-.optionLabel input[type='radio'] {
-  margin-right: 8px;
-  width: 14px;
-  height: 14px;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  border: 1px solid #e5ebf3;
-  border-radius: 50%;
-  outline: none;
-  transition: border-color 0.2s, background-color 0.2s;
-  cursor: pointer;
-  position: relative;
-}
-
-.optionLabel input[type='radio']:checked {
-  border-color: #007bff;
-}
-
-.optionLabel input[type='radio']:checked::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  background-color: #007bff;
-  border-radius: 50%;
-}
-*/
-
-/*
-  커스텀 체크박스 스타일 (주석 처리)
-.optionLabel input[type='checkbox'] {
-  margin-right: 8px;
-  width: 14px;
-  height: 14px;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  border: 1px solid #e5ebf3;
-  border-radius: 3px;
-  outline: none;
-  transition: border-color 0.2s, background-color 0.2s;
-  position: relative;
-  cursor: pointer;
-}
-
-.optionLabel input[type='checkbox']:checked {
-  background-color: #007bff;
-  border-color: #007bff;
-}
-
-.optionLabel input[type='checkbox']:checked::before {
-  content: '\2713';
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  color: #e5ebf3;
-  font-size: 12px;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-*/
 
 .starInputContainer {
   display: flex;
@@ -241,6 +165,12 @@
 .starInputContainer .starOptionLabel.checked .star,
 .starInputContainer .starOptionLabel.checked ~ .starOptionLabel .star {
   color: #ffca28;
+}
+
+.star {
+  font-size: 50px;
+  cursor: pointer;
+  color: #e5ebf3;
 }
 
 textarea {
