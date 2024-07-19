@@ -137,7 +137,6 @@
 }
 
 .starOptionLabel {
-  flex: 0 0 auto; /* 자동으로 크기 조절 */
   display: flex;
   justify-content: center;
   align-items: center;
