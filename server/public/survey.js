@@ -901,25 +901,12 @@
 
   // 트리거 설정을 확인하고 설정하는 함수
   function checkAndSetupTriggers(element, sortedTriggers, cleanupFunctions) {
-    // CSS 선택자에 대한 로그를 한 번만 출력하기 위한 Set
-    const loggedSelectors = new Set()
-
     sortedTriggers.forEach(([key, surveyList]) => {
       const trigger = JSON.parse(key)
 
       if (trigger.type === 'click' && isCorrectPage(trigger)) {
         if (trigger.clickType === 'css') {
           const escapedSelector = escapeClassName(trigger.clickValue)
-
-          // 선택자에 대한 로그를 아직 출력하지 않았다면 출력
-          if (!loggedSelectors.has(escapedSelector)) {
-            const matchingElements = document.querySelectorAll(escapedSelector)
-            console.log(
-              `Click trigger for ${trigger.clickValue}. Current matching elements: ${matchingElements.length}`,
-            )
-            loggedSelectors.add(escapedSelector)
-          }
-
           if (
             element.matches(escapedSelector) &&
             !triggeredElements.has(element)
@@ -927,21 +914,18 @@
             const clickHandler = () => showSurvey(surveyList)
             element.addEventListener('click', clickHandler)
             triggeredElements.set(element, true)
-            // 개별 요소에 대한 트리거 설정 로그는 제거
+            console.log(`Click trigger set for ${trigger.clickValue}`)
             cleanupFunctions.set(element, () => {
               element.removeEventListener('click', clickHandler)
               triggeredElements.delete(element)
             })
           }
         } else if (trigger.clickType === 'text') {
-          // 텍스트 트리거 로직은 변경 없음
           const textNodes = getTextNodes(element)
-          let matchingElements = 0
           textNodes.forEach((textNode) => {
             if (textNode.textContent.trim() === trigger.clickValue) {
               const parentElement = textNode.parentElement
               if (!triggeredElements.has(parentElement)) {
-                matchingElements++
                 const eventListener = (event) => {
                   if (event.target.textContent.trim() === trigger.clickValue) {
                     showSurvey(surveyList)
@@ -961,11 +945,6 @@
               }
             }
           })
-          if (matchingElements > 0) {
-            console.log(
-              `Text trigger for "${trigger.clickValue}". Current matching elements: ${matchingElements}`,
-            )
-          }
         }
       }
     })
