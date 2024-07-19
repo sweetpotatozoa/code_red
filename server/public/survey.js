@@ -495,18 +495,16 @@
           </div>
           ${
             buttonText
-              ? `<div class="button-container">
-                   <button type="button" id="nextStepButton" class="submit-button">${buttonText}</button>
-                 </div>`
+              ? `<div class="button-container"><button type="button" id="nextStepButton" class="submit-button">${buttonText}</button></div>`
               : ''
           }
         </div>
         <div class="survey-progress">
-            <p class="powered-by">Powered by <span class="logo">CatchTalk</span></p>
-            <div class="background-bar">
-              <div class="progress-bar"></div>
-            </div>
+          <p class="powered-by">Powered by <span class="logo">CatchTalk</span></p>
+          <div class="background-bar">
+            <div class="progress-bar"></div>
           </div>
+        </div>
       </div>
     `
   }
@@ -528,7 +526,7 @@
       case 'welcome':
         return '참여하기'
       case 'link':
-        return step.buttonText
+        return step.buttonText || '링크로 이동'
       case 'thank':
         return ''
       default:
