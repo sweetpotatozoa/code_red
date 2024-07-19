@@ -128,15 +128,11 @@
 
 .starInputContainer {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 32px;
   width: 100%;
   flex-direction: row-reverse;
-}
-
-.starOptionLabel {
-  margin-bottom: 0 5px;
 }
 
 .starInputContainer:hover .starOptionLabel .star {
