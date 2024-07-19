@@ -134,26 +134,15 @@
 
 .starInputContainer {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 32px;
   width: 100%;
   flex-direction: row-reverse;
 }
 
-.starOptionLabel {
-  font-size: 48px;
-  color: #e5ebf3;
-  cursor: pointer;
-  margin: 0 8px;
-}
-
 .starOptionLabel input {
   display: none;
-}
-
-.starOptionLabel .star {
-  transition: color 0.2s;
 }
 
 .starInputContainer:hover .starOptionLabel .star {
@@ -161,7 +150,10 @@
 }
 
 .starInputContainer .starOptionLabel:hover .star,
-.starInputContainer .starOptionLabel:hover ~ .starOptionLabel .star,
+.starInputContainer .starOptionLabel:hover ~ .starOptionLabel .star {
+  color: #ffca28;
+}
+
 .starInputContainer .starOptionLabel.checked .star,
 .starInputContainer .starOptionLabel.checked ~ .starOptionLabel .star {
   color: #ffca28;

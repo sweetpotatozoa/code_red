@@ -317,7 +317,7 @@
       const stars = starContainer.querySelectorAll('.starOptionLabel')
       stars.forEach((star, index) => {
         star.addEventListener('click', () => {
-          const rating = 5 - index // 역순으로 인덱스 계산
+          const rating = 5 - index
           stars.forEach((s, i) => {
             if (i >= index) {
               s.classList.add('checked')
@@ -325,7 +325,6 @@
               s.classList.remove('checked')
             }
           })
-          // 여기에 선택된 rating 값을 저장하는 로직 추가
         })
       })
     }
@@ -645,16 +644,18 @@
       case 'rating':
         const starContainer = document.createElement('div')
         starContainer.className = 'starInputContainer'
-        ;[5, 4, 3, 2, 1].forEach((value) => {
+
+        // 별 개수에 따라 동적으로 생성
+        step.options.reverse().forEach((option) => {
           const label = document.createElement('label')
           label.className = 'starOptionLabel'
-          label.htmlFor = `rating-${value}`
+          label.htmlFor = `rating-${option.id}`
 
           const input = document.createElement('input')
           input.type = 'radio'
           input.name = 'rating'
-          input.value = value
-          input.id = `rating-${value}`
+          input.value = option.value
+          input.id = `rating-${option.id}`
 
           const span = document.createElement('span')
           span.className = 'star'
