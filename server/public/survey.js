@@ -907,6 +907,12 @@
       if (trigger.type === 'click' && isCorrectPage(trigger)) {
         if (trigger.clickType === 'css') {
           const escapedSelector = escapeClassName(trigger.clickValue)
+          const matchingElements = document.querySelectorAll(escapedSelector)
+          console.log(
+            `Elements matched by CSS selector "${escapedSelector}":`,
+            matchingElements.length,
+          )
+
           if (
             element.matches(escapedSelector) &&
             !triggeredElements.has(element)
@@ -914,7 +920,9 @@
             const clickHandler = () => showSurvey(surveyList)
             element.addEventListener('click', clickHandler)
             triggeredElements.set(element, true)
-            console.log(`Click trigger set for ${trigger.clickValue}`)
+            console.log(
+              `Click trigger set for CSS selector: ${trigger.clickValue}`,
+            )
             cleanupFunctions.set(element, () => {
               element.removeEventListener('click', clickHandler)
               triggeredElements.delete(element)
@@ -922,8 +930,10 @@
           }
         } else if (trigger.clickType === 'text') {
           const textNodes = getTextNodes(element)
+          let matchCount = 0
           textNodes.forEach((textNode) => {
             if (textNode.textContent.trim() === trigger.clickValue) {
+              matchCount++
               const parentElement = textNode.parentElement
               if (!triggeredElements.has(parentElement)) {
                 const eventListener = (event) => {
@@ -945,6 +955,10 @@
               }
             }
           })
+          console.log(
+            `Elements matched by text content "${trigger.clickValue}":`,
+            matchCount,
+          )
         }
       }
     })
