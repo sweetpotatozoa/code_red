@@ -524,11 +524,10 @@
 
     contentWrapper.appendChild(textContent)
 
-    // Input Content - 필요한 경우에만 생성
-    const inputContent = generateStepContent(step)
-    if (inputContent) {
-      inputContent.className = 'input-content'
-      contentWrapper.appendChild(inputContent)
+    // Step Content - 직접 contentWrapper에 추가
+    const stepContent = generateStepContent(step)
+    if (stepContent) {
+      contentWrapper.appendChild(stepContent)
     }
 
     // Button Container
