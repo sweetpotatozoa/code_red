@@ -968,6 +968,8 @@
 
   // 이스케이프 처리 함수 정의
   function escapeClassName(selectorString) {
+    console.log('Original selector:', JSON.stringify(selectorString))
+
     // ID 선택자(#)로 시작하는 경우
     if (selectorString.startsWith('#')) {
       return selectorString.replace(
@@ -977,17 +979,21 @@
     }
 
     // 클래스 선택자의 경우
-    return selectorString
-      .split(' ')
+    const escapedSelector = selectorString
+      .split(/\s+/)
       .map((className) => {
-        // 이미 .으로 시작하는 경우 그대로 두고, 아니면 .을 추가
+        if (className === '') return ''
         const prefix = className.startsWith('.') ? '' : '.'
+        // '_'는 이스케이프 처리하지 않음
         return (
           prefix +
           className.replace(/([!"#$%&'()*+,/:;<=>?@[\\\]^`{|}~])/g, '\\$1')
         )
       })
-      .join('')
+      .join(' ')
+
+    console.log('Escaped selector:', JSON.stringify(escapedSelector))
+    return escapedSelector
   }
 
   // 초기화 함수 - 초기화 함수로, 고객 ID를 추출하고 설문조사 데이터를 가져온 후 트리거를 설정합니다.
