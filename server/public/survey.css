@@ -132,10 +132,12 @@
   align-items: center;
   margin-bottom: 16px;
   width: 100%;
+  flex-direction: row-reverse;
 }
 
 .starOptionLabel {
   display: flex;
+  flex: 0 0 50px;
   align-items: center;
   justify-content: center;
   width: 50px;
@@ -150,7 +152,6 @@
   cursor: pointer;
 }
 
-/* 호버 및 체크 스타일은 그대로 유지 */
 .starInputContainer:hover .starOptionLabel .star {
   color: #e5ebf3;
 }
