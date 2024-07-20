@@ -33,6 +33,11 @@ const Home = () => {
         setSurveys(Array.isArray(result) ? result : [])
         const customerInfo = await backendApis.getUserInfo()
         setUserInfo(customerInfo)
+
+        // 사용자 정보의 isOnboarding 상태 확인
+        if (!customerInfo.isOnboarding) {
+          navigate('/onboarding')
+        }
       } catch (error) {
         console.error('Error initializing data:', error)
         navigate('/login')

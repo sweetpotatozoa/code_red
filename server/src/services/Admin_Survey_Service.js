@@ -82,6 +82,7 @@ class AdminSurveyService {
       realName: userInfo.realName || '익명의 유저',
       surveyPosition: userInfo.surveyPosition || 4,
       isConnect: userInfo.isConnect || false,
+      isOnboarding: userInfo.isOnboarding || false,
     }
   }
 
