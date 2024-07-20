@@ -1,28 +1,21 @@
-;(async function () {
+;(function () {
   console.log('CatchTalk script loaded')
 
   const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
-  window.activeSurveyId = null
-  let currentStep = 0
-  let surveyResponseId = null
-  let surveyResponses = []
-  let surveys = []
+
+  // CatchTalk 객체 생성
+  window.CatchTalk = {
+    activeSurveyId: null,
+    currentStep: 0,
+    surveyResponseId: null,
+    surveyResponses: [],
+    surveys: [],
+    userId: null,
+  }
+
   const triggeredElements = new WeakMap()
 
   // 1. Helper Functions
-
-  // URL에서 userId 추출
-  function getUserIdFromUrl() {
-    const scriptElements = document.getElementsByTagName('script')
-    for (let script of scriptElements) {
-      const src = script.src
-      const match = src.match(/userId=([0-9a-fA-F]{24})/)
-      if (match) {
-        return match[1]
-      }
-    }
-    return null
-  }
 
   // 로컬 스토리지에서 설문조사 데이터를 가져오기
   function getSurveyData(surveyId) {
@@ -37,7 +30,7 @@
 
   // 설문조사 응답을 저장
   function saveResponse(step, answer) {
-    surveyResponses.push({
+    CatchTalk.surveyResponses.push({
       stepId: step.id,
       stepTitle: step.title,
       stepDescription: step.description,
@@ -134,11 +127,11 @@
 
       // updateResponse 호출 시 로컬 스토리지의 completed 값을 true로 변경
       const surveyData = JSON.parse(
-        localStorage.getItem(`survey-${window.activeSurveyId}`),
+        localStorage.getItem(`survey-${CatchTalk.activeSurveyId}`),
       )
       if (surveyData) {
         surveyData.completed = true
-        saveSurveyData(window.activeSurveyId, surveyData)
+        saveSurveyData(CatchTalk.activeSurveyId, surveyData)
       }
 
       return result.json()
@@ -158,6 +151,17 @@
       console.error('노출 카운트 증가 중 오류 발생:', error)
     }
   }
+
+  // CatchTalk 객체에 헬퍼 함수 추가
+  Object.assign(CatchTalk, {
+    getSurveyData,
+    saveSurveyData,
+    saveResponse,
+    fetchSurvey,
+    createResponse,
+    updateResponse,
+    incrementViews,
+  })
 
   // 2. Survey Validation Functions
 
@@ -185,8 +189,6 @@
       console.error(`Survey ${survey._id}: 'delay.delayValue' must be a number`)
       return false
     }
-
-    // Trigger validation remains the same
 
     for (let step of survey.steps) {
       if (!step.id) {
@@ -286,11 +288,14 @@
     return true
   }
 
+  // CatchTalk 객체에 유효성 검사 함수 추가
+  CatchTalk.validateSurvey = validateSurvey
+
   // 3. Survey Display Functions
 
   // 설문조사 표시 조건 확인
   function canShowSurvey(survey) {
-    const surveyData = getSurveyData(survey._id)
+    const surveyData = CatchTalk.getSurveyData(survey._id)
     if (!surveyData) return true
 
     const { lastShownTime, completed } = surveyData
@@ -339,7 +344,7 @@
     const surveyContainer = document.getElementById('survey-popup')
 
     if (!step) {
-      closeSurvey(survey._id, false)
+      CatchTalk.closeSurvey(survey._id, false)
       return
     }
 
@@ -348,7 +353,7 @@
     surveyContainer.appendChild(generateStepHTML(step))
 
     document.getElementById('closeSurvey').onclick = () => {
-      closeSurvey(survey._id, step.type === 'thank')
+      CatchTalk.closeSurvey(survey._id, step.type === 'thank')
     }
 
     if (step.type === 'singleChoice' || step.type === 'multipleChoice') {
@@ -371,7 +376,7 @@
     const nextButton = document.getElementById('nextStepButton')
     if (nextButton) {
       if (step.type === 'thank') {
-        nextButton.onclick = () => closeSurvey(survey._id, true)
+        nextButton.onclick = () => CatchTalk.closeSurvey(survey._id, true)
       } else {
         nextButton.onclick = async function (event) {
           event.preventDefault()
@@ -381,17 +386,21 @@
             return
           }
 
-          saveResponse(step, stepAnswer)
+          CatchTalk.saveResponse(step, stepAnswer)
 
           try {
-            if (surveyResponseId) {
-              await updateResponse(surveyResponseId, surveyResponses, false)
+            if (CatchTalk.surveyResponseId) {
+              await CatchTalk.updateResponse(
+                CatchTalk.surveyResponseId,
+                CatchTalk.surveyResponses,
+                false,
+              )
             } else {
-              surveyResponseId = await createResponse(
-                survey.userId,
+              CatchTalk.surveyResponseId = await CatchTalk.createResponse(
+                CatchTalk.userId,
                 survey._id,
                 {
-                  ...surveyResponses[0],
+                  ...CatchTalk.surveyResponses[0],
                 },
               )
             }
@@ -446,7 +455,11 @@
 
             // isComplete가 true일 때만 updateResponse 호출
             if (isComplete) {
-              await updateResponse(surveyResponseId, surveyResponses, true)
+              await CatchTalk.updateResponse(
+                CatchTalk.surveyResponseId,
+                CatchTalk.surveyResponses,
+                true,
+              )
             }
 
             // 다음 스텝으로 이동 또는 설문 종료
@@ -462,7 +475,7 @@
                 )
                 showStep(survey, thankStepIndex)
               } else {
-                closeSurvey(survey._id, true)
+                CatchTalk.closeSurvey(survey._id, true)
               }
             }
           } catch (error) {
@@ -601,13 +614,17 @@
     if (surveyPopup) {
       surveyPopup.remove()
     }
-    window.activeSurveyId = null
+    CatchTalk.activeSurveyId = null
 
     window.dispatchEvent(new Event('surveyCompleted'))
 
     // 서버 응답 업데이트
-    if (surveyResponseId) {
-      updateResponse(surveyResponseId, surveyResponses, isComplete)
+    if (CatchTalk.surveyResponseId) {
+      CatchTalk.updateResponse(
+        CatchTalk.surveyResponseId,
+        CatchTalk.surveyResponses,
+        isComplete,
+      )
     }
   }
 
@@ -726,6 +743,18 @@
     }
   }
 
+  // CatchTalk 객체에 설문조사 표시 관련 함수들 추가
+  Object.assign(CatchTalk, {
+    canShowSurvey,
+    showStep,
+    closeSurvey,
+    generateStepHTML,
+    updateProgressBar,
+    getButtonText,
+    generateStepContent,
+    getResponse,
+  })
+
   // 4. Event Listener and Trigger Setup
 
   // Debounce 함수
@@ -744,8 +773,11 @@
   // Debounce와 조건 체크를 포함한 showSurvey 함수
   const showSurvey = debounce((surveyList) => {
     for (let survey of surveyList) {
-      if (window.activeSurveyId === null && canShowSurvey(survey)) {
-        loadSurvey(survey)
+      if (
+        CatchTalk.activeSurveyId === null &&
+        CatchTalk.canShowSurvey(survey)
+      ) {
+        CatchTalk.loadSurvey(survey)
         break
       }
     }
@@ -775,7 +807,7 @@
   // URL 트리거를 감지하고 설문조사를 표시하는 함수
   function handleUrlChange() {
     const currentUrl = new URL(window.location.href)
-    surveys.forEach((survey) => {
+    CatchTalk.surveys.forEach((survey) => {
       survey.triggers.forEach((trigger) => {
         if (trigger.type === 'url') {
           // #checkConnection 특별 케이스 처리
@@ -812,7 +844,7 @@
 
   // 트리거 설정 및 처리
   function setupTriggers(surveysData) {
-    surveys = surveysData
+    CatchTalk.surveys = surveysData
     const surveyMap = new Map()
 
     // 트리거 유형별 우선순위 설정
@@ -825,7 +857,7 @@
     }
 
     // 각 설문조사의 트리거를 surveyMap에 추가
-    surveys.forEach((survey) => {
+    CatchTalk.surveys.forEach((survey) => {
       survey.triggers.forEach((trigger) => {
         const key = JSON.stringify({
           ...trigger,
@@ -1118,12 +1150,12 @@
 
   // 설문조사 로드 - 설문조사를 시작하고 첫 번째 스텝을 표시합니다.
   function loadSurvey(survey) {
-    if (window.activeSurveyId !== null) {
+    if (CatchTalk.activeSurveyId !== null) {
       return
     }
-    window.activeSurveyId = survey._id
-    currentStep = 0
-    surveyResponses = []
+    CatchTalk.activeSurveyId = survey._id
+    CatchTalk.currentStep = 0
+    CatchTalk.surveyResponses = []
 
     const link = document.createElement('link')
     link.rel = 'stylesheet'
@@ -1134,20 +1166,64 @@
     link.onload = async () => {
       const surveyContainer = document.createElement('div')
       surveyContainer.id = 'survey-popup'
-      surveyContainer.classList.add(`survey-popup-position-${survey.position}`) // 이 줄 추가
+      surveyContainer.classList.add(`survey-popup-position-${survey.position}`)
       document.body.appendChild(surveyContainer)
 
-      await incrementViews(survey._id)
+      await CatchTalk.incrementViews(survey._id)
 
-      showStep(survey, currentStep)
+      CatchTalk.showStep(survey, CatchTalk.currentStep)
 
-      saveSurveyData(survey._id, {
+      CatchTalk.saveSurveyData(survey._id, {
         lastShownTime: new Date().toISOString(),
         completed: false,
       })
     }
   }
 
-  // 스크립트 초기화 호출
-  init()
+  // CatchTalk 객체에 트리거 및 초기화 관련 함수들 추가
+  Object.assign(CatchTalk, {
+    setupTriggers,
+    loadSurvey,
+    handleUrlChange,
+    isCorrectPage,
+  })
+
+  // 초기화 함수
+  CatchTalk.init = async function (config) {
+    if (!config || !config.userId) {
+      throw new Error('User ID is required in the configuration')
+    }
+
+    CatchTalk.userId = config.userId
+
+    try {
+      const surveyData = await CatchTalk.fetchSurvey(CatchTalk.userId)
+      if (surveyData) {
+        const cleanupTriggers = CatchTalk.setupTriggers(surveyData.data)
+
+        // 페이지 언로드 시 클린업 수행
+        window.addEventListener('beforeunload', () =>
+          cleanupTriggers(CatchTalk.activeSurveyId),
+        )
+
+        // 설문조사 완료 시 클린업 수행 + 닫기 버튼을 눌러서 완료할 시에도 동작
+        function handleSurveyCompletion() {
+          cleanupTriggers(CatchTalk.activeSurveyId)
+          window.removeEventListener('surveyCompleted', handleSurveyCompletion)
+        }
+        window.addEventListener('surveyCompleted', handleSurveyCompletion)
+      }
+    } catch (error) {
+      console.error('Error initializing survey script:', error)
+    }
+  }
+
+  // 스크립트 로드 완료 후 실행되는 코드
+  if (document.readyState === 'complete') {
+    console.log('CatchTalk script is ready to be initialized')
+  } else {
+    window.addEventListener('load', function () {
+      console.log('CatchTalk script is ready to be initialized')
+    })
+  }
 })()
