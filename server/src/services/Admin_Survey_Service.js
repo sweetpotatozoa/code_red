@@ -325,7 +325,9 @@ class AdminSurveyService {
       throw new Error('No response found')
     }
 
-    await this.checkSurveyOwnership(userId, response.surveyId)
+    const surveyId = response.surveyId
+
+    await SurveysRepo.decreaseView(surveyId)
 
     return ResponsesRepo.deleteResponse(responseId)
   }
