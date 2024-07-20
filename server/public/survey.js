@@ -1,8 +1,7 @@
 ;(function () {
   console.log('CatchTalk script loaded')
 
-  const API_URI =
-    'https://port-0-checktalk-dev-ss7z32llwexb5xe.sel5.cloudtype.app'
+  const API_URI = 'https://api.catchtalk.co.kr'
 
   // CatchTalk 객체 생성
   window.CatchTalk = {
@@ -431,53 +430,55 @@
               nextStepId = step.nextStepId
             }
 
-            let nextStepIndex
-            if (!nextStepId || nextStepId === '') {
-              nextStepIndex = activeSteps.findIndex((s) => s.id === step.id) + 1
-            } else {
-              nextStepIndex = activeSteps.findIndex((s) => s.id === nextStepId)
-              if (nextStepIndex === -1) {
-                nextStepIndex =
-                  activeSteps.findIndex((s) => s.id === step.id) + 1
-              }
-            }
+            // 'thank' 스텝의 존재 여부 확인 (활성화 여부와 관계없이)
+            const thankStep = survey.steps.find((s) => s.type === 'thank')
 
             // isComplete 결정 로직
             let isComplete = false
-            if (nextStepIndex >= activeSteps.length) {
-              // 마지막 스텝 완료
-              isComplete = true
-            } else {
-              const nextStep = survey.steps[nextStepIndex]
-              if (nextStep.type === 'thank' && nextStep.isActive) {
-                // thank 스텝으로 진입
+            if (thankStep) {
+              if (nextStepId === '' || nextStepId === null) {
+                // nextStepId가 비어있거나 null이면, 다음 활성화된 스텝이 'thank'인지 확인
+                const currentStepIndex = activeSteps.findIndex(
+                  (s) => s.id === step.id,
+                )
+                const nextActiveStep = activeSteps[currentStepIndex + 1]
+                if (nextActiveStep && nextActiveStep.type === 'thank') {
+                  isComplete = true
+                } else if (!nextActiveStep) {
+                  // 다음 활성화된 스텝이 없고, thank 스텝이 존재하면 완료로 간주
+                  isComplete = true
+                }
+              } else if (nextStepId === thankStep.id) {
+                // nextStepId가 'thank' 스텝의 id와 일치하면 완료
                 isComplete = true
               }
             }
 
-            // isComplete가 true일 때만 updateResponse 호출
-            if (isComplete) {
-              await CatchTalk.updateResponse(
-                CatchTalk.surveyResponseId,
-                CatchTalk.surveyResponses,
-                true,
-              )
-            }
+            // 서버에 응답 업데이트
+            await CatchTalk.updateResponse(
+              CatchTalk.surveyResponseId,
+              CatchTalk.surveyResponses,
+              isComplete,
+            )
 
             // 다음 스텝으로 이동 또는 설문 종료
-            if (nextStepIndex < activeSteps.length) {
-              showStep(survey, nextStepIndex)
-            } else {
-              const thankStep = survey.steps.find(
-                (step) => step.type === 'thank' && step.isActive,
+            if (nextStepId && nextStepId !== '') {
+              const nextStepIndex = activeSteps.findIndex(
+                (s) => s.id === nextStepId,
               )
-              if (thankStep) {
-                const thankStepIndex = survey.steps.findIndex(
-                  (step) => step.id === thankStep.id,
-                )
-                showStep(survey, thankStepIndex)
+              if (nextStepIndex !== -1) {
+                showStep(survey, nextStepIndex)
               } else {
-                CatchTalk.closeSurvey(survey._id, true)
+                CatchTalk.closeSurvey(survey._id, isComplete)
+              }
+            } else {
+              const currentStepIndex = activeSteps.findIndex(
+                (s) => s.id === step.id,
+              )
+              if (currentStepIndex < activeSteps.length - 1) {
+                showStep(survey, currentStepIndex + 1)
+              } else {
+                CatchTalk.closeSurvey(survey._id, isComplete)
               }
             }
           } catch (error) {
