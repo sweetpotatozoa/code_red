@@ -45,7 +45,7 @@
     try {
       // 설문조사 데이터 가져오기
       const response = await fetch(
-        `${API_URI}/api/appliedSurvey?environmentId=${environmentId}&isDeploy=true`,
+        `${API_URI}/api/appliedSurvey?userId=${environmentId}&isDeploy=true`,
       )
       if (!response.ok) {
         throw new Error('Network response was not ok')
@@ -85,7 +85,7 @@
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          environmentId,
+          userId: environmentId,
           surveyId,
           answers: [answer],
           createAt: answer.timestamp,
