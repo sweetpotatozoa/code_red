@@ -396,3 +396,11 @@ input:checked + .slider:before {
   cursor: pointer;
   margin-left: 0;
 }
+
+.connect {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 8px 16px;
+  margin-left: 16px;
+  border-radius: 5px;
+}

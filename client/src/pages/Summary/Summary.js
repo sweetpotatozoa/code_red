@@ -128,7 +128,9 @@ const Summary = () => {
       </div>
       <div className={styles.main}>
         <div className={styles.basicSetting}>
-          <div className={styles.setting}>연결상태 정상</div>
+          <div className={styles.connect}>
+            연결상태 {userInfo.isConnect ? '정상' : '비정상'}
+          </div>
           <a
             href='https://zenith-income-03c.notion.site/1-079333926e1c44899b4d44ab50a98a83/'
             target='_blank'
@@ -218,6 +220,10 @@ const Summary = () => {
           </div>
           <div className={styles.steps}>
             {surveyQuestions.map((question) => {
+              if (question.type === 'welcome' && !question.isActive) {
+                return null
+              }
+
               switch (question.type) {
                 case 'welcome':
                   return <SummaryWelcome key={question.id} data={question} />
