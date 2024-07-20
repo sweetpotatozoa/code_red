@@ -432,11 +432,12 @@
 
             let nextStepIndex
             if (!nextStepId || nextStepId === '') {
-              nextStepIndex = stepIndex + 1
+              nextStepIndex = activeSteps.findIndex((s) => s.id === step.id) + 1
             } else {
-              nextStepIndex = survey.steps.findIndex((s) => s.id === nextStepId)
+              nextStepIndex = activeSteps.findIndex((s) => s.id === nextStepId)
               if (nextStepIndex === -1) {
-                nextStepIndex = stepIndex + 1
+                nextStepIndex =
+                  activeSteps.findIndex((s) => s.id === step.id) + 1
               }
             }
 
