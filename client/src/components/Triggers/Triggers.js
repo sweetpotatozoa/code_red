@@ -75,7 +75,11 @@ const Triggers = ({ survey, setSurvey }) => {
             어떤 조건에서 설문조사가 뜨게 하고 싶으신가요?
           </div>
         </div>
-        <a href='https://www.naver.com/' target='_blank' rel='noreferrer'>
+        <a
+          href='https://zenith-income-03c.notion.site/1-079333926e1c44899b4d44ab50a98a83/'
+          target='_blank'
+          rel='noreferrer'
+        >
           <div className={styles.guide}>가이드</div>
         </a>
       </div>

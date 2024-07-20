@@ -132,3 +132,8 @@
 .complete img {
   margin-bottom: 32px;
 }
+
+.syntaxHighlighter {
+  max-height: 300px;
+  overflow-y: auto;
+}
