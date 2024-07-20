@@ -9,6 +9,25 @@
       name="description"
       content="Web site created using create-react-app"
     />
+    <script type="text/javascript">
+      ;(function () {
+        var t = document.createElement('script')
+        t.type = 'text/javascript'
+        t.async = !0
+        t.src = 'https://api.catchtalk.co.kr/survey.js'
+        var e = document.getElementsByTagName('script')[0]
+        e.parentNode.insertBefore(t, e)
+
+        t.onload = function () {
+          setTimeout(function () {
+            window.CatchTalk.init({
+              environmentId: '669baaa542e5d4a7dae09566',
+              apiHost: 'https://api.catchtalk.co.kr',
+            })
+          }, 500)
+        }
+      })()
+    </script>
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
