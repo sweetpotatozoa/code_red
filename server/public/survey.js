@@ -10,7 +10,7 @@
     surveyResponseId: null,
     surveyResponses: [],
     surveys: [],
-    userId: null,
+    environmentId: null,
   }
 
   const triggeredElements = new WeakMap()
@@ -41,11 +41,11 @@
   }
 
   // HTTP 요청을 통해 설문조사 데이터 가져오기
-  async function fetchSurvey(userId) {
+  async function fetchSurvey(environmentId) {
     try {
       // 설문조사 데이터 가져오기
       const response = await fetch(
-        `${API_URI}/api/appliedSurvey?userId=${userId}&isDeploy=true`,
+        `${API_URI}/api/appliedSurvey?environmentId=${environmentId}&isDeploy=true`,
       )
       if (!response.ok) {
         throw new Error('Network response was not ok')
@@ -56,7 +56,7 @@
 
       // 사용자 데이터에서 surveyPosition 값 가져오기
       const userResponse = await fetch(
-        `${API_URI}/api/appliedSurvey/users/${userId}`,
+        `${API_URI}/api/appliedSurvey/users/${environmentId}`,
       )
       if (!userResponse.ok) {
         throw new Error('Network response was not ok')
@@ -77,7 +77,7 @@
   }
 
   // 설문조사 응답 생성
-  async function createResponse(userId, surveyId, answer) {
+  async function createResponse(environmentId, surveyId, answer) {
     try {
       const result = await fetch(`${API_URI}/api/appliedSurvey/response`, {
         method: 'POST',
@@ -85,7 +85,7 @@
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId,
+          environmentId,
           surveyId,
           answers: [answer],
           createAt: answer.timestamp,
@@ -397,7 +397,7 @@
               )
             } else {
               CatchTalk.surveyResponseId = await CatchTalk.createResponse(
-                CatchTalk.userId,
+                CatchTalk.environmentId,
                 survey._id,
                 {
                   ...CatchTalk.surveyResponses[0],
@@ -1120,34 +1120,6 @@
     return textNodes
   }
 
-  // 초기화 함수 - 초기화 함수로, 고객 ID를 추출하고 설문조사 데이터를 가져온 후 트리거를 설정합니다.
-  async function init() {
-    const userId = getUserIdFromUrl()
-    if (!userId) {
-      throw new Error('User ID is not provided in the URL')
-    }
-    try {
-      const surveyData = await fetchSurvey(userId)
-      if (surveyData) {
-        const cleanupTriggers = setupTriggers(surveyData.data)
-
-        // 페이지 언로드 시 클린업 수행
-        window.addEventListener('beforeunload', () =>
-          cleanupTriggers(window.activeSurveyId),
-        )
-
-        // 설문조사 완료 시 클린업 수행 + 닫기 버튼을 눌러서 완료할 시에도 동작
-        function handleSurveyCompletion() {
-          cleanupTriggers(window.activeSurveyId)
-          window.removeEventListener('surveyCompleted', handleSurveyCompletion)
-        }
-        window.addEventListener('surveyCompleted', handleSurveyCompletion)
-      }
-    } catch (error) {
-      console.error('Error initializing survey script:', error)
-    }
-  }
-
   // 설문조사 로드 - 설문조사를 시작하고 첫 번째 스텝을 표시합니다.
   function loadSurvey(survey) {
     if (CatchTalk.activeSurveyId !== null) {
@@ -1190,14 +1162,14 @@
 
   // 초기화 함수
   CatchTalk.init = async function (config) {
-    if (!config || !config.userId) {
+    if (!config || !config.environmentId) {
       throw new Error('User ID is required in the configuration')
     }
 
-    CatchTalk.userId = config.userId
+    CatchTalk.environmentId = config.environmentId
 
     try {
-      const surveyData = await CatchTalk.fetchSurvey(CatchTalk.userId)
+      const surveyData = await CatchTalk.fetchSurvey(CatchTalk.environmentId)
       if (surveyData) {
         const cleanupTriggers = CatchTalk.setupTriggers(surveyData.data)
 
