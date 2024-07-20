@@ -1,15 +1,15 @@
 import styles from './Onboarding.module.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Role from '../../components/Onboardings/Role'
 import Purpose from '../../components/Onboardings/Purpose'
 import Connecting from '../../components/Onboardings/Connecting'
 import Complete from '../../components/Onboardings/Complete'
 
 const Onboarding = () => {
-  //현재 단계
+  // 현재 단계
   const [currentStep, setCurrentStep] = useState(0)
 
-  //온보딩 응답 정보
+  // 온보딩 응답 정보
   const [onboardingInfo, setOnboardingInfo] = useState({
     role: '',
     purpose: '',
@@ -17,7 +17,16 @@ const Onboarding = () => {
     isOnboarding: false,
   })
 
-  //랜더링
+  // dev 모드 확인
+  const [devMode, setDevMode] = useState(false)
+
+  useEffect(() => {
+    if (window.location.hash === '#dev') {
+      setDevMode(true)
+    }
+  }, [])
+
+  // 랜더링
   const renderStep = () => {
     switch (currentStep) {
       case 0:
@@ -39,6 +48,7 @@ const Onboarding = () => {
           <Connecting
             setCurrentStep={setCurrentStep}
             setOnboardingInfo={setOnboardingInfo}
+            devMode={devMode} // devMode prop 전달
           />
         )
       case 3:

@@ -4,7 +4,7 @@ import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import backendApis from '../../utils/backendApis'
 import { useState, useEffect } from 'react'
 
-const Connecting = ({ setCurrentStep, setOnboardingInfo }) => {
+const Connecting = ({ setCurrentStep, setOnboardingInfo, devMode }) => {
   const [userId, setUserId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [connectionStatus, setConnectionStatus] = useState('waiting') // 'waiting', 'connected', 'timeout'
@@ -86,13 +86,21 @@ const Connecting = ({ setCurrentStep, setOnboardingInfo }) => {
   }
 
   // 삽입 스크립트
+  const scriptSrc = devMode
+    ? 'https://port-0-checktalk-dev-ss7z32llwexb5xe.sel5.cloudtype.app/survey.js'
+    : 'https://api.catchtalk.co.kr/survey.js'
+
+  const apiHost = devMode
+    ? 'https://port-0-checktalk-dev-ss7z32llwexb5xe.sel5.cloudtype.app'
+    : 'https://api.catchtalk.co.kr'
+
   const scriptCode = userId
     ? `<script type="text/javascript">
       (function() {
         var t = document.createElement("script");
         t.type = "text/javascript";
         t.async = !0;
-        t.src = "https://api.catchtalk.co.kr/survey.js";
+        t.src = "${scriptSrc}";
         var e = document.getElementsByTagName("script")[0];
         e.parentNode.insertBefore(t, e);
 
@@ -100,7 +108,7 @@ const Connecting = ({ setCurrentStep, setOnboardingInfo }) => {
           setTimeout(function() {
             window.CatchTalk.init({
               environmentId: "${userId}",
-              apiHost: "https://api.catchtalk.co.kr"
+              apiHost: "${apiHost}"
             });
           }, 500);
         };
