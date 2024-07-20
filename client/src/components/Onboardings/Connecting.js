@@ -92,7 +92,7 @@ const Connecting = ({ setCurrentStep, setOnboardingInfo }) => {
         var t = document.createElement("script");
         t.type = "text/javascript";
         t.async = !0;
-        t.src = "https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/survey.js";
+        t.src = "https://api.catchtalk.co.kr/survey.js";
         var e = document.getElementsByTagName("script")[0];
         e.parentNode.insertBefore(t, e);
 
@@ -100,7 +100,7 @@ const Connecting = ({ setCurrentStep, setOnboardingInfo }) => {
           setTimeout(function() {
             window.CatchTalk.init({
               environmentId: "${userId}",
-              apiHost: "https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app"
+              apiHost: "https://api.catchtalk.co.kr"
             });
           }, 500);
         };
