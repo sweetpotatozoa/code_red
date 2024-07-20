@@ -218,6 +218,10 @@ const Summary = () => {
           </div>
           <div className={styles.steps}>
             {surveyQuestions.map((question) => {
+              if (question.type === 'welcome' && !question.isActive) {
+                return null
+              }
+
               switch (question.type) {
                 case 'welcome':
                   return <SummaryWelcome key={question.id} data={question} />
