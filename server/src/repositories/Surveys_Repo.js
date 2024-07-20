@@ -128,6 +128,16 @@ class SurveysRepo {
     )
     return result.value
   }
+
+  //view하나 깎기
+  async decreaseView(surveyId) {
+    const result = await this.collection.findOneAndUpdate(
+      { _id: new ObjectId(surveyId) },
+      { $inc: { views: -1 } },
+      { returnDocument: 'after' },
+    )
+    return result.value
+  }
 }
 
 module.exports = new SurveysRepo()
