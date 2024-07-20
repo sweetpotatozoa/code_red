@@ -9,7 +9,6 @@ const SummaryWelcome = ({ data }) => {
       <div className={styles.title}>{data.title}</div>
       <div className={styles.informations}>
         <div className={styles.info}>환영인사</div>
-        <div className={styles.info}>노출 {views}명</div>
         <div className={styles.info}>응답 {responses}명</div>
       </div>
       <div className={styles.title}>CTR {ctr}%</div>
