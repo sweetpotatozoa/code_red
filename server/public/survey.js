@@ -1,8 +1,6 @@
 ;(function () {
   console.log('CatchTalk script loaded')
 
-  const API_URI = 'https://api.catchtalk.co.kr'
-
   // CatchTalk 객체 생성
   window.CatchTalk = {
     activeSurveyId: null,
@@ -45,7 +43,7 @@
     try {
       // 설문조사 데이터 가져오기
       const response = await fetch(
-        `${API_URI}/api/appliedSurvey?userId=${environmentId}&isDeploy=true`,
+        `${CatchTalk.apiHost}/api/appliedSurvey?userId=${environmentId}&isDeploy=true`,
       )
       if (!response.ok) {
         throw new Error('Network response was not ok')
@@ -56,7 +54,7 @@
 
       // 사용자 데이터에서 surveyPosition 값 가져오기
       const userResponse = await fetch(
-        `${API_URI}/api/appliedSurvey/users/${environmentId}`,
+        `${CatchTalk.apiHost}/api/appliedSurvey/users/${environmentId}`,
       )
       if (!userResponse.ok) {
         throw new Error('Network response was not ok')
@@ -79,20 +77,23 @@
   // 설문조사 응답 생성
   async function createResponse(environmentId, surveyId, answer) {
     try {
-      const result = await fetch(`${API_URI}/api/appliedSurvey/response`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const result = await fetch(
+        `${CatchTalk.apiHost}/api/appliedSurvey/response`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: environmentId,
+            surveyId,
+            answers: [answer],
+            createAt: answer.timestamp,
+            completeAt: null,
+            isComplete: false,
+          }),
         },
-        body: JSON.stringify({
-          userId: environmentId,
-          surveyId,
-          answers: [answer],
-          createAt: answer.timestamp,
-          completeAt: null,
-          isComplete: false,
-        }),
-      })
+      )
       if (!result.ok) {
         throw new Error(`HTTP error! status: ${result.status}`)
       }
@@ -108,7 +109,7 @@
   async function updateResponse(responseId, answers, isComplete) {
     try {
       const result = await fetch(
-        `${API_URI}/api/appliedSurvey/response/${responseId}`,
+        `${CatchTalk.apiHost}/api/appliedSurvey/response/${responseId}`,
         {
           method: 'PUT',
           headers: {
@@ -144,9 +145,12 @@
   // 설문조사 노출 수 카운트
   async function incrementViews(surveyId) {
     try {
-      await fetch(`${API_URI}/api/appliedSurvey/${surveyId}/increment-views`, {
-        method: 'POST',
-      })
+      await fetch(
+        `${CatchTalk.apiHost}/api/appliedSurvey/${surveyId}/increment-views`,
+        {
+          method: 'POST',
+        },
+      )
     } catch (error) {
       console.error('노출 카운트 증가 중 오류 발생:', error)
     }
@@ -509,7 +513,7 @@
     closeButton.className = 'close-button'
 
     const closeIcon = document.createElement('img')
-    closeIcon.src = `${API_URI}/images/close.svg`
+    closeIcon.src = `${CatchTalk.apiHost}/images/close.svg`
     closeIcon.alt = 'close'
     closeIcon.className = 'close-icon'
 
@@ -1135,7 +1139,7 @@
     const link = document.createElement('link')
     link.rel = 'stylesheet'
     link.type = 'text/css'
-    link.href = `${API_URI}/survey.css`
+    link.href = `${CatchTalk.apiHost}/survey.css`
     document.head.appendChild(link)
 
     link.onload = async () => {
@@ -1166,10 +1170,11 @@
   // 초기화 함수
   CatchTalk.init = async function (config) {
     if (!config || !config.environmentId) {
-      throw new Error('User ID is required in the configuration')
+      throw new Error('Environment ID is required in the configuration')
     }
 
     CatchTalk.environmentId = config.environmentId
+    CatchTalk.apiHost = config.apiHost
 
     try {
       const surveyData = await CatchTalk.fetchSurvey(CatchTalk.environmentId)
