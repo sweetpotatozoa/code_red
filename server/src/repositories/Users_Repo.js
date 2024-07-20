@@ -37,7 +37,15 @@ class UsersRepo {
   async getUserInfo(userId) {
     const userInfo = await this.collection.findOne(
       { _id: new mongoose.Types.ObjectId(userId) },
-      { projection: { realName: 1, surveyPosition: 1, isConnect: 1, _id: 1 } }, // 이름, 설문조사 위치, 연결상태 필드만 가져오기
+      {
+        projection: {
+          realName: 1,
+          surveyPosition: 1,
+          isConnect: 1,
+          _id: 1,
+          isOnboarding: 1,
+        },
+      }, // 이름, 설문조사 위치, 연결상태 필드만 가져오기
     )
     return userInfo
   }

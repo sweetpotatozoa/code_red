@@ -9,42 +9,50 @@ const EditingLink = ({ step, updateStep, steps, showWarning }) => {
   const [buttonText, setButtonText] = useState(step.buttonText || '')
   const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
 
+  useEffect(() => {
+    setTitle(step.title)
+    setDescription(step.description || '')
+    setUrl(step.url || '')
+    setButtonText(step.buttonText || '')
+    setNextStepId(step.nextStepId || '')
+  }, [step])
+
   // 제목 변경 시 상태 업데이트
   const handleTitleChange = (e) => {
-    setTitle(e.target.value)
-    updateStep({ ...step, title: e.target.value })
+    const newTitle = e.target.value
+    setTitle(newTitle)
+    updateStep({ ...step, title: newTitle })
   }
 
   // 설명 변경 시 상태 업데이트
   const handleDescriptionChange = (e) => {
-    setDescription(e.target.value)
-    updateStep({ ...step, description: e.target.value })
+    const newDescription = e.target.value
+    setDescription(newDescription)
+    updateStep({ ...step, description: newDescription })
   }
 
   // URL 변경 시 상태 업데이트
   const handleUrlChange = (e) => {
-    setUrl(e.target.value)
-    updateStep({ ...step, url: e.target.value })
+    const newUrl = e.target.value
+    setUrl(newUrl)
+    updateStep({ ...step, url: newUrl })
   }
 
   // 버튼 텍스트 변경 시 상태 업데이트
   const handleButtonTextChange = (e) => {
-    setButtonText(e.target.value)
-    updateStep({ ...step, buttonText: e.target.value })
+    const newButtonText = e.target.value
+    setButtonText(newButtonText)
+    updateStep({ ...step, buttonText: newButtonText })
   }
 
   // 다음 스텝 변경 시 상태 업데이트
   const handleNextStepChange = (e) => {
-    setNextStepId(e.target.value)
-    updateStep({ ...step, nextStepId: e.target.value })
-  }
-
-  // nextStepId 변경 시 유효성 검사 업데이트
-  useEffect(() => {
-    if (nextStepId !== '' && !steps.some((s) => s.id === nextStepId)) {
-      updateStep({ ...step, nextStepId })
+    const newNextStepId = e.target.value
+    setNextStepId(newNextStepId)
+    if (newNextStepId !== step.nextStepId) {
+      updateStep({ ...step, nextStepId: newNextStepId })
     }
-  }, [nextStepId, steps, step, updateStep])
+  }
 
   return (
     <div>
@@ -53,7 +61,7 @@ const EditingLink = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={title}
         onChange={handleTitleChange}
-        placeholder='질문을 입력하세요.'
+        placeholder='제목을 입력하세요..'
         className={styles.input}
       />
       <div className={styles.title}>설명</div>
@@ -61,7 +69,7 @@ const EditingLink = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={description}
         onChange={handleDescriptionChange}
-        placeholder='설명 (선택사항)'
+        placeholder='설명을 입력하세요.'
         className={styles.input}
       />
       <div className={styles.title}>URL</div>
