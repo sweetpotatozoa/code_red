@@ -1,0 +1,213 @@
+.previewContainer {
+  position: relative;
+  height: 500px;
+  overflow: hidden;
+}
+
+.container {
+  position: absolute;
+  width: 384px;
+  background-color: #f9fafc;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.current {
+  bottom: 16px;
+  right: 16px;
+  transform: translate(0, 0);
+  opacity: 1;
+  z-index: 2;
+}
+
+/* 나머지 스타일은 그대로 유지 */
+
+.step {
+  width: 100%;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.description {
+  font-size: 14px;
+  color: #1c0f24;
+  margin-bottom: 16px;
+}
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.textInputContainer {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.footer {
+  display: flex;
+  justify-content: right;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+}
+
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #6c7b90;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 11px 13px;
+}
+
+.waterMark {
+  font-size: 12px;
+}
+
+.logo {
+  font-weight: bold;
+}
+
+.backgroundBar {
+  height: 8px;
+  width: 100%;
+  margin-top: 16px;
+  background-color: #e5ebf3;
+  border-radius: 8px;
+}
+
+.progressBar {
+  height: 20px;
+  width: 0;
+  background-color: #6c7b90;
+  line-height: 20px;
+  border-radius: 25px;
+  height: 8px;
+}
+
+.inputContainer {
+  display: flex;
+  margin-bottom: 0px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.optionLabel {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #e5ebf3;
+  border-radius: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s ease;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.optionLabel:hover {
+  background-color: #e5ebf3;
+}
+
+.optionLabel input {
+  margin-right: 8px;
+  width: 16px;
+}
+
+.optionLabel.checked {
+  border-color: #007bff;
+  background-color: #e5ebf3;
+}
+
+.typingBox {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  min-height: 100px;
+  border: 1px solid #e5ebf3;
+  border-radius: 5px;
+  resize: none; /* 사용자가 크기를 조정하지 못하게 함 */
+  overflow-y: auto; /* 내용이 많을 때 스크롤바 표시 */
+  word-wrap: break-word; /* 텍스트가 박스 너비를 넘을 때 줄바꿈 */
+  white-space: pre-wrap; /* 공백을 유지하며 줄바꿈 */
+}
+
+.link {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #e5ebf3;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.starInputContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  width: 100%;
+  flex-direction: row-reverse;
+}
+
+/* 호버 효과 */
+.starInputContainer:hover .starOptionLabel .star {
+  color: #e5ebf3;
+}
+
+.starInputContainer .starOptionLabel:hover .star,
+.starInputContainer .starOptionLabel:hover ~ .starOptionLabel .star {
+  color: #ffca28;
+}
+
+/* 선택 후 별 채우기 유지 */
+.starInputContainer .starOptionLabel.checked .star,
+.starInputContainer .starOptionLabel.checked ~ .starOptionLabel .star {
+  color: #ffca28;
+}
+
+.starOptionLabel input {
+  display: none;
+}
+
+.star {
+  font-size: 50px;
+  color: #e5ebf3;
+  cursor: pointer;
+}
+
+.closeButton {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  cursor: pointer;
+  margin-bottom: 16px;
+}

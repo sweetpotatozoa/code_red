@@ -1,0 +1,184 @@
+.previewContainer {
+  position: relative;
+  height: 500px;
+  overflow: hidden;
+}
+
+.container {
+  position: absolute;
+  width: 384px;
+  background-color: #f9fafc;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  max-height: 400px;
+  overflow-y: auto;
+  bottom: 16px;
+  right: 16px;
+}
+
+.step {
+  width: 100%;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.description {
+  font-size: 14px;
+  color: #1c0f24;
+  margin-bottom: 16px;
+}
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0px;
+  justify-content: center;
+  align-items: center;
+}
+
+.textInputContainer {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.footer {
+  display: flex;
+  justify-content: right;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+}
+
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #6c7b90;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 11px 13px;
+}
+
+.waterMark {
+  font-size: 12px;
+}
+
+.logo {
+  font-weight: bold;
+}
+
+.backgroundBar {
+  height: 8px;
+  width: 100%;
+  margin-top: 16px;
+  background-color: #e5ebf3;
+  border-radius: 8px;
+}
+
+.progressBar {
+  height: 8px;
+  width: 0;
+  background-color: #6c7b90;
+  border-radius: 8px;
+}
+
+.optionLabel {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #e5ebf3;
+  border-radius: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s ease;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.optionLabel:hover {
+  background-color: #e5ebf3;
+}
+
+.optionLabel input {
+  margin-right: 8px;
+  width: 16px;
+}
+
+.optionLabel.checked {
+  border-color: #007bff;
+  background-color: #e9f5ff;
+}
+
+.typingBox {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  min-height: 100px;
+  border: 1px solid #e5ebf3;
+  border-radius: 5px;
+  resize: none;
+  overflow-y: auto;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.starInputContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  width: 100%;
+  flex-direction: row-reverse;
+}
+
+.starInputContainer:hover .starOptionLabel .star {
+  color: #e5ebf3;
+}
+
+.starInputContainer .starOptionLabel:hover .star,
+.starInputContainer .starOptionLabel:hover ~ .starOptionLabel .star {
+  color: #ffca28;
+}
+
+.starInputContainer .starOptionLabel.checked .star,
+.starInputContainer .starOptionLabel.checked ~ .starOptionLabel .star {
+  color: #ffca28;
+}
+
+.starOptionLabel input {
+  display: none;
+}
+
+.star {
+  font-size: 50px;
+  cursor: pointer;
+  color: #e5ebf3;
+}
+
+.closeButton {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  cursor: pointer;
+  margin-bottom: 16px;
+}

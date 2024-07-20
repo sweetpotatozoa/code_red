@@ -1,0 +1,147 @@
+.container {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  background-color: #f9fafc;
+  min-width: 1420px;
+  height: 732px;
+  overflow-x: auto;
+  flex-direction: column;
+}
+
+.header {
+  background-color: #ffffff;
+  padding: 16px;
+  width: 100%;
+  display: flex;
+  border: 1px solid #e5ebf3;
+}
+
+.bigButton {
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #e5ebf3;
+  color: #6c7b90;
+  padding: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.main {
+  display: flex;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  width: 700px;
+  margin-right: 20px;
+  border-right: 1px solid #e5ebf3;
+  height: 642px;
+}
+
+.mainTitle {
+  font-size: 36px;
+  font-weight: bold;
+  padding: 32px 16px;
+}
+
+.options {
+  display: flex;
+  width: 100%;
+  padding: 0 16px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  width: 324px;
+  padding: 16px;
+  border: 1px solid #e5ebf3;
+  background-color: #ffffff;
+  border-radius: 10px;
+  margin-top: 16px;
+}
+
+.optionTitle {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.optionContent {
+  font-size: 14px;
+}
+
+.display {
+  display: flex;
+  flex-direction: column;
+  width: 700px;
+  justify-content: center;
+}
+
+.website {
+  display: flex;
+  flex-direction: column;
+  background-color: #f2f3f6;
+  height: 518px;
+  margin-right: 16px;
+  margin-top: 32px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  position: relative;
+  padding: 16px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  padding: 0px 16px;
+}
+
+.macButton {
+  height: 16px;
+}
+
+.yourWeb {
+  font-size: 16px;
+  font-weight: bold;
+  margin-left: 16px;
+}
+
+.bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 16px;
+  padding-bottom: 16px;
+}
+
+.selected {
+  background-color: #f1f3f6;
+}
+
+.option:hover {
+  background-color: #f1f3f6;
+  cursor: pointer;
+}
+
+.smallBottom {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #11192c;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 32px;
+  font-weight: bold;
+}

@@ -1,0 +1,100 @@
+.triggers {
+  display: flex;
+  flex-direction: column;
+  margin-top: 32px;
+  margin-left: 16px;
+  margin-right: 16px;
+  background-color: white;
+  height: 668px;
+  border-radius: 10px;
+  overflow-y: auto;
+}
+
+.explain {
+  padding: 16px;
+  padding-bottom: 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.explainTitle {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.explaincontent {
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.guide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 16px;
+  border: 2px solid #e5ebf3;
+  background-color: #ffffff;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.triggerList {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+  margin-left: 16px;
+  margin-right: 16px;
+}
+
+.trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+.triggerContent {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  justify-content: left;
+  width: 592px;
+  border: 2px solid #e5ebf3;
+  border-radius: 10px;
+}
+
+.triggerTitle {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.triggerDiscription {
+  font-size: 14px;
+  margin-top: 16px;
+}
+
+.triggerDelete {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 16px;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.addTrigger {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 10px;
+  background-color: #e5ebf3;
+  cursor: pointer;
+}
