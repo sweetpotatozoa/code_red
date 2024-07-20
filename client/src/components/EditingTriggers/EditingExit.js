@@ -58,7 +58,7 @@ const EditingExit = ({ trigger, updateTrigger, setEditingTriggerId }) => {
         type='text'
         value={title}
         onChange={handleTitleChange}
-        placeholder='질문을 입력하세요.'
+        placeholder='제목을 입력하세요..'
         className={styles.input}
       />
       <div className={styles.title}>설명</div>
@@ -66,7 +66,7 @@ const EditingExit = ({ trigger, updateTrigger, setEditingTriggerId }) => {
         type='text'
         value={description}
         onChange={handleDescriptionChange}
-        placeholder='설명 (선택사항)'
+        placeholder='설명을 입력하세요.'
         className={styles.input}
       />
       <div className={styles.title}>페이지 지정하기</div>

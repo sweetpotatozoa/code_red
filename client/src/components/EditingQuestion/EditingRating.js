@@ -20,6 +20,24 @@ const EditingRating = ({ step, updateStep, steps, showWarning }) => {
         }))
   })
 
+  useEffect(() => {
+    setTitle(step.title)
+    setDescription(step.description)
+    setOptions(() =>
+      step.options && step.options.length === 5
+        ? step.options.map((option, index) => ({
+            ...option,
+            value: index + 1,
+            nextStepId: option.nextStepId || '',
+          }))
+        : Array.from({ length: 5 }, (_, index) => ({
+            id: uuidv4(),
+            value: index + 1,
+            nextStepId: '',
+          })),
+    )
+  }, [step])
+
   // 제목 변경 시 상태 업데이트
   const handleTitleChange = (e) => {
     const newTitle = e.target.value
@@ -40,20 +58,14 @@ const EditingRating = ({ step, updateStep, steps, showWarning }) => {
       option.id === optionId ? { ...option, nextStepId } : option,
     )
     setOptions(newOptions)
-    updateStep({ ...step, options: newOptions })
+    if (
+      options.some(
+        (option) => option.id === optionId && option.nextStepId !== nextStepId,
+      )
+    ) {
+      updateStep({ ...step, options: newOptions })
+    }
   }
-
-  // nextStepId 변경 시 유효성 검사 업데이트
-  useEffect(() => {
-    options.forEach((option) => {
-      if (
-        option.nextStepId !== '' &&
-        !steps.some((s) => s.id === option.nextStepId)
-      ) {
-        updateStep({ ...step, options })
-      }
-    })
-  }, [options, steps, step, updateStep])
 
   return (
     <div>
@@ -63,7 +75,7 @@ const EditingRating = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={title}
         onChange={handleTitleChange}
-        placeholder='질문을 입력하세요.'
+        placeholder='제목을 입력하세요..'
       />
       <div className={styles.title}>설명</div>
       <input
@@ -71,7 +83,7 @@ const EditingRating = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={description}
         onChange={handleDescriptionChange}
-        placeholder='설명 (선택사항)'
+        placeholder='설명을 입력하세요.'
       />
       <div className={styles.title}>
         *별점의 경우 5점 기준 '매우 동의함', 1점 기준 '전혀 동의하지 않음'으로

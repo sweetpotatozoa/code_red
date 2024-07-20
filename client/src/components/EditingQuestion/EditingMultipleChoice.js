@@ -14,6 +14,13 @@ const EditingMultipleChoice = ({ step, updateStep, steps, showWarning }) => {
   })
   const [nextStepId, setNextStepId] = useState(step.nextStepId || '')
 
+  useEffect(() => {
+    setTitle(step.title)
+    setDescription(step.description)
+    setOptions(step.options || [])
+    setNextStepId(step.nextStepId || '')
+  }, [step])
+
   // 제목 변경 시 상태 업데이트
   const handleTitleChange = (e) => {
     const newTitle = e.target.value
@@ -55,15 +62,10 @@ const EditingMultipleChoice = ({ step, updateStep, steps, showWarning }) => {
   const handleNextStepChange = (e) => {
     const newNextStepId = e.target.value
     setNextStepId(newNextStepId)
-    updateStep({ ...step, nextStepId: newNextStepId })
-  }
-
-  // nextStepId 변경 시 유효성 검사 업데이트
-  useEffect(() => {
-    if (nextStepId !== '' && !steps.some((s) => s.id === nextStepId)) {
-      updateStep({ ...step, nextStepId })
+    if (newNextStepId !== step.nextStepId) {
+      updateStep({ ...step, nextStepId: newNextStepId })
     }
-  }, [nextStepId, steps, step, updateStep])
+  }
 
   return (
     <div>
@@ -72,7 +74,7 @@ const EditingMultipleChoice = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={title}
         onChange={handleTitleChange}
-        placeholder='질문을 입력하세요.'
+        placeholder='제목을 입력하세요..'
         className={styles.input}
       />
       <div className={styles.title}>설명</div>
@@ -80,7 +82,7 @@ const EditingMultipleChoice = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={description}
         onChange={handleDescriptionChange}
-        placeholder='설명 (선택사항)'
+        placeholder='설명을 입력하세요.'
         className={styles.input}
       />
       <div className={styles.title}>선택지</div>
