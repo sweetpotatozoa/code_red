@@ -184,7 +184,7 @@ const Responses = () => {
         <div className={styles.basicSetting}>
           <div className={styles.setting}>연결상태 정상</div>
           <a
-            href='https://www.naver.com/'
+            href='https://zenith-income-03c.notion.site/1-079333926e1c44899b4d44ab50a98a83/'
             target='_blank'
             rel='noopener noreferrer'
           >

@@ -1,1 +1,1201 @@
-!async function(){let u="https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app",n=(window.activeSurveyId=null,0),p=null,m=[],c=[],i=new WeakMap;function s(e,t){localStorage.setItem("survey-"+e,JSON.stringify(t))}async function y(e,t,n){try{var r,a=await fetch(u+"/api/appliedSurvey/response/"+e,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({answers:t,completeAt:n?new Date:null,isComplete:n})});if(a.ok)return(r=JSON.parse(localStorage.getItem("survey-"+window.activeSurveyId)))&&(r.completed=!0,s(window.activeSurveyId,r)),a.json();throw new Error("HTTP error! status: "+a.status)}catch(e){throw e}}function o(e){if(!e.updateAt)return!1;if(!Array.isArray(e.triggers)||0===e.triggers.length)return!1;if(!Array.isArray(e.steps)||0===e.steps.length)return!1;if(!e.delay||!e.delay.delayType)return!1;if("number"!=typeof e.delay.delayValue)return!1;for(var t of e.steps){if(!t.id)return!1;if(void 0===t.title)return!1;if(void 0===t.description)return!1;switch(t.type){case"singleChoice":case"rating":if(!Array.isArray(t.options))return!1;for(var n of t.options){if(!n.id)return!1;if(void 0===n.value)return!1;if(void 0===n.nextStepId)return!1}break;case"multipleChoice":if(!Array.isArray(t.options))return!1;for(var r of t.options){if(!r.id)return!1;if(void 0===r.value)return!1}if(void 0===t.nextStepId)return!1;break;case"welcome":case"thank":case"link":case"freeText":case"info":if(void 0===t.nextStepId)return!1;break;default:return!1}}return!0}function r(e){t=e._id;var t=(t=localStorage.getItem("survey-"+t))?JSON.parse(t):null;if(!t)return 1;var{lastShownTime:t,completed:n}=t,r=(new Date-new Date(t))/1e3;switch(e.delay.delayType){case"once":return;case"untilCompleted":return n?void 0:r>=e.delay.delayValue;case"always":return r>=e.delay.delayValue;default:return}}async function h(s,o){let l=s.steps.filter(e=>"welcome"!==e.type&&"thank"!==e.type||e.isActive),d=l[o];var e=document.getElementById("survey-popup");if(d){if(e.innerHTML="",e.appendChild(function(e){var t=document.createElement("div"),n=(t.className="survey-step",document.createElement("div")),r=(n.className="survey-header",document.createElement("button")),a=(r.type="button",r.id="closeSurvey",r.className="close-button",document.createElement("img")),a=(a.src=u+"/images/close.svg",a.alt="close",a.className="close-icon",r.appendChild(a),n.appendChild(r),t.appendChild(n),document.createElement("div")),r=(a.className="content-wrapper",document.createElement("div"));r.className="text-content",e.title&&((n=document.createElement("p")).className="survey-title",n.textContent=e.title,r.appendChild(n));e.description&&((n=document.createElement("p")).className="survey-description",n.textContent=e.description,r.appendChild(n));a.appendChild(r);n=function(i){switch(i.type){case"singleChoice":case"multipleChoice":let a=document.createElement("div");return a.className="optionContainer",i.options.forEach(e=>{var t=document.createElement("label"),n=(t.className="optionLabel",document.createElement("input")),r=(n.type="singleChoice"===i.type?"radio":"checkbox",n.name=i.type,n.value=e.value,n.id=i.type+"-"+e.id,document.createElement("span"));r.textContent=e.value,t.appendChild(n),t.appendChild(r),a.appendChild(t)}),a;case"rating":let r=document.createElement("div");return r.className="starInputContainer",[...i.options].reverse().forEach(e=>{var t=document.createElement("label"),n=(t.className="starOptionLabel",document.createElement("input")),e=(n.type="radio",n.name="rating",n.value=e.value,n.id="rating-"+e.id,document.createElement("span"));e.className="star",e.textContent="★",t.appendChild(n),t.appendChild(e),r.appendChild(t)}),r;case"freeText":var e=document.createElement("textarea");return e.name="response",e.id="response",e.rows=4,e.cols=50,e.className="freeTextArea",e;default:return null}}(e);n&&a.appendChild(n);r=function(e){switch(e.type){case"welcome":return"참여하기";case"link":return e.buttonText||"링크로 이동";case"thank":return"닫기";default:return"다음"}}(e);r&&((n=document.createElement("div")).className="button-container",(e=document.createElement("button")).type="button",e.id="nextStepButton",e.className="submit-button",e.textContent=r,n.appendChild(e),a.appendChild(n));t.appendChild(a);r=document.createElement("div"),r.className="survey-progress",e=document.createElement("p"),e.className="powered-by",e.innerHTML='Powered by <span class="logo">CatchTalk</span>',r.appendChild(e),n=document.createElement("div"),n.className="background-bar",a=document.createElement("div");return a.className="progress-bar",n.appendChild(a),r.appendChild(n),t.appendChild(r),t}(d)),document.getElementById("closeSurvey").onclick=()=>{f(s._id,"thank"===d.type)},"singleChoice"===d.type||"multipleChoice"===d.type){let t=document.querySelectorAll(".optionLabel");t.forEach(e=>{e.querySelector("input").addEventListener("change",function(){"singleChoice"===d.type&&t.forEach(e=>e.classList.remove("checked")),this.checked?e.classList.add("checked"):e.classList.remove("checked")})})}var t,n,e=document.getElementById("nextStepButton");if(e&&("thank"===d.type?e.onclick=()=>f(s._id,!0):e.onclick=async function(r){r.preventDefault();var e,t,a,i,r=function(e){switch(e.type){case"welcome":return"clicked";case"singleChoice":var t=document.querySelector('input[name="singleChoice"]:checked');return t?{id:t.id.replace("singleChoice-",""),value:t.value}:null;case"multipleChoice":t=Array.from(document.querySelectorAll('input[name="multipleChoice"]:checked'));return 0<t.length?t.map(e=>({id:e.id.replace("multipleChoice-",""),value:e.value})):null;case"rating":var n=document.querySelector(".starOptionLabel.checked");return n?{id:n.querySelector("input").id.replace("rating-",""),value:5-Array.from(n.parentNode.children).indexOf(n)}:null;case"freeText":n=document.getElementById("response");return n?n.value:"";case"link":case"info":return"clicked";default:return""}}(d);if(null!==r){e=d,t=r,m.push({stepId:e.id,stepTitle:e.title,stepDescription:e.description,answer:t,type:e.type,timestamp:(new Date).toISOString()});try{if(p?await y(p,m,!1):p=await async function(e,t,n){try{var r=await fetch(u+"/api/appliedSurvey/response",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId:e,surveyId:t,answers:[n],createAt:n.timestamp,completeAt:null,isComplete:!1})});if(r.ok)return(await r.json()).data._id;throw new Error("HTTP error! status: "+r.status)}catch(e){throw e}}(s.userId,s._id,{...m[0]}),"link"===d.type){if(!d.url)return;window.open(d.url.startsWith("http")?d.url:"https://"+d.url,"_blank")}let n;if("singleChoice"===d.type||"rating"===d.type){let t=r.id;var c=d.options.find(e=>e.id===t);n=c?c.nextStepId:null}else n=d.nextStepId;let e,t=((!n||""===n||-1===(e=s.steps.findIndex(e=>e.id===n)))&&(e=o+1),!1);if((t=e>=l.length||"thank"===(a=s.steps[e]).type&&a.isActive?!0:t)&&await y(p,m,!0),e<l.length)h(s,e);else{let t=s.steps.find(e=>"thank"===e.type&&e.isActive);t?(i=s.steps.findIndex(e=>e.id===t.id),h(s,i)):f(s._id,!0)}}catch(e){}}}),"rating"===d.type){e=document.querySelector(".starInputContainer");if(e){let t=e.querySelectorAll(".starOptionLabel");t.forEach((e,n)=>{e.addEventListener("click",()=>{t.forEach((e,t)=>{n<=t?e.classList.add("checked"):e.classList.remove("checked")})})})}}t=d.id,e=s.steps,(n=document.querySelector(".progress-bar"))&&(e=(e.findIndex(e=>e.id===t)+1)/e.length*100,n.style.width=e+"%")}else f(s._id,!1)}function f(e,t=!1){var n=document.getElementById("survey-popup");n&&n.remove(),window.activeSurveyId=null,window.dispatchEvent(new Event("surveyCompleted")),p&&y(p,m,t)}function l(t,n){let r;return function(...e){clearTimeout(r),r=setTimeout(()=>{clearTimeout(r),t(...e)},n)}}let d=l(e=>{for(var t of e)if(null===window.activeSurveyId&&r(t)){!function(t){var e;null===window.activeSurveyId&&(window.activeSurveyId=t._id,n=0,m=[],(e=document.createElement("link")).rel="stylesheet",e.type="text/css",e.href=u+"/survey.css",document.head.appendChild(e),e.onload=async()=>{var e=document.createElement("div"),e=(e.id="survey-popup",e.classList.add("survey-popup-position-"+t.position),document.body.appendChild(e),t._id);try{await fetch(u+`/api/appliedSurvey/${e}/increment-views`,{method:"POST"})}catch(e){}await 0,h(t,n),s(t._id,{lastShownTime:(new Date).toISOString(),completed:!1})})}(t);break}},200);function v(){let n=new URL(window.location.href);c.forEach(t=>{t.triggers.forEach(e=>{"url"===e.type&&("#checkConnection"===e.url?"#checkConnection"===n.hash&&d([t]):(e=new URL(e.url,window.location.origin),(n.pathname===e.pathname||"/"===n.pathname&&""===e.pathname)&&d([t])))})})}function w(e){return"all"===e.pageType||"specific"===e.pageType&&new URL(window.location.href).pathname===e.pageValue}function a(e){c=e;let a=new Map,i={firstVisit:1,url:2,exit:3,scroll:4,click:5},t=(c.forEach(r=>{r.triggers.forEach(e=>{var t,n,e=JSON.stringify({...e,priority:i[e.type]});a.has(e)?-1===(n=(t=a.get(e)).findIndex(e=>new Date(r.updateAt)>new Date(e.updateAt)))?t.push(r):t.splice(n,0,r):a.set(e,[r])})}),Array.from(a.entries()).sort((e,t)=>{var n=JSON.parse(e[0]),r=JSON.parse(t[0]);return n.priority===r.priority?new Date(a.get(t[0])[0].updateAt)-new Date(a.get(e[0])[0].updateAt):n.priority-r.priority})),r=new Map;try{new MutationObserver(e=>{e.forEach(e=>{"attributes"===e.type&&"class"===e.attributeName?E(e.target,t,r):"childList"===e.type&&e.addedNodes.forEach(e=>{e.nodeType===Node.ELEMENT_NODE&&(E(e,t,r),e.querySelectorAll("*").forEach(e=>E(e,t,r)))})})}).observe(document.body,{childList:!0,subtree:!0,attributes:!0,attributeFilter:["class"]}),document.querySelectorAll("*").forEach(e=>E(e,t,r)),t.forEach(([e,t])=>{e=JSON.parse(e);if("exit"===e.type&&w(e)){let e=e=>{e.clientY<=0&&d(t)};document.addEventListener("mouseleave",e),r.set("mouseleave",()=>document.removeEventListener("mouseleave",e))}if("firstVisit"===e.type&&w(e)&&d(t),"url"===e.type){{var n=v;let e=history.pushState,t=history.replaceState;history.pushState=function(){e.apply(this,arguments),n()},history.replaceState=function(){t.apply(this,arguments),n()},window.addEventListener("popstate",n)}v()}if("scroll"===e.type&&w(e)){let e=l(()=>{.01<=(window.scrollY+window.innerHeight)/document.body.scrollHeight&&d(t)},200);window.addEventListener("scroll",e),r.set("scroll",()=>window.removeEventListener("scroll",e))}})}catch(e){}return()=>{r.forEach(e=>e()),r.clear()}}function E(t,e,a){e.forEach(([e,n])=>{let r=JSON.parse(e);if("click"===r.type&&w(r))if("css"===r.clickType){e=r.clickValue.trim().split(/\s+/).map(e=>e.startsWith("#")?"#"+CSS.escape(e.slice(1)):e.startsWith(".")?"."+CSS.escape(e.slice(1)):"."+CSS.escape(e)).join("");try{if(t.matches(e)&&!i.has(t)){let e=()=>d(n);t.addEventListener("click",e),i.set(t,!0),a.set(t,()=>{t.removeEventListener("click",e),i.delete(t)})}}catch(e){}}else"text"===r.clickType&&function(e){let t=[],n=document.createTreeWalker(e,NodeFilter.SHOW_TEXT,null,!1),r;for(;r=n.nextNode();)t.push(r);return t}(t).forEach(e=>{if(e.textContent.trim()===r.clickValue){let t=e.parentElement;if(!i.has(t)){let e=e=>{e.target.textContent.trim()===r.clickValue&&d(n)};t.addEventListener("click",e),i.set(t,!0),a.set(t,()=>{t.removeEventListener("click",e),i.delete(t)})}}})})}"function"!=typeof CSS.escape&&(CSS.escape=function(e){return String(e).replace(/[\0-\x1F\x7F-\x9F\xA0\xAD\u0600-\u0604\u070F\u17B4\u17B5\u2000-\u200F\u2028-\u202F\u2060-\u206F\uFEFF\uFFF0-\uFFF8\uD800-\uF8FF\uFDD0-\uFDEF\uFFFE\uFFFF]/g,function(e){return"\\"+e.charCodeAt(0).toString(16)+" "}).replace(/[\s\S]/g,function(e){switch(e){case" ":case'"':case"#":case"$":case"%":case"&":case"'":case"(":case")":case"*":case"+":case",":case".":case"/":case";":case"<":case"=":case">":case"?":case"@":case"[":case"\\":case"]":case"^":case"`":case"{":case"|":case"}":case"~":return"\\"+e;default:return e}})}),async function(){var e=function(){var e;for(e of document.getElementsByTagName("script")){var t=e.src.match(/userId=([0-9a-fA-F]{24})/);if(t)return t[1]}return null}();if(!e)throw new Error("User ID is not provided in the URL");try{var n=await async function(e){try{var n=await fetch(u+`/api/appliedSurvey?userId=${e}&isDeploy=true`);if(!n.ok)throw new Error("Network response was not ok");var r=await n.json(),a=r.data.filter(o),i=await fetch(u+"/api/appliedSurvey/users/"+e);if(!i.ok)throw new Error("Network response was not ok");let t=(await i.json()).surveyPosition;return a.forEach(e=>{e.position=t}),{status:r.status,data:a}}catch(e){return null}}(e);if(n){let t=a(n.data);window.addEventListener("beforeunload",()=>t(window.activeSurveyId)),window.addEventListener("surveyCompleted",function e(){t(window.activeSurveyId),window.removeEventListener("surveyCompleted",e)})}}catch(e){}}()}();
+;(function () {
+  console.log('CatchTalk script loaded')
+
+  const API_URI = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app'
+
+  // CatchTalk 객체 생성
+  window.CatchTalk = {
+    activeSurveyId: null,
+    currentStep: 0,
+    surveyResponseId: null,
+    surveyResponses: [],
+    surveys: [],
+    environmentId: null,
+  }
+
+  const triggeredElements = new WeakMap()
+
+  // 1. Helper Functions
+
+  // 로컬 스토리지에서 설문조사 데이터를 가져오기
+  function getSurveyData(surveyId) {
+    const data = localStorage.getItem(`survey-${surveyId}`)
+    return data ? JSON.parse(data) : null
+  }
+
+  // 로컬 스토리지에 설문조사 데이터 저장
+  function saveSurveyData(surveyId, data) {
+    localStorage.setItem(`survey-${surveyId}`, JSON.stringify(data))
+  }
+
+  // 설문조사 응답을 저장
+  function saveResponse(step, answer) {
+    CatchTalk.surveyResponses.push({
+      stepId: step.id,
+      stepTitle: step.title,
+      stepDescription: step.description,
+      answer: answer,
+      type: step.type,
+      timestamp: new Date().toISOString(),
+    })
+  }
+
+  // HTTP 요청을 통해 설문조사 데이터 가져오기
+  async function fetchSurvey(environmentId) {
+    try {
+      // 설문조사 데이터 가져오기
+      const response = await fetch(
+        `${API_URI}/api/appliedSurvey?environmentId=${environmentId}&isDeploy=true`,
+      )
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      const data = await response.json()
+
+      const validSurveys = data.data.filter(validateSurvey)
+
+      // 사용자 데이터에서 surveyPosition 값 가져오기
+      const userResponse = await fetch(
+        `${API_URI}/api/appliedSurvey/users/${environmentId}`,
+      )
+      if (!userResponse.ok) {
+        throw new Error('Network response was not ok')
+      }
+      const userData = await userResponse.json()
+      const surveyPosition = userData.surveyPosition
+
+      // 각 설문조사에 surveyPosition 값 설정
+      validSurveys.forEach((survey) => {
+        survey.position = surveyPosition
+      })
+
+      return { status: data.status, data: validSurveys }
+    } catch (error) {
+      console.error('Error fetching survey:', error)
+      return null
+    }
+  }
+
+  // 설문조사 응답 생성
+  async function createResponse(environmentId, surveyId, answer) {
+    try {
+      const result = await fetch(`${API_URI}/api/appliedSurvey/response`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          environmentId,
+          surveyId,
+          answers: [answer],
+          createAt: answer.timestamp,
+          completeAt: null,
+          isComplete: false,
+        }),
+      })
+      if (!result.ok) {
+        throw new Error(`HTTP error! status: ${result.status}`)
+      }
+      const data = await result.json()
+      return data.data._id
+    } catch (error) {
+      console.error('Error in createResponse:', error)
+      throw error
+    }
+  }
+
+  // 설문조사 응답 업데이트
+  async function updateResponse(responseId, answers, isComplete) {
+    try {
+      const result = await fetch(
+        `${API_URI}/api/appliedSurvey/response/${responseId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            answers,
+            completeAt: isComplete ? new Date() : null,
+            isComplete,
+          }),
+        },
+      )
+      if (!result.ok) {
+        throw new Error(`HTTP error! status: ${result.status}`)
+      }
+
+      // updateResponse 호출 시 로컬 스토리지의 completed 값을 true로 변경
+      const surveyData = JSON.parse(
+        localStorage.getItem(`survey-${CatchTalk.activeSurveyId}`),
+      )
+      if (surveyData) {
+        surveyData.completed = true
+        saveSurveyData(CatchTalk.activeSurveyId, surveyData)
+      }
+
+      return result.json()
+    } catch (error) {
+      console.error('Error in updateResponse:', error)
+      throw error
+    }
+  }
+
+  // 설문조사 노출 수 카운트
+  async function incrementViews(surveyId) {
+    try {
+      await fetch(`${API_URI}/api/appliedSurvey/${surveyId}/increment-views`, {
+        method: 'POST',
+      })
+    } catch (error) {
+      console.error('노출 카운트 증가 중 오류 발생:', error)
+    }
+  }
+
+  // CatchTalk 객체에 헬퍼 함수 추가
+  Object.assign(CatchTalk, {
+    getSurveyData,
+    saveSurveyData,
+    saveResponse,
+    fetchSurvey,
+    createResponse,
+    updateResponse,
+    incrementViews,
+  })
+
+  // 2. Survey Validation Functions
+
+  // 설문조사 데이터 유효성 검사
+  function validateSurvey(survey) {
+    if (!survey.updateAt) {
+      console.error(`Survey ${survey._id}: Missing 'updateAt' field`)
+      return false
+    }
+    if (!Array.isArray(survey.triggers) || survey.triggers.length === 0) {
+      console.error(
+        `Survey ${survey._id}: 'triggers' must be a non-empty array`,
+      )
+      return false
+    }
+    if (!Array.isArray(survey.steps) || survey.steps.length === 0) {
+      console.error(`Survey ${survey._id}: 'steps' must be a non-empty array`)
+      return false
+    }
+    if (!survey.delay || !survey.delay.delayType) {
+      console.error(`Survey ${survey._id}: Missing 'delay.delayType' field`)
+      return false
+    }
+    if (typeof survey.delay.delayValue !== 'number') {
+      console.error(`Survey ${survey._id}: 'delay.delayValue' must be a number`)
+      return false
+    }
+
+    for (let step of survey.steps) {
+      if (!step.id) {
+        console.error(`Survey ${survey._id}: Missing 'id' in step`)
+        return false
+      }
+      if (step.title === undefined) {
+        console.error(
+          `Survey ${survey._id}: Missing 'title' in step ${step.id}`,
+        )
+        return false
+      }
+      if (step.description === undefined) {
+        console.error(
+          `Survey ${survey._id}: Missing 'description' in step ${step.id}`,
+        )
+        return false
+      }
+
+      switch (step.type) {
+        case 'singleChoice':
+        case 'rating':
+          if (!Array.isArray(step.options)) {
+            console.error(
+              `Survey ${survey._id}: 'options' must be an array in ${step.type} step ${step.id}`,
+            )
+            return false
+          }
+          for (let option of step.options) {
+            if (!option.id) {
+              console.error(
+                `Survey ${survey._id}: Missing 'id' in option of step ${step.id}`,
+              )
+              return false
+            }
+            if (option.value === undefined) {
+              console.error(
+                `Survey ${survey._id}: Missing 'value' in option ${option.id} of step ${step.id}`,
+              )
+              return false
+            }
+            if (option.nextStepId === undefined) {
+              console.error(
+                `Survey ${survey._id}: Missing 'nextStepId' in option ${option.id} of step ${step.id}`,
+              )
+              return false
+            }
+          }
+          break
+        case 'multipleChoice':
+          if (!Array.isArray(step.options)) {
+            console.error(
+              `Survey ${survey._id}: 'options' must be an array in ${step.type} step ${step.id}`,
+            )
+            return false
+          }
+          for (let option of step.options) {
+            if (!option.id) {
+              console.error(
+                `Survey ${survey._id}: Missing 'id' in option of step ${step.id}`,
+              )
+              return false
+            }
+            if (option.value === undefined) {
+              console.error(
+                `Survey ${survey._id}: Missing 'value' in option ${option.id} of step ${step.id}`,
+              )
+              return false
+            }
+          }
+          if (step.nextStepId === undefined) {
+            console.error(
+              `Survey ${survey._id}: Missing 'nextStepId' in multipleChoice step ${step.id}`,
+            )
+            return false
+          }
+          break
+        case 'welcome':
+        case 'thank':
+        case 'link':
+        case 'freeText':
+        case 'info':
+          if (step.nextStepId === undefined) {
+            console.error(
+              `Survey ${survey._id}: Missing 'nextStepId' in step ${step.id}`,
+            )
+            return false
+          }
+          break
+        default:
+          console.error(
+            `Survey ${survey._id}: Unknown step type '${step.type}' in step ${step.id}`,
+          )
+          return false
+      }
+    }
+    return true
+  }
+
+  // CatchTalk 객체에 유효성 검사 함수 추가
+  CatchTalk.validateSurvey = validateSurvey
+
+  // 3. Survey Display Functions
+
+  // 설문조사 표시 조건 확인
+  function canShowSurvey(survey) {
+    const surveyData = CatchTalk.getSurveyData(survey._id)
+    if (!surveyData) return true
+
+    const { lastShownTime, completed } = surveyData
+    const now = new Date()
+    const lastShown = new Date(lastShownTime)
+    const secondsSinceLastShown = (now - lastShown) / 1000
+
+    switch (survey.delay.delayType) {
+      case 'once':
+        return false
+      case 'untilCompleted':
+        if (completed) return false
+        return secondsSinceLastShown >= survey.delay.delayValue
+      case 'always':
+        return secondsSinceLastShown >= survey.delay.delayValue
+      default:
+        return false
+    }
+  }
+
+  function setupRatingStars() {
+    const starContainer = document.querySelector('.starInputContainer')
+    if (starContainer) {
+      const stars = starContainer.querySelectorAll('.starOptionLabel')
+      stars.forEach((star, index) => {
+        star.addEventListener('click', () => {
+          const rating = 5 - index
+          stars.forEach((s, i) => {
+            if (i >= index) {
+              s.classList.add('checked')
+            } else {
+              s.classList.remove('checked')
+            }
+          })
+        })
+      })
+    }
+  }
+
+  // 설문조사 스텝 표시
+  async function showStep(survey, stepIndex) {
+    const activeSteps = survey.steps.filter((step) =>
+      step.type === 'welcome' || step.type === 'thank' ? step.isActive : true,
+    )
+    const step = activeSteps[stepIndex]
+    const surveyContainer = document.getElementById('survey-popup')
+
+    if (!step) {
+      CatchTalk.closeSurvey(survey._id, false)
+      return
+    }
+
+    // 기존 HTML을 제거하고 새로 생성된 요소를 추가합니다.
+    surveyContainer.innerHTML = ''
+    surveyContainer.appendChild(generateStepHTML(step))
+
+    document.getElementById('closeSurvey').onclick = () => {
+      CatchTalk.closeSurvey(survey._id, step.type === 'thank')
+    }
+
+    if (step.type === 'singleChoice' || step.type === 'multipleChoice') {
+      const optionLabels = document.querySelectorAll('.optionLabel')
+      optionLabels.forEach((label) => {
+        const input = label.querySelector('input')
+        input.addEventListener('change', function () {
+          if (step.type === 'singleChoice') {
+            optionLabels.forEach((l) => l.classList.remove('checked'))
+          }
+          if (this.checked) {
+            label.classList.add('checked')
+          } else {
+            label.classList.remove('checked')
+          }
+        })
+      })
+    }
+
+    const nextButton = document.getElementById('nextStepButton')
+    if (nextButton) {
+      if (step.type === 'thank') {
+        nextButton.onclick = () => CatchTalk.closeSurvey(survey._id, true)
+      } else {
+        nextButton.onclick = async function (event) {
+          event.preventDefault()
+          const stepAnswer = getResponse(step)
+
+          if (stepAnswer === null) {
+            return
+          }
+
+          CatchTalk.saveResponse(step, stepAnswer)
+
+          try {
+            if (CatchTalk.surveyResponseId) {
+              await CatchTalk.updateResponse(
+                CatchTalk.surveyResponseId,
+                CatchTalk.surveyResponses,
+                false,
+              )
+            } else {
+              CatchTalk.surveyResponseId = await CatchTalk.createResponse(
+                CatchTalk.environmentId,
+                survey._id,
+                {
+                  ...CatchTalk.surveyResponses[0],
+                },
+              )
+            }
+
+            if (step.type === 'link') {
+              if (step.url) {
+                window.open(
+                  step.url.startsWith('http')
+                    ? step.url
+                    : `https://${step.url}`,
+                  '_blank',
+                )
+              } else {
+                console.error('링크 URL이 존재하지 않습니다.')
+                return
+              }
+            }
+
+            let nextStepId
+            if (step.type === 'singleChoice' || step.type === 'rating') {
+              const selectedOptionId = stepAnswer.id
+              const selectedOption = step.options.find(
+                (option) => option.id === selectedOptionId,
+              )
+              nextStepId = selectedOption ? selectedOption.nextStepId : null
+            } else {
+              nextStepId = step.nextStepId
+            }
+
+            let nextStepIndex
+            if (!nextStepId || nextStepId === '') {
+              nextStepIndex = stepIndex + 1
+            } else {
+              nextStepIndex = survey.steps.findIndex((s) => s.id === nextStepId)
+              if (nextStepIndex === -1) {
+                nextStepIndex = stepIndex + 1
+              }
+            }
+
+            // isComplete 결정 로직
+            let isComplete = false
+            if (nextStepIndex >= activeSteps.length) {
+              // 마지막 스텝 완료
+              isComplete = true
+            } else {
+              const nextStep = survey.steps[nextStepIndex]
+              if (nextStep.type === 'thank' && nextStep.isActive) {
+                // thank 스텝으로 진입
+                isComplete = true
+              }
+            }
+
+            // isComplete가 true일 때만 updateResponse 호출
+            if (isComplete) {
+              await CatchTalk.updateResponse(
+                CatchTalk.surveyResponseId,
+                CatchTalk.surveyResponses,
+                true,
+              )
+            }
+
+            // 다음 스텝으로 이동 또는 설문 종료
+            if (nextStepIndex < activeSteps.length) {
+              showStep(survey, nextStepIndex)
+            } else {
+              const thankStep = survey.steps.find(
+                (step) => step.type === 'thank' && step.isActive,
+              )
+              if (thankStep) {
+                const thankStepIndex = survey.steps.findIndex(
+                  (step) => step.id === thankStep.id,
+                )
+                showStep(survey, thankStepIndex)
+              } else {
+                CatchTalk.closeSurvey(survey._id, true)
+              }
+            }
+          } catch (error) {
+            console.error('Error while submitting survey:', error)
+          }
+        }
+      }
+    }
+
+    if (step.type === 'rating') {
+      setupRatingStars()
+    }
+
+    updateProgressBar(step.id, survey.steps)
+  }
+
+  function generateStepHTML(step) {
+    const surveyStep = document.createElement('div')
+    surveyStep.className = 'survey-step'
+
+    // Survey Header
+    const surveyHeader = document.createElement('div')
+    surveyHeader.className = 'survey-header'
+
+    const closeButton = document.createElement('button')
+    closeButton.type = 'button'
+    closeButton.id = 'closeSurvey'
+    closeButton.className = 'close-button'
+
+    const closeIcon = document.createElement('img')
+    closeIcon.src = `${API_URI}/images/close.svg`
+    closeIcon.alt = 'close'
+    closeIcon.className = 'close-icon'
+
+    closeButton.appendChild(closeIcon)
+    surveyHeader.appendChild(closeButton)
+    surveyStep.appendChild(surveyHeader)
+
+    // Content Wrapper
+    const contentWrapper = document.createElement('div')
+    contentWrapper.className = 'content-wrapper'
+
+    const textContent = document.createElement('div')
+    textContent.className = 'text-content'
+
+    if (step.title) {
+      const title = document.createElement('p')
+      title.className = 'survey-title'
+      title.textContent = step.title
+      textContent.appendChild(title)
+    }
+
+    if (step.description) {
+      const description = document.createElement('p')
+      description.className = 'survey-description'
+      description.textContent = step.description
+      textContent.appendChild(description)
+    }
+
+    contentWrapper.appendChild(textContent)
+
+    // Step Content - 직접 contentWrapper에 추가
+    const stepContent = generateStepContent(step)
+    if (stepContent) {
+      contentWrapper.appendChild(stepContent)
+    }
+
+    // Button Container
+    const buttonText = getButtonText(step)
+    if (buttonText) {
+      const buttonContainer = document.createElement('div')
+      buttonContainer.className = 'button-container'
+
+      const nextButton = document.createElement('button')
+      nextButton.type = 'button'
+      nextButton.id = 'nextStepButton'
+      nextButton.className = 'submit-button'
+      nextButton.textContent = buttonText
+
+      buttonContainer.appendChild(nextButton)
+      contentWrapper.appendChild(buttonContainer)
+    }
+
+    surveyStep.appendChild(contentWrapper)
+
+    // Survey Progress
+    const surveyProgress = document.createElement('div')
+    surveyProgress.className = 'survey-progress'
+
+    const poweredBy = document.createElement('p')
+    poweredBy.className = 'powered-by'
+    poweredBy.innerHTML = 'Powered by <span class="logo">CatchTalk</span>'
+    surveyProgress.appendChild(poweredBy)
+
+    const backgroundBar = document.createElement('div')
+    backgroundBar.className = 'background-bar'
+
+    const progressBar = document.createElement('div')
+    progressBar.className = 'progress-bar'
+    backgroundBar.appendChild(progressBar)
+    surveyProgress.appendChild(backgroundBar)
+
+    surveyStep.appendChild(surveyProgress)
+
+    return surveyStep
+  }
+
+  function updateProgressBar(currentStepId, steps) {
+    const progressBar = document.querySelector('.progress-bar')
+    if (progressBar) {
+      const currentStepIndex = steps.findIndex(
+        (step) => step.id === currentStepId,
+      )
+      const progressPercentage = ((currentStepIndex + 1) / steps.length) * 100
+      progressBar.style.width = `${progressPercentage}%`
+    }
+  }
+
+  // 설문조사 단계별 버튼 텍스트 설정
+  function getButtonText(step) {
+    switch (step.type) {
+      case 'welcome':
+        return '참여하기'
+      case 'link':
+        return step.buttonText || '링크로 이동'
+      case 'thank':
+        return '닫기'
+      default:
+        return '다음'
+    }
+  }
+
+  // 설문조사 닫기
+  function closeSurvey(surveyId, isComplete = false) {
+    const surveyPopup = document.getElementById('survey-popup')
+    if (surveyPopup) {
+      surveyPopup.remove()
+    }
+    CatchTalk.activeSurveyId = null
+
+    window.dispatchEvent(new Event('surveyCompleted'))
+
+    // 서버 응답 업데이트
+    if (CatchTalk.surveyResponseId) {
+      CatchTalk.updateResponse(
+        CatchTalk.surveyResponseId,
+        CatchTalk.surveyResponses,
+        isComplete,
+      )
+    }
+  }
+
+  // 설문조사 스텝 콘텐츠 생성
+  function generateStepContent(step) {
+    switch (step.type) {
+      case 'singleChoice':
+      case 'multipleChoice':
+        const optionContainer = document.createElement('div')
+        optionContainer.className = 'optionContainer'
+        step.options.forEach((option) => {
+          const label = document.createElement('label')
+          label.className = 'optionLabel'
+          const input = document.createElement('input')
+          input.type = step.type === 'singleChoice' ? 'radio' : 'checkbox'
+          input.name = step.type
+          input.value = option.value
+          input.id = `${step.type}-${option.id}`
+          const span = document.createElement('span')
+          span.textContent = option.value
+          label.appendChild(input)
+          label.appendChild(span)
+          optionContainer.appendChild(label)
+        })
+        return optionContainer
+
+      case 'rating':
+        const starContainer = document.createElement('div')
+        starContainer.className = 'starInputContainer'
+        ;[...step.options].reverse().forEach((option) => {
+          const label = document.createElement('label')
+          label.className = 'starOptionLabel'
+          const input = document.createElement('input')
+          input.type = 'radio'
+          input.name = 'rating'
+          input.value = option.value
+          input.id = `rating-${option.id}`
+          const star = document.createElement('span')
+          star.className = 'star'
+          star.textContent = '★'
+          label.appendChild(input)
+          label.appendChild(star)
+          starContainer.appendChild(label)
+        })
+        return starContainer
+
+      case 'freeText':
+        const textarea = document.createElement('textarea')
+        textarea.name = 'response'
+        textarea.id = 'response'
+        textarea.rows = 4
+        textarea.cols = 50
+        textarea.className = 'freeTextArea'
+        return textarea
+
+      case 'welcome':
+      case 'link':
+      case 'info':
+      case 'thank':
+        return null
+
+      default:
+        return null
+    }
+  }
+
+  // 응답 추출
+  function getResponse(step) {
+    switch (step.type) {
+      case 'welcome':
+        return 'clicked'
+      case 'singleChoice': {
+        const selectedOption = document.querySelector(
+          'input[name="singleChoice"]:checked',
+        )
+        return selectedOption
+          ? {
+              id: selectedOption.id.replace('singleChoice-', ''),
+              value: selectedOption.value,
+            }
+          : null
+      }
+      case 'multipleChoice': {
+        const selectedOptions = Array.from(
+          document.querySelectorAll('input[name="multipleChoice"]:checked'),
+        )
+        return selectedOptions.length > 0
+          ? selectedOptions.map((option) => ({
+              id: option.id.replace('multipleChoice-', ''),
+              value: option.value,
+            }))
+          : null
+      }
+      case 'rating': {
+        const checkedStar = document.querySelector('.starOptionLabel.checked')
+        return checkedStar
+          ? {
+              id: checkedStar.querySelector('input').id.replace('rating-', ''),
+              value:
+                5 -
+                Array.from(checkedStar.parentNode.children).indexOf(
+                  checkedStar,
+                ),
+            }
+          : null
+      }
+      case 'freeText': {
+        const textResponse = document.getElementById('response')
+        return textResponse ? textResponse.value : ''
+      }
+      case 'link':
+      case 'info':
+        return 'clicked'
+      default:
+        return ''
+    }
+  }
+
+  // CatchTalk 객체에 설문조사 표시 관련 함수들 추가
+  Object.assign(CatchTalk, {
+    canShowSurvey,
+    showStep,
+    closeSurvey,
+    generateStepHTML,
+    updateProgressBar,
+    getButtonText,
+    generateStepContent,
+    getResponse,
+  })
+
+  // 4. Event Listener and Trigger Setup
+
+  // Debounce 함수
+  function debounce(func, wait) {
+    let timeout
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout)
+        func(...args)
+      }
+      clearTimeout(timeout)
+      timeout = setTimeout(later, wait)
+    }
+  }
+
+  // Debounce와 조건 체크를 포함한 showSurvey 함수
+  const showSurvey = debounce((surveyList) => {
+    for (let survey of surveyList) {
+      if (
+        CatchTalk.activeSurveyId === null &&
+        CatchTalk.canShowSurvey(survey)
+      ) {
+        CatchTalk.loadSurvey(survey)
+        break
+      }
+    }
+  }, 200)
+
+  // URL 변경 감지 함수
+  function setupUrlChangeListener(callback) {
+    const originalPushState = history.pushState
+    const originalReplaceState = history.replaceState
+
+    // history.pushState를 감지
+    history.pushState = function () {
+      originalPushState.apply(this, arguments)
+      callback()
+    }
+
+    // history.replaceState를 감지
+    history.replaceState = function () {
+      originalReplaceState.apply(this, arguments)
+      callback()
+    }
+
+    // popstate 이벤트를 감지
+    window.addEventListener('popstate', callback)
+  }
+
+  // URL 트리거를 감지하고 설문조사를 표시하는 함수
+  function handleUrlChange() {
+    const currentUrl = new URL(window.location.href)
+    CatchTalk.surveys.forEach((survey) => {
+      survey.triggers.forEach((trigger) => {
+        if (trigger.type === 'url') {
+          // #checkConnection 특별 케이스 처리
+          if (trigger.url === '#checkConnection') {
+            if (currentUrl.hash === '#checkConnection') {
+              showSurvey([survey])
+            }
+            return
+          }
+
+          // 일반적인 URL 트리거 처리 (pathname만 비교)
+          const triggerUrl = new URL(trigger.url, window.location.origin)
+          if (
+            currentUrl.pathname === triggerUrl.pathname ||
+            (currentUrl.pathname === '/' && triggerUrl.pathname === '')
+          ) {
+            showSurvey([survey])
+          }
+        }
+      })
+    })
+  }
+
+  // 페이지가 특정 URL인지 확인하는 함수
+  function isCorrectPage(trigger) {
+    if (trigger.pageType === 'all') {
+      return true
+    } else if (trigger.pageType === 'specific') {
+      const currentUrl = new URL(window.location.href)
+      return currentUrl.pathname === trigger.pageValue
+    }
+    return false
+  }
+
+  // 트리거 설정 및 처리
+  function setupTriggers(surveysData) {
+    CatchTalk.surveys = surveysData
+    const surveyMap = new Map()
+
+    // 트리거 유형별 우선순위 설정
+    const triggerPriority = {
+      firstVisit: 1,
+      url: 2,
+      exit: 3,
+      scroll: 4,
+      click: 5,
+    }
+
+    // 각 설문조사의 트리거를 surveyMap에 추가
+    CatchTalk.surveys.forEach((survey) => {
+      survey.triggers.forEach((trigger) => {
+        const key = JSON.stringify({
+          ...trigger,
+          priority: triggerPriority[trigger.type],
+        })
+        if (!surveyMap.has(key)) {
+          surveyMap.set(key, [survey])
+        } else {
+          const surveys = surveyMap.get(key)
+          const insertIndex = surveys.findIndex(
+            (s) => new Date(survey.updateAt) > new Date(s.updateAt),
+          )
+          if (insertIndex === -1) {
+            surveys.push(survey)
+          } else {
+            surveys.splice(insertIndex, 0, survey)
+          }
+        }
+      })
+    })
+
+    // surveyMap의 엔트리를 트리거 우선순위에 따라 정렬
+    const sortedTriggers = Array.from(surveyMap.entries()).sort((a, b) => {
+      const triggerA = JSON.parse(a[0])
+      const triggerB = JSON.parse(b[0])
+      if (triggerA.priority === triggerB.priority) {
+        return (
+          new Date(surveyMap.get(b[0])[0].updateAt) -
+          new Date(surveyMap.get(a[0])[0].updateAt)
+        )
+      }
+      return triggerA.priority - triggerB.priority
+    })
+
+    const cleanupFunctions = new Map()
+
+    try {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (
+            mutation.type === 'attributes' &&
+            mutation.attributeName === 'class'
+          ) {
+            checkAndSetupTriggers(
+              mutation.target,
+              sortedTriggers,
+              cleanupFunctions,
+            )
+          } else if (mutation.type === 'childList') {
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                checkAndSetupTriggers(node, sortedTriggers, cleanupFunctions)
+                node
+                  .querySelectorAll('*')
+                  .forEach((el) =>
+                    checkAndSetupTriggers(el, sortedTriggers, cleanupFunctions),
+                  )
+              }
+            })
+          }
+        })
+      })
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class'],
+      })
+
+      // 초기 설정
+      document
+        .querySelectorAll('*')
+        .forEach((el) =>
+          checkAndSetupTriggers(el, sortedTriggers, cleanupFunctions),
+        )
+
+      sortedTriggers.forEach(([key, surveyList]) => {
+        const trigger = JSON.parse(key)
+
+        if (trigger.type === 'exit' && isCorrectPage(trigger)) {
+          const handleExitIntent = (event) => {
+            if (event.clientY <= 0) {
+              showSurvey(surveyList)
+            }
+          }
+          document.addEventListener('mouseleave', handleExitIntent)
+          console.log(`Exit trigger set`)
+          cleanupFunctions.set('mouseleave', () =>
+            document.removeEventListener('mouseleave', handleExitIntent),
+          )
+        }
+
+        if (trigger.type === 'firstVisit' && isCorrectPage(trigger)) {
+          showSurvey(surveyList)
+          console.log(`First Visit trigger set`)
+        }
+
+        if (trigger.type === 'url') {
+          setupUrlChangeListener(handleUrlChange)
+          handleUrlChange()
+          console.log(`URL trigger set for ${trigger.url}`)
+        }
+
+        if (trigger.type === 'scroll' && isCorrectPage(trigger)) {
+          const handleScroll = () => {
+            const scrollPercentage =
+              (window.scrollY + window.innerHeight) / document.body.scrollHeight
+            if (scrollPercentage >= 0.01) {
+              showSurvey(surveyList)
+            }
+          }
+          const debouncedHandleScroll = debounce(handleScroll, 200)
+          window.addEventListener('scroll', debouncedHandleScroll)
+          console.log(`Scroll trigger set`)
+          cleanupFunctions.set('scroll', () =>
+            window.removeEventListener('scroll', debouncedHandleScroll),
+          )
+        }
+      })
+    } catch (error) {
+      console.error('Error in setupTriggers:', error)
+    }
+
+    return () => {
+      cleanupFunctions.forEach((cleanup) => cleanup())
+      cleanupFunctions.clear()
+    }
+  }
+
+  // 이스케이프 처리 함수 정의
+  if (typeof CSS.escape !== 'function') {
+    CSS.escape = function (value) {
+      return String(value)
+        .replace(
+          /[\0-\x1F\x7F-\x9F\xA0\xAD\u0600-\u0604\u070F\u17B4\u17B5\u2000-\u200F\u2028-\u202F\u2060-\u206F\uFEFF\uFFF0-\uFFF8\uD800-\uF8FF\uFDD0-\uFDEF\uFFFE\uFFFF]/g,
+          function (ch) {
+            return '\\' + ch.charCodeAt(0).toString(16) + ' '
+          },
+        )
+        .replace(/[\s\S]/g, function (ch) {
+          switch (ch) {
+            case ' ':
+            case '"':
+            case '#':
+            case '$':
+            case '%':
+            case '&':
+            case "'":
+            case '(':
+            case ')':
+            case '*':
+            case '+':
+            case ',':
+            case '.':
+            case '/':
+            case ';':
+            case '<':
+            case '=':
+            case '>':
+            case '?':
+            case '@':
+            case '[':
+            case '\\':
+            case ']':
+            case '^':
+            case '`':
+            case '{':
+            case '|':
+            case '}':
+            case '~':
+              return '\\' + ch
+            default:
+              return ch
+          }
+        })
+    }
+  }
+
+  function escapeClassName(selectorString) {
+    return selectorString
+      .trim()
+      .split(/\s+/) // 여러 개의 공백을 하나의 공백으로 줄임
+      .map((part) => {
+        if (part.startsWith('#')) {
+          return '#' + CSS.escape(part.slice(1))
+        } else if (part.startsWith('.')) {
+          return '.' + CSS.escape(part.slice(1))
+        } else {
+          return '.' + CSS.escape(part)
+        }
+      })
+      .join('') // 공백 없이 연결
+  }
+
+  // 트리거 설정을 확인하고 설정하는 함수
+  function checkAndSetupTriggers(element, sortedTriggers, cleanupFunctions) {
+    sortedTriggers.forEach(([key, surveyList]) => {
+      const trigger = JSON.parse(key)
+
+      if (trigger.type === 'click' && isCorrectPage(trigger)) {
+        if (trigger.clickType === 'css') {
+          const escapedSelector = escapeClassName(trigger.clickValue)
+          // 유효한 선택자인지 확인
+          try {
+            if (
+              element.matches(escapedSelector) &&
+              !triggeredElements.has(element)
+            ) {
+              const clickHandler = () => showSurvey(surveyList)
+              element.addEventListener('click', clickHandler)
+              triggeredElements.set(element, true)
+              console.log(`Click trigger set for ${trigger.clickValue}`)
+              cleanupFunctions.set(element, () => {
+                element.removeEventListener('click', clickHandler)
+                triggeredElements.delete(element)
+              })
+            }
+          } catch (error) {
+            console.error(`Invalid selector: ${escapedSelector}`, error)
+          }
+        } else if (trigger.clickType === 'text') {
+          const textNodes = getTextNodes(element)
+          textNodes.forEach((textNode) => {
+            if (textNode.textContent.trim() === trigger.clickValue) {
+              const parentElement = textNode.parentElement
+              if (!triggeredElements.has(parentElement)) {
+                const eventListener = (event) => {
+                  if (event.target.textContent.trim() === trigger.clickValue) {
+                    showSurvey(surveyList)
+                  }
+                }
+                parentElement.addEventListener('click', eventListener)
+                triggeredElements.set(parentElement, true)
+                cleanupFunctions.set(parentElement, () => {
+                  parentElement.removeEventListener('click', eventListener)
+                  triggeredElements.delete(parentElement)
+                })
+              }
+            }
+          })
+        }
+      }
+    })
+  }
+
+  // 텍스트 노드를 찾는 헬퍼 함수
+  function getTextNodes(element) {
+    const textNodes = []
+    const walker = document.createTreeWalker(
+      element,
+      NodeFilter.SHOW_TEXT,
+      null,
+      false,
+    )
+    let node
+    while ((node = walker.nextNode())) {
+      textNodes.push(node)
+    }
+    return textNodes
+  }
+
+  // 설문조사 로드 - 설문조사를 시작하고 첫 번째 스텝을 표시합니다.
+  function loadSurvey(survey) {
+    if (CatchTalk.activeSurveyId !== null) {
+      return
+    }
+    CatchTalk.activeSurveyId = survey._id
+    CatchTalk.currentStep = 0
+    CatchTalk.surveyResponses = []
+
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.type = 'text/css'
+    link.href = `${API_URI}/survey.css`
+    document.head.appendChild(link)
+
+    link.onload = async () => {
+      const surveyContainer = document.createElement('div')
+      surveyContainer.id = 'survey-popup'
+      surveyContainer.classList.add(`survey-popup-position-${survey.position}`)
+      document.body.appendChild(surveyContainer)
+
+      await CatchTalk.incrementViews(survey._id)
+
+      CatchTalk.showStep(survey, CatchTalk.currentStep)
+
+      CatchTalk.saveSurveyData(survey._id, {
+        lastShownTime: new Date().toISOString(),
+        completed: false,
+      })
+    }
+  }
+
+  // CatchTalk 객체에 트리거 및 초기화 관련 함수들 추가
+  Object.assign(CatchTalk, {
+    setupTriggers,
+    loadSurvey,
+    handleUrlChange,
+    isCorrectPage,
+  })
+
+  // 초기화 함수
+  CatchTalk.init = async function (config) {
+    if (!config || !config.environmentId) {
+      throw new Error('User ID is required in the configuration')
+    }
+
+    CatchTalk.environmentId = config.environmentId
+
+    try {
+      const surveyData = await CatchTalk.fetchSurvey(CatchTalk.environmentId)
+      if (surveyData) {
+        const cleanupTriggers = CatchTalk.setupTriggers(surveyData.data)
+
+        // 페이지 언로드 시 클린업 수행
+        window.addEventListener('beforeunload', () =>
+          cleanupTriggers(CatchTalk.activeSurveyId),
+        )
+
+        // 설문조사 완료 시 클린업 수행 + 닫기 버튼을 눌러서 완료할 시에도 동작
+        function handleSurveyCompletion() {
+          cleanupTriggers(CatchTalk.activeSurveyId)
+          window.removeEventListener('surveyCompleted', handleSurveyCompletion)
+        }
+        window.addEventListener('surveyCompleted', handleSurveyCompletion)
+      }
+    } catch (error) {
+      console.error('Error initializing survey script:', error)
+    }
+  }
+
+  // 스크립트 로드 완료 후 실행되는 코드
+  if (document.readyState === 'complete') {
+    console.log('CatchTalk script is ready to be initialized')
+  } else {
+    window.addEventListener('load', function () {
+      console.log('CatchTalk script is ready to be initialized')
+    })
+  }
+})()

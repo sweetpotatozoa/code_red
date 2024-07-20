@@ -88,15 +88,24 @@ const Connecting = ({ setCurrentStep, setOnboardingInfo }) => {
   // 삽입 스크립트
   const scriptCode = userId
     ? `<script type="text/javascript">
-    !(function () {
-      var t = document.createElement('script');
-      t.type = 'text/javascript';
-      t.async = !0;
-      t.src = 'https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/survey.js?userId=${userId}';
-      var e = document.getElementsByTagName('script')[0];
-      e.parentNode.insertBefore(t, e);
-    })();
-  </script>`
+      (function() {
+        var t = document.createElement("script");
+        t.type = "text/javascript";
+        t.async = !0;
+        t.src = "https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app/survey.js";
+        var e = document.getElementsByTagName("script")[0];
+        e.parentNode.insertBefore(t, e);
+
+        t.onload = function() {
+          setTimeout(function() {
+            window.CatchTalk.init({
+              environmentId: "${userId}",
+              apiHost: "https://port-0-codered-ss7z32llwexb5xe.sel5.cloudtype.app"
+            });
+          }, 500);
+        };
+      })();
+    </script>`
     : ''
 
   const getStatusMessage = () => {
@@ -130,7 +139,11 @@ const Connecting = ({ setCurrentStep, setOnboardingInfo }) => {
         </div>
         <div className={styles.info}>ex) www.yoursite.com/#checkConnection</div>
         {!loading && (
-          <SyntaxHighlighter language='javascript' style={prism}>
+          <SyntaxHighlighter
+            language='javascript'
+            style={prism}
+            className={styles.syntaxHighlighter}
+          >
             {scriptCode}
           </SyntaxHighlighter>
         )}
@@ -142,7 +155,7 @@ const Connecting = ({ setCurrentStep, setOnboardingInfo }) => {
             코드 복사하기
           </button>
           <a
-            href='https://www.naver.com/'
+            href='https://zenith-income-03c.notion.site/1-079333926e1c44899b4d44ab50a98a83/'
             target='_blank'
             rel='noopener noreferrer'
           >
