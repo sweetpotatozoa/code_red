@@ -1,7 +1,8 @@
 ;(function () {
   console.log('CatchTalk script loaded')
 
-  const API_URI = 'https://api.catchtalk.co.kr'
+  const API_URI =
+    'https://port-0-checktalk-dev-ss7z32llwexb5xe.sel5.cloudtype.app'
 
   // CatchTalk 객체 생성
   window.CatchTalk = {
