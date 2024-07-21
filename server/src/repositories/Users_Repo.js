@@ -90,6 +90,15 @@ class UsersRepo {
     )
     return true
   }
+
+  //온보딩 스킵하기
+  async skipOnboarding(userId) {
+    await this.collection.findOneAndUpdate(
+      { _id: new mongoose.Types.ObjectId(userId) },
+      { $set: { isOnboarding: true } },
+    )
+    return true
+  }
 }
 
 module.exports = new UsersRepo()

@@ -25,6 +25,13 @@ router.get('/checkConnect', auth, wrapAsync(AdminSurveyController.checkConnect))
 // 유저 아이디 반환
 router.get('/getId', auth, wrapAsync(AdminSurveyController.getUserId))
 
+// 온보딩 스킵하기
+router.put(
+  '/skipOnboarding',
+  auth,
+  wrapAsync(AdminSurveyController.skipOnboarding),
+)
+
 // 각 설문조사의 배포상태를 변경함
 router.put(
   '/toggleSurveyDeploy/:id',

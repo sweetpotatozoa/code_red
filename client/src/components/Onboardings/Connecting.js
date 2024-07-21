@@ -3,12 +3,15 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import backendApis from '../../utils/backendApis'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const Connecting = ({ setCurrentStep, setOnboardingInfo, devMode }) => {
   const [userId, setUserId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [connectionStatus, setConnectionStatus] = useState('waiting') // 'waiting', 'connected', 'timeout'
   const [loadingDots, setLoadingDots] = useState('.')
+
+  const navigate = useNavigate()
 
   // 유저아이디 가져오기
   useEffect(() => {
@@ -129,6 +132,15 @@ const Connecting = ({ setCurrentStep, setOnboardingInfo, devMode }) => {
     }
   }
 
+  const skipHandler = async () => {
+    const result = await backendApis.skipOnboarding()
+    if (result) {
+      navigate('/')
+    } else {
+      alert('오류가 발생했습니다. 나중에 다시 시도해주세요.')
+    }
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.title}>웹앱 혹은 웹사이트에 연결하세요</div>
@@ -156,19 +168,36 @@ const Connecting = ({ setCurrentStep, setOnboardingInfo, devMode }) => {
           </SyntaxHighlighter>
         )}
         <div className={styles.buttons}>
+          <div className={styles.left}>
+            <button
+              style={{ backgroundColor: '#172134', color: '#ffffff' }}
+              onClick={handleCopy}
+            >
+              코드 복사하기
+            </button>
+            <a
+              href='https://zenith-income-03c.notion.site/1-079333926e1c44899b4d44ab50a98a83/'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              <button>상세가이드 보러가기</button>
+            </a>
+          </div>
           <button
-            style={{ backgroundColor: '#172134', color: '#ffffff' }}
-            onClick={handleCopy}
+            className={styles.skip}
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: '#F9FAFC',
+              textDecoration: 'underline',
+              color: '#6C7B90',
+              marginRight: 0,
+            }}
+            onClick={skipHandler}
           >
-            코드 복사하기
+            SKIP 하기
           </button>
-          <a
-            href='https://zenith-income-03c.notion.site/1-079333926e1c44899b4d44ab50a98a83/'
-            target='_blank'
-            rel='noopener noreferrer'
-          >
-            <button>상세가이드 보러가기</button>
-          </a>
         </div>
       </div>
     </div>
