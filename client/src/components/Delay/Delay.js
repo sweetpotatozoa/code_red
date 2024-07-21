@@ -61,7 +61,7 @@ const Delays = ({ survey, setSurvey }) => {
       <div className={styles.explain}>
         <div className={styles.explainTitle}>발동주기 구성</div>
         <div className={styles.explainContent}>
-          설문조사가 뜰 주기를 설정합니다.
+          설문조사가 뜨는 주기를 설정합니다.
         </div>
       </div>
       <div className={styles.delayContent}>
@@ -73,7 +73,7 @@ const Delays = ({ survey, setSurvey }) => {
             }`}
             onClick={() => handleDelayTypeChange('once')}
           >
-            최초1회
+            최초 1회
           </div>
           <div
             className={`${styles.type} ${
@@ -81,7 +81,7 @@ const Delays = ({ survey, setSurvey }) => {
             }`}
             onClick={() => handleDelayTypeChange('untilCompleted')}
           >
-            응답할 때 까지
+            응답할 때까지
           </div>
           <div
             className={`${styles.type} ${
@@ -96,16 +96,17 @@ const Delays = ({ survey, setSurvey }) => {
           <>
             <div className={styles.explainTitle}>* 최초 1회</div>
             <div className={styles.explainContent}>
-              처음 트리거가 발생했을 때에만 설문조사를 띄우고 응답여부와
-              상관없이 다음부터는 띄우지 않습니다.
+              처음 트리거가 발생했을 때에만 설문조사를 띄우고 응답 여부와
+              상관없이 다시 띄우지 않습니다.
             </div>
           </>
         )}
         {delayType === 'untilCompleted' && (
           <>
-            <div className={styles.explainTitle}>* 응답할 때 까지</div>
+            <div className={styles.explainTitle}>* 응답할 때까지</div>
             <div className={styles.explainContent}>
-              응답을 받을 때까지 계속해서 설문조사를 띄웁니다.
+              응답에 참여하지 않을 경우, 응답을 받을 때까지 다시 설문조사를
+              띄웁니다.
             </div>
           </>
         )}
@@ -113,7 +114,8 @@ const Delays = ({ survey, setSurvey }) => {
           <>
             <div className={styles.explainTitle}>* 항상</div>
             <div className={styles.explainContent}>
-              응답여부와 상관없이 설문조사를 항상 띄웁니다.
+              응답 여부와 상관없이 트리거가 발생했을 경우 설문조사를 반복하여
+              띄웁니다.
             </div>
           </>
         )}

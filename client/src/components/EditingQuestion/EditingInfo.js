@@ -43,7 +43,7 @@ const EditingInfo = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={title}
         onChange={handleTitleChange}
-        placeholder='제목을 입력하세요..'
+        placeholder='제목을 입력하세요.'
         className={styles.input}
       />
       <div className={styles.title}>설명</div>
@@ -54,7 +54,7 @@ const EditingInfo = ({ step, updateStep, steps, showWarning }) => {
         onChange={handleDescriptionChange}
         placeholder='설명을 입력하세요.'
       />
-      <div className={styles.title}>응답에 따른 대응</div>
+      <div className={styles.title}>응답에 따른 이동</div>
       <select
         className={styles.action}
         value={nextStepId}
