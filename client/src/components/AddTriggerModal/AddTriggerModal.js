@@ -13,11 +13,11 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
   const [urlValue, setUrlValue] = useState('')
 
   const triggerDescriptions = {
-    firstVisit: '* 사용자가 웹사이트를 처음 방문할 때 설문조사가 표시됩니다.',
-    url: '* 특정 URL에 사용자가 접근할 때 설문조사가 표시됩니다.',
-    click: '* 사용자가 지정된 요소를 클릭할 때 설문조사가 표시됩니다.',
-    exit: '* 사용자가 페이지를 벗어나려고 할 때 설문조사가 표시됩니다.',
-    scroll: '* 사용자가 페이지에서 스크롤했을 때 설문조사가 표시됩니다.',
+    firstVisit: '* 유저가 웹사이트를 처음 방문할 때 설문조사가 표시됩니다.',
+    url: '* 특정 URL에 유저가 접근할 때 설문조사가 표시됩니다.',
+    click: '* 유저가 지정된 요소를 클릭할 때 설문조사가 표시됩니다.',
+    exit: '* 유저가 페이지를 벗어나려고 할 때 설문조사가 표시됩니다.',
+    scroll: '* 유저가 페이지에서 스크롤했을 때 설문조사가 표시됩니다.',
   }
 
   const pageTypeDescriptions = {
