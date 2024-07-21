@@ -466,6 +466,12 @@ class AdminSurveyService {
       return String(answer)
     }
   }
+
+  //온보딩 스킵하기
+  async skipOnboarding(userId) {
+    await this.checkUserIdExist(userId)
+    return UsersRepo.skipOnboarding(userId)
+  }
 }
 
 module.exports = new AdminSurveyService()

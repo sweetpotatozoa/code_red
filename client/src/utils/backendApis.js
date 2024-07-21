@@ -283,6 +283,14 @@ class BackendApis {
       'blob', // 응답 타입을 'blob'으로 지정
     )
   }
+
+  async skipOnboarding() {
+    return await fetcher(
+      '/api/adminSurvey/skipOnboarding',
+      this.getToken(),
+      'PUT',
+    )
+  }
 }
 
 export default new BackendApis()
