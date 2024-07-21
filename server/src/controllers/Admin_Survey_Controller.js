@@ -425,6 +425,22 @@ class AdminSurveyController {
         .json({ message: 'Internal server error', error: err.message })
     }
   }
+
+  // 온보딩 스킵하기
+  async skipOnboarding(req, res) {
+    const userId = req.user.id
+    if (!userId || !isObjectId(userId)) {
+      res.status(400).json({ message: 'Invalid user id' })
+      return
+    }
+    try {
+      const result = await AdminSurveyService.skipOnboarding(userId)
+      res.status(200).json(result)
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'skipOnboarding')
+      res.status(status).json({ message })
+    }
+  }
 }
 
 module.exports = new AdminSurveyController()

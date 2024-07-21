@@ -153,6 +153,11 @@ const Responses = () => {
   if (!survey)
     return <div className={styles.error}>설문조사를 찾을 수 없습니다.</div>
 
+  const connectHandler = () => {
+    if (userInfo.isConnect) return
+    navigate('/onboarding')
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.sideBar}>
@@ -182,8 +187,12 @@ const Responses = () => {
       </div>
       <div className={styles.main}>
         <div className={styles.basicSetting}>
-          <div className={styles.connect}>
-            연결상태 {userInfo.isConnect ? '정상' : '비정상'}
+          <div
+            className={styles.connect}
+            onClick={connectHandler}
+            style={{ cursor: 'pointer' }}
+          >
+            연결 {userInfo.isConnect ? '상태 정상' : '하러가기'}
           </div>
           <a
             href='https://zenith-income-03c.notion.site/1-079333926e1c44899b4d44ab50a98a83/'

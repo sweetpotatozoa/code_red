@@ -73,9 +73,22 @@
 
 .buttons {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   margin-top: 32px;
   width: 100%;
+}
+
+.skip {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
 }
 
 .buttons button {
