@@ -62,7 +62,7 @@ const EditingUrl = ({ trigger, updateTrigger, setEditingTriggerId }) => {
         placeholder='설명을 입력하세요.'
         className={styles.input}
       />
-      <div className={styles.title}>URL</div>
+      <div className={styles.title}>URL 입력하기</div>
       <input
         type='text'
         value={url}

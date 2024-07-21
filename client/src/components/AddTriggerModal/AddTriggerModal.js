@@ -12,6 +12,19 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
   const [pageValue, setPageValue] = useState('')
   const [urlValue, setUrlValue] = useState('')
 
+  const triggerDescriptions = {
+    firstVisit: '* 사용자가 웹사이트를 처음 방문할 때 설문조사가 표시됩니다.',
+    url: '* 특정 URL에 사용자가 접근할 때 설문조사가 표시됩니다.',
+    click: '* 사용자가 지정된 요소를 클릭할 때 설문조사가 표시됩니다.',
+    exit: '* 사용자가 페이지를 벗어나려고 할 때 설문조사가 표시됩니다.',
+    scroll: '* 사용자가 페이지에서 스크롤했을 때 설문조사가 표시됩니다.',
+  }
+
+  const pageTypeDescriptions = {
+    all: '* 웹사이트의 모든 페이지에서 트리거가 작동합니다.',
+    specific: '* 지정한 특정 페이지에서만 트리거가 작동합니다.',
+  }
+
   const addTriggerHandler = () => {
     if (!title) {
       alert('제목을 입력해주세요!')
@@ -114,6 +127,10 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
             </div>
           </div>
 
+          <div className={styles.triggerDescription}>
+            {triggerDescriptions[type]}
+          </div>
+
           {type === 'click' && (
             <>
               <div className={styles.inputTitle}>클릭버튼 지정하기</div>
@@ -152,7 +169,7 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
               <div className={styles.inputTitle}>URL 입력하기</div>
               <input
                 className={styles.input}
-                placeholder='ex) /login '
+                placeholder='ex) /login'
                 type='text'
                 value={urlValue}
                 onChange={(e) => setUrlValue(e.target.value)}
@@ -178,6 +195,9 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
                 >
                   특정 페이지
                 </div>
+              </div>
+              <div className={styles.pageTypeDescription}>
+                {pageTypeDescriptions[pageType]}
               </div>
               {pageType === 'specific' && (
                 <input
