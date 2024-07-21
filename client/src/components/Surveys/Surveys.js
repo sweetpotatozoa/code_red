@@ -106,7 +106,7 @@ const Surveys = ({
       return
     }
 
-    if (!window.confirm('정말로 이 질문을 삭제하시겠습니까?')) {
+    if (!window.confirm('정말로 이 스텝을 삭제하시겠습니까?')) {
       return
     }
 

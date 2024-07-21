@@ -133,3 +133,17 @@
   background-color: #1c0f24;
   color: #ffffff;
 }
+
+.triggerDescription {
+  margin-bottom: 16px;
+  padding: 2.5px;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.pageTypeDescription {
+  margin-bottom: 16px;
+  padding: 2.5px;
+  border-radius: 5px;
+  font-size: 16px;
+}

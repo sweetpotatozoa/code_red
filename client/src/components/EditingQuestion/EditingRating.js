@@ -75,7 +75,7 @@ const EditingRating = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={title}
         onChange={handleTitleChange}
-        placeholder='제목을 입력하세요..'
+        placeholder='제목을 입력하세요.'
       />
       <div className={styles.title}>설명</div>
       <input
@@ -89,7 +89,7 @@ const EditingRating = ({ step, updateStep, steps, showWarning }) => {
         *별점의 경우 5점 기준 '매우 동의함', 1점 기준 '전혀 동의하지 않음'으로
         평가 됩니다.
       </div>
-      <div className={styles.title}>별점별 액션</div>
+      <div className={styles.title}>응답에 따른 이동</div>
       {options.map((option) => (
         <div key={option.id} className={styles.optionAction}>
           <div className={styles.optionLabel}>{option.value}점</div>
@@ -98,7 +98,7 @@ const EditingRating = ({ step, updateStep, steps, showWarning }) => {
             value={option.nextStepId}
             onChange={(e) => handleNextStepChange(option.id, e.target.value)}
           >
-            <option value=''>다음 질문으로 이동</option>
+            <option value=''>다음 스텝으로 이동</option>
             {steps.map((q) => (
               <option key={q.id} value={q.id}>
                 {q.title}

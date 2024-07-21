@@ -61,7 +61,7 @@ const EditingLink = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={title}
         onChange={handleTitleChange}
-        placeholder='제목을 입력하세요..'
+        placeholder='제목을 입력하세요.'
         className={styles.input}
       />
       <div className={styles.title}>설명</div>
@@ -77,7 +77,7 @@ const EditingLink = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={url}
         onChange={handleUrlChange}
-        placeholder='URL을 입력하세요.'
+        placeholder='URL을 입력하세요. ex) www.example.com'
         className={styles.input}
       />
       <div className={styles.title}>버튼 텍스트</div>
@@ -85,16 +85,16 @@ const EditingLink = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={buttonText}
         onChange={handleButtonTextChange}
-        placeholder='버튼의 텍스트를 입력하세요.'
+        placeholder='버튼의 텍스트를 입력하세요. ex) 신청하기'
         className={styles.input}
       />
-      <div className={styles.title}>응답에 따른 대응</div>
+      <div className={styles.title}>응답에 따른 이동</div>
       <select
         className={styles.action}
         value={nextStepId}
         onChange={handleNextStepChange}
       >
-        <option value=''>다음 질문으로 이동</option>
+        <option value=''>다음 스텝으로 이동</option>
         {steps.map((q) => (
           <option key={q.id} value={q.id}>
             {q.title}

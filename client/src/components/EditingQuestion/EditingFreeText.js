@@ -54,13 +54,13 @@ const EditingFreeText = ({ step, updateStep, steps, showWarning }) => {
         placeholder='설명을 입력하세요.'
         className={styles.input}
       />
-      <div className={styles.title}>응답에 따른 대응</div>
+      <div className={styles.title}>응답에 따른 이동</div>
       <select
         className={styles.action}
         value={nextStepId}
         onChange={handleNextStepChange}
       >
-        <option value=''>다음 질문으로 이동</option>
+        <option value=''>다음 스텝으로 이동</option>
         {steps.map((q) => (
           <option key={q.id} value={q.id}>
             {q.title}

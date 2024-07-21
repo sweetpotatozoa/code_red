@@ -75,7 +75,7 @@ const EditingSingleChoice = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={title}
         onChange={handleTitleChange}
-        placeholder='제목을 입력하세요..'
+        placeholder='제목을 입력하세요.'
         className={styles.input}
       />
       <div className={styles.title}>설명</div>
@@ -109,7 +109,7 @@ const EditingSingleChoice = ({ step, updateStep, steps, showWarning }) => {
         선택지 추가
       </div>
 
-      <div className={styles.title}>선택지별 액션</div>
+      <div className={styles.title}>응답에 따른 이동</div>
       {options.map((option) => (
         <div key={option.id} className={styles.optionAction}>
           <div className={styles.optionLabel}>{option.value}</div>
@@ -118,7 +118,7 @@ const EditingSingleChoice = ({ step, updateStep, steps, showWarning }) => {
             onChange={(e) => nextStepHandler(option.id, e.target.value)}
             className={styles.action}
           >
-            <option value=''>다음 질문으로 이동</option>
+            <option value=''>다음 스텝으로 이동</option>
             {steps.map((q) => (
               <option key={q.id} value={q.id}>
                 {q.title}
