@@ -60,7 +60,7 @@ const EditingInfo = ({ step, updateStep, steps, showWarning }) => {
         value={nextStepId}
         onChange={handleNextStepChange}
       >
-        <option value=''>다음 질문으로 이동</option>
+        <option value=''>다음 스텝으로 이동</option>
         {steps.map((q) => (
           <option key={q.id} value={q.id}>
             {q.title}
