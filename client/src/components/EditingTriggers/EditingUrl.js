@@ -67,7 +67,7 @@ const EditingUrl = ({ trigger, updateTrigger, setEditingTriggerId }) => {
         type='text'
         value={url}
         onChange={handleUrlChange}
-        placeholder='URL을 입력하세요. ex) /login'
+        placeholder='ex) /login'
         className={styles.input}
       />
     </div>

@@ -86,8 +86,8 @@ const EditingRating = ({ step, updateStep, steps, showWarning }) => {
         placeholder='설명을 입력하세요.'
       />
       <div className={styles.title}>
-        *별점의 경우 5점 기준 '매우 동의함', 1점 기준 '전혀 동의하지 않음'으로
-        평가 됩니다.
+        * 별점의 경우 5점 기준 '매우 동의함', 1점 기준 '전혀 동의하지 않음'으로
+        평가됩니다.
       </div>
       <div className={styles.title}>응답에 따른 이동</div>
       {options.map((option) => (

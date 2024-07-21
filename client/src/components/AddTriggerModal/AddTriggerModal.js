@@ -77,7 +77,7 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
           <div className={styles.inputTitle}>설명</div>
           <input
             className={styles.input}
-            placeholder='설명을 입력하세요'
+            placeholder='설명을 입력하세요.'
             type='text'
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -202,7 +202,7 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
               {pageType === 'specific' && (
                 <input
                   className={styles.input}
-                  placeholder='특정 페이지 URL을 입력하세요. ex) /login'
+                  placeholder='ex) /login'
                   type='text'
                   value={pageValue}
                   onChange={(e) => setPageValue(e.target.value)}

@@ -77,7 +77,7 @@ const EditingLink = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={url}
         onChange={handleUrlChange}
-        placeholder='URL을 입력하세요. ex) www.example.com'
+        placeholder='유저를 이동시킬 URL을 입력하세요. ex) www.example.com'
         className={styles.input}
       />
       <div className={styles.title}>버튼 텍스트</div>
@@ -85,7 +85,7 @@ const EditingLink = ({ step, updateStep, steps, showWarning }) => {
         type='text'
         value={buttonText}
         onChange={handleButtonTextChange}
-        placeholder='버튼의 텍스트를 입력하세요. ex) 신청하기'
+        placeholder='버튼의 텍스트를 입력하세요. ex) 가이드 보기'
         className={styles.input}
       />
       <div className={styles.title}>응답에 따른 이동</div>
