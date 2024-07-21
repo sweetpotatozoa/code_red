@@ -138,7 +138,7 @@ const EditingClick = ({ trigger, updateTrigger, setEditingTriggerId }) => {
             type='text'
             value={pageValue}
             onChange={handlePageValueChange}
-            placeholder='특정 페이지 URL을 입력하세요. ex) /login'
+            placeholder='ex) /login'
           />
         </>
       )}
