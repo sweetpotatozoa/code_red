@@ -69,8 +69,8 @@ const Summary = () => {
         isDeploy: !prevSurvey.isDeploy,
       }))
     } catch (error) {
-      console.error('설문조사 배포상태 변경 실패', error)
-      alert('설문조사 배포상태 변경에 실패했습니다.')
+      console.error('설문조사 게시상태 변경 실패', error)
+      alert('설문조사 게시상태 변경에 실패했습니다.')
     }
   }
 

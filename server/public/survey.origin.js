@@ -907,6 +907,24 @@
   }
 
   function setupClickObserver(selector, surveyList, cleanupFunctions) {
+    // 페이지 로드 시 즉시 트리거 설정
+    const setupClickHandler = (element) => {
+      if (!triggeredElements.has(element)) {
+        const clickHandler = () => showSurvey(surveyList)
+        element.addEventListener('click', clickHandler)
+        triggeredElements.set(element, true)
+        console.log(`Click trigger set for ${selector}`)
+        cleanupFunctions.set(element, () => {
+          element.removeEventListener('click', clickHandler)
+          triggeredElements.delete(element)
+        })
+      }
+    }
+
+    // 초기 설정
+    document.querySelectorAll(selector).forEach(setupClickHandler)
+
+    // MutationObserver 설정
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (
@@ -914,18 +932,7 @@
           mutation.attributeName === 'class'
         ) {
           const elements = document.querySelectorAll(selector)
-          elements.forEach((element) => {
-            if (!triggeredElements.has(element)) {
-              const clickHandler = () => showSurvey(surveyList)
-              element.addEventListener('click', clickHandler)
-              triggeredElements.set(element, true)
-              console.log(`Click trigger set for ${selector}`)
-              cleanupFunctions.set(element, () => {
-                element.removeEventListener('click', clickHandler)
-                triggeredElements.delete(element)
-              })
-            }
-          })
+          elements.forEach(setupClickHandler)
         }
       })
     })

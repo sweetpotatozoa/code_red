@@ -105,8 +105,8 @@ const Home = () => {
       })
       setSurveys(newSurveys)
     } catch (error) {
-      console.error('설문조사 배포상태 변경 실패', error)
-      alert('설문조사 배포상태 변경에 실패했습니다.')
+      console.error('설문조사 게시상태 변경 실패', error)
+      alert('설문조사 게시상태 변경에 실패했습니다.')
     }
   }
 
@@ -174,7 +174,7 @@ const Home = () => {
           <div className={styles.descriptions}>
             <div className={styles.description1}>제목</div>
             <div className={styles.description2}>수정날짜</div>
-            <div className={styles.description3}>배포상태</div>
+            <div className={styles.description3}>게시상태</div>
           </div>
 
           {surveys.length === 0 ? (
