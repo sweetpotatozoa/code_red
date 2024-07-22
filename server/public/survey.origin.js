@@ -41,33 +41,28 @@
   // HTTP 요청을 통해 설문조사 데이터 가져오기
   async function fetchSurvey(environmentId) {
     try {
-      // 설문조사 데이터 가져오기
-      const response = await fetch(
-        `${CatchTalk.apiHost}/api/appliedSurvey?userId=${environmentId}&isDeploy=true`,
-      )
-      if (!response.ok) {
+      // 설문조사 데이터 및 서베이 포지션 값 가져오기
+      const [surveyResponse, userResponse] = await Promise.all([
+        fetch(
+          `${CatchTalk.apiHost}/api/appliedSurvey?userId=${environmentId}&isDeploy=true`,
+        ),
+        fetch(`${CatchTalk.apiHost}/api/appliedSurvey/users/${environmentId}`),
+      ])
+
+      if (!surveyResponse.ok || !userResponse.ok) {
         throw new Error('Network response was not ok')
       }
-      const data = await response.json()
 
-      const validSurveys = data.data.filter(validateSurvey)
-
-      // 사용자 데이터에서 surveyPosition 값 가져오기
-      const userResponse = await fetch(
-        `${CatchTalk.apiHost}/api/appliedSurvey/users/${environmentId}`,
-      )
-      if (!userResponse.ok) {
-        throw new Error('Network response was not ok')
-      }
+      const surveyData = await surveyResponse.json()
       const userData = await userResponse.json()
-      const surveyPosition = userData.surveyPosition
+      const validSurveys = surveyData.data.filter(validateSurvey)
 
       // 각 설문조사에 surveyPosition 값 설정
       validSurveys.forEach((survey) => {
-        survey.position = surveyPosition
+        survey.position = userData.surveyPosition
       })
 
-      return { status: data.status, data: validSurveys }
+      return { status: surveyData.status, data: validSurveys }
     } catch (error) {
       console.error('Error fetching survey:', error)
       return null
@@ -863,23 +858,7 @@
       case 'click':
         if (trigger.clickType === 'css') {
           const escapedSelector = escapeClassName(trigger.clickValue)
-          try {
-            const elements = document.querySelectorAll(escapedSelector)
-            elements.forEach((element) => {
-              if (!triggeredElements.has(element)) {
-                const clickHandler = () => showSurvey(surveyList)
-                element.addEventListener('click', clickHandler)
-                triggeredElements.set(element, true)
-                console.log(`Click trigger set for ${trigger.clickValue}`)
-                cleanupFunctions.set(element, () => {
-                  element.removeEventListener('click', clickHandler)
-                  triggeredElements.delete(element)
-                })
-              }
-            })
-          } catch (error) {
-            console.error(`Invalid selector: ${escapedSelector}`, error)
-          }
+          setupClickObserver(escapedSelector, surveyList, cleanupFunctions)
         } else if (trigger.clickType === 'text') {
           const textNodes = getTextNodes(document.body)
           textNodes.forEach((textNode) => {
@@ -920,6 +899,47 @@
       default:
         console.error(`Unknown trigger type: ${trigger.type}`)
     }
+  }
+
+  function setupClickObserver(selector, surveyList, cleanupFunctions) {
+    // 페이지 로드 시 즉시 트리거 설정
+    const setupClickHandler = (element) => {
+      if (!triggeredElements.has(element)) {
+        const clickHandler = () => showSurvey(surveyList)
+        element.addEventListener('click', clickHandler)
+        triggeredElements.set(element, true)
+        console.log(`Click trigger set for ${selector}`)
+        cleanupFunctions.set(element, () => {
+          element.removeEventListener('click', clickHandler)
+          triggeredElements.delete(element)
+        })
+      }
+    }
+
+    // 초기 설정
+    document.querySelectorAll(selector).forEach(setupClickHandler)
+
+    // MutationObserver 설정
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.type === 'attributes' &&
+          mutation.attributeName === 'class'
+        ) {
+          const elements = document.querySelectorAll(selector)
+          elements.forEach(setupClickHandler)
+        }
+      })
+    })
+
+    const config = {
+      attributes: true,
+      subtree: true,
+      attributeFilter: ['class'],
+    }
+    observer.observe(document.body, config)
+
+    cleanupFunctions.set('clickObserver', () => observer.disconnect())
   }
 
   // 트리거 설정 및 처리
