@@ -41,33 +41,28 @@
   // HTTP 요청을 통해 설문조사 데이터 가져오기
   async function fetchSurvey(environmentId) {
     try {
-      // 설문조사 데이터 가져오기
-      const response = await fetch(
-        `${CatchTalk.apiHost}/api/appliedSurvey?userId=${environmentId}&isDeploy=true`,
-      )
-      if (!response.ok) {
+      // 설문조사 데이터 및 서베이 포지션 값 가져오기
+      const [surveyResponse, userResponse] = await Promise.all([
+        fetch(
+          `${CatchTalk.apiHost}/api/appliedSurvey?userId=${environmentId}&isDeploy=true`,
+        ),
+        fetch(`${CatchTalk.apiHost}/api/appliedSurvey/users/${environmentId}`),
+      ])
+
+      if (!surveyResponse.ok || !userResponse.ok) {
         throw new Error('Network response was not ok')
       }
-      const data = await response.json()
 
-      const validSurveys = data.data.filter(validateSurvey)
-
-      // 사용자 데이터에서 surveyPosition 값 가져오기
-      const userResponse = await fetch(
-        `${CatchTalk.apiHost}/api/appliedSurvey/users/${environmentId}`,
-      )
-      if (!userResponse.ok) {
-        throw new Error('Network response was not ok')
-      }
+      const surveyData = await surveyResponse.json()
       const userData = await userResponse.json()
-      const surveyPosition = userData.surveyPosition
+      const validSurveys = surveyData.data.filter(validateSurvey)
 
       // 각 설문조사에 surveyPosition 값 설정
       validSurveys.forEach((survey) => {
-        survey.position = surveyPosition
+        survey.position = userData.surveyPosition
       })
 
-      return { status: data.status, data: validSurveys }
+      return { status: surveyData.status, data: validSurveys }
     } catch (error) {
       console.error('Error fetching survey:', error)
       return null
