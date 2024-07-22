@@ -10,11 +10,9 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
   const [clickValue, setClickValue] = useState('')
   const [pageType, setPageType] = useState('all')
   const [pageValue, setPageValue] = useState('')
-  const [urlValue, setUrlValue] = useState('')
 
   const triggerDescriptions = {
-    firstVisit: '* 유저가 웹사이트를 처음 방문할 때 설문조사가 표시됩니다.',
-    url: '* 특정 URL에 유저가 접근할 때 설문조사가 표시됩니다.',
+    firstVisit: '* 유저가 웹사이트에 방문할 때 설문조사가 표시됩니다.',
     click: '* 유저가 지정된 요소를 클릭할 때 설문조사가 표시됩니다.',
     exit: '* 유저가 페이지를 벗어나려고 할 때 설문조사가 표시됩니다.',
     scroll: '* 유저가 페이지에서 스크롤했을 때 설문조사가 표시됩니다.',
@@ -34,11 +32,7 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
       alert('어떤 요소를 클릭할 때 발동할지 입력해주세요!')
       return
     }
-    if (type === 'url' && !urlValue) {
-      alert('URL을 입력해주세요!')
-      return
-    }
-    if (type !== 'url' && pageType === 'specific' && !pageValue) {
+    if (pageType === 'specific' && !pageValue) {
       alert('페이지 url을 입력해주세요!')
       return
     }
@@ -49,9 +43,8 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
       description: description,
       clickType: type === 'click' ? clickType : undefined,
       clickValue: type === 'click' ? clickValue : undefined,
-      pageType: type !== 'url' ? pageType : undefined,
-      pageValue: type !== 'url' ? pageValue : undefined,
-      url: type === 'url' ? urlValue : undefined,
+      pageType: pageType,
+      pageValue: pageValue,
     }
     const updatedSurvey = {
       ...survey,
@@ -91,15 +84,7 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
               }`}
               onClick={() => setType('firstVisit')}
             >
-              첫 방문
-            </div>
-            <div
-              className={`${styles.triggerType} ${
-                type === 'url' ? styles.selected : ''
-              }`}
-              onClick={() => setType('url')}
-            >
-              URL
+              페이지뷰
             </div>
             <div
               className={`${styles.triggerType} ${
@@ -164,51 +149,36 @@ const AddTriggerModal = ({ setIsAddTrigger, survey, setSurvey }) => {
             </>
           )}
 
-          {type === 'url' ? (
-            <>
-              <div className={styles.inputTitle}>URL 입력하기</div>
-              <input
-                className={styles.input}
-                placeholder='ex) /login'
-                type='text'
-                value={urlValue}
-                onChange={(e) => setUrlValue(e.target.value)}
-              />
-            </>
-          ) : (
-            <>
-              <div className={styles.inputTitle}>페이지 지정하기</div>
-              <div className={styles.triggerTypes}>
-                <div
-                  className={`${styles.pageType} ${
-                    pageType === 'all' ? styles.selected : ''
-                  }`}
-                  onClick={() => setPageType('all')}
-                >
-                  모든 페이지
-                </div>
-                <div
-                  className={`${styles.pageType} ${
-                    pageType === 'specific' ? styles.selected : ''
-                  }`}
-                  onClick={() => setPageType('specific')}
-                >
-                  특정 페이지
-                </div>
-              </div>
-              <div className={styles.pageTypeDescription}>
-                {pageTypeDescriptions[pageType]}
-              </div>
-              {pageType === 'specific' && (
-                <input
-                  className={styles.input}
-                  placeholder='ex) /login'
-                  type='text'
-                  value={pageValue}
-                  onChange={(e) => setPageValue(e.target.value)}
-                />
-              )}
-            </>
+          <div className={styles.inputTitle}>페이지 지정하기</div>
+          <div className={styles.triggerTypes}>
+            <div
+              className={`${styles.pageType} ${
+                pageType === 'all' ? styles.selected : ''
+              }`}
+              onClick={() => setPageType('all')}
+            >
+              모든 페이지
+            </div>
+            <div
+              className={`${styles.pageType} ${
+                pageType === 'specific' ? styles.selected : ''
+              }`}
+              onClick={() => setPageType('specific')}
+            >
+              특정 페이지
+            </div>
+          </div>
+          <div className={styles.pageTypeDescription}>
+            {pageTypeDescriptions[pageType]}
+          </div>
+          {pageType === 'specific' && (
+            <input
+              className={styles.input}
+              placeholder='ex) /login'
+              type='text'
+              value={pageValue}
+              onChange={(e) => setPageValue(e.target.value)}
+            />
           )}
         </div>
 
