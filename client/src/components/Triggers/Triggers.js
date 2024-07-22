@@ -2,7 +2,6 @@ import styles from './Triggers.module.css'
 import AddTriggerModal from '../AddTriggerModal/AddTriggerModal'
 import { useState, useRef } from 'react'
 import EditingFirstVisit from '../EditingTriggers/EditingFirstVisit'
-import EditingUrl from '../EditingTriggers/EditingUrl'
 import EditingClick from '../EditingTriggers/EditingClick'
 import EditingExit from '../EditingTriggers/EditingExit'
 import EditingScroll from '../EditingTriggers/EditingScroll'
@@ -11,9 +10,7 @@ import EditingScroll from '../EditingTriggers/EditingScroll'
 const getTriggerTypeInKorean = (type) => {
   switch (type) {
     case 'firstVisit':
-      return '첫 방문'
-    case 'url':
-      return 'URL'
+      return '페이지뷰'
     case 'click':
       return '클릭'
     case 'exit':
@@ -98,13 +95,6 @@ const Triggers = ({ survey, setSurvey }) => {
                 >
                   {trigger.type === 'firstVisit' && (
                     <EditingFirstVisit
-                      trigger={trigger}
-                      updateTrigger={updateTrigger}
-                      setEditingTriggerId={setEditingTriggerId} // 전달
-                    />
-                  )}
-                  {trigger.type === 'url' && (
-                    <EditingUrl
                       trigger={trigger}
                       updateTrigger={updateTrigger}
                       setEditingTriggerId={setEditingTriggerId} // 전달
