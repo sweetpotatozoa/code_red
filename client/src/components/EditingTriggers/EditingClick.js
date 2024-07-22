@@ -92,7 +92,7 @@ const EditingClick = ({ trigger, updateTrigger, setEditingTriggerId }) => {
           }`}
           onClick={() => handleClickTypeChange('css')}
         >
-          CSS
+          CSS로 선택하기
         </div>
         <div
           className={`${styles.type} ${
@@ -100,7 +100,7 @@ const EditingClick = ({ trigger, updateTrigger, setEditingTriggerId }) => {
           }`}
           onClick={() => handleClickTypeChange('text')}
         >
-          텍스트
+          텍스트로 선택하기
         </div>
       </div>
       <input
