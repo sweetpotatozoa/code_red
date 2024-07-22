@@ -863,23 +863,7 @@
       case 'click':
         if (trigger.clickType === 'css') {
           const escapedSelector = escapeClassName(trigger.clickValue)
-          try {
-            const elements = document.querySelectorAll(escapedSelector)
-            elements.forEach((element) => {
-              if (!triggeredElements.has(element)) {
-                const clickHandler = () => showSurvey(surveyList)
-                element.addEventListener('click', clickHandler)
-                triggeredElements.set(element, true)
-                console.log(`Click trigger set for ${trigger.clickValue}`)
-                cleanupFunctions.set(element, () => {
-                  element.removeEventListener('click', clickHandler)
-                  triggeredElements.delete(element)
-                })
-              }
-            })
-          } catch (error) {
-            console.error(`Invalid selector: ${escapedSelector}`, error)
-          }
+          setupClickObserver(escapedSelector, surveyList, cleanupFunctions)
         } else if (trigger.clickType === 'text') {
           const textNodes = getTextNodes(document.body)
           textNodes.forEach((textNode) => {
@@ -920,6 +904,40 @@
       default:
         console.error(`Unknown trigger type: ${trigger.type}`)
     }
+  }
+
+  function setupClickObserver(selector, surveyList, cleanupFunctions) {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.type === 'attributes' &&
+          mutation.attributeName === 'class'
+        ) {
+          const elements = document.querySelectorAll(selector)
+          elements.forEach((element) => {
+            if (!triggeredElements.has(element)) {
+              const clickHandler = () => showSurvey(surveyList)
+              element.addEventListener('click', clickHandler)
+              triggeredElements.set(element, true)
+              console.log(`Click trigger set for ${selector}`)
+              cleanupFunctions.set(element, () => {
+                element.removeEventListener('click', clickHandler)
+                triggeredElements.delete(element)
+              })
+            }
+          })
+        }
+      })
+    })
+
+    const config = {
+      attributes: true,
+      subtree: true,
+      attributeFilter: ['class'],
+    }
+    observer.observe(document.body, config)
+
+    cleanupFunctions.set('clickObserver', () => observer.disconnect())
   }
 
   // 트리거 설정 및 처리
