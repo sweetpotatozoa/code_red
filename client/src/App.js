@@ -9,9 +9,19 @@ import Responses from './pages/Responses/Responses'
 import Summary from './pages/Summary/Summary'
 import Templates from './pages/Templates/Templates'
 import Edit from './pages/Edit/Edit'
+import { useMediaQuery } from 'react-responsive'
 
 function App() {
-  return (
+  const isMobile = useMediaQuery({ query: '(max-width: 768px)' })
+  return isMobile ? (
+    <div style={{ textAlign: 'center', marginTop: '20px' }}>
+      <p style={{ fontSize: '32px', color: 'black', fontWeight: 'bold' }}>
+        아직 모바일을 지원하지 않습니다.
+        <br />
+        PC로 접속해주세요 :)
+      </p>
+    </div>
+  ) : (
     <Routes>
       <Route path='/login' element={<Login />} />
       <Route path='/register' element={<Register />} />
