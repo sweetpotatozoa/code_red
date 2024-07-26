@@ -13,6 +13,23 @@ import { useMediaQuery } from 'react-responsive'
 
 function App() {
   const isMobile = useMediaQuery({ query: '(max-width: 768px)' })
+
+  useEffect(() => {
+    if (isMobile) {
+      document.body.style.minHeight = 'auto'
+      document.body.style.minWidth = 'auto'
+    } else {
+      document.body.style.minHeight = '732px'
+      document.body.style.minWidth = '1420px'
+    }
+  }, [isMobile])
+
+  useEffect(() => {
+    if (isMobile) {
+      alert('PC로 접속해주세요')
+    }
+  }, [isMobile])
+
   return isMobile ? (
     <div style={{ textAlign: 'center', marginTop: '20px' }}>
       <p style={{ fontSize: '32px', color: 'black', fontWeight: 'bold' }}>
