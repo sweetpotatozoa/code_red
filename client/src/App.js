@@ -27,13 +27,13 @@ function App() {
 
   useEffect(() => {
     if (isMobile) {
-      alert('PC로 접속해주세요')
+      alert('아직 모바일을 지원하지 않습니다. PC로 접속해주세요')
     }
   }, [isMobile])
 
   return isMobile ? (
     <div style={{ textAlign: 'center', marginTop: '20px' }}>
-      <p style={{ fontSize: '32px', color: 'black', fontWeight: 'bold' }}>
+      <p style={{ fontSize: '30px', color: 'black', fontWeight: 'bold' }}>
         아직 모바일을 지원하지 않습니다.
         <br />
         PC로 접속해주세요 :)
