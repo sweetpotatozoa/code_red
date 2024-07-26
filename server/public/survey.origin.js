@@ -922,20 +922,26 @@
     // MutationObserver 설정
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (
-          mutation.type === 'attributes' &&
-          mutation.attributeName === 'class'
-        ) {
-          const elements = document.querySelectorAll(selector)
-          elements.forEach(setupClickHandler)
+        if (mutation.type === 'childList') {
+          // 새로 추가된 요소에 대해 처리
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE && node.matches(selector)) {
+              setupClickHandler(node)
+            }
+          })
+        } else if (mutation.type === 'attributes') {
+          // 속성 변경된 요소에 대해 처리
+          if (mutation.target.matches(selector)) {
+            setupClickHandler(mutation.target)
+          }
         }
       })
     })
 
     const config = {
       attributes: true,
+      childList: true,
       subtree: true,
-      attributeFilter: ['class'],
     }
     observer.observe(document.body, config)
 
