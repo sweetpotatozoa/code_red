@@ -10,6 +10,7 @@ import Summary from './pages/Summary/Summary'
 import Templates from './pages/Templates/Templates'
 import Edit from './pages/Edit/Edit'
 import { useMediaQuery } from 'react-responsive'
+import { useEffect } from 'react'
 
 function App() {
   const isMobile = useMediaQuery({ query: '(max-width: 768px)' })
