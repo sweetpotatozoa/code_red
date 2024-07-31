@@ -1,6 +1,10 @@
 const API_URI = process.env.REACT_APP_API_URI
 
-const { GoogleGenerativeAI } = require('@google/generative-ai')
+const {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} = require('@google/generative-ai')
 
 const fetcher = async (
   url,
@@ -35,7 +39,18 @@ const fetcher = async (
 class BackendApis {
   constructor() {
     this.token = localStorage.getItem('token')
-    this.genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY)
+    const apiKey = process.env.REACT_APP_GEMINI_API_KEY // 환경변수에서 API 키 가져오기
+    this.genAI = new GoogleGenerativeAI(apiKey)
+    this.model = this.genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      systemInstruction: `너는 웹사이트 고객 만족도 설문을 같이 만들어주는 도우미야. 
+      해당 설문은 인앱 api고, 다른 사이트에 팝업 형식으로 띄워질거야.
+      처음에는, 고객의 설문조사 목적이 무엇인지 먼저 물어봐줘. 
+      예를 들어, 설문조사 목적은 '유료고객 이탈 막기, 유료전환 일으키기, 인터뷰 요청하기' 등등이 될 수 있어.
+      그 다음에는, 유저에게 해당 목적에 맞는 설문 질문 5개와 각각 선택지 5개를 추천해줘. 
+      그 다음에 고객과 소통하며 설문을 조금씩 바꿔나가.
+      설문 답을 받는 유형은 '객관식(중복 불가), 객관식(중복 가능), 주관식, 별점, 외부링크, 안내'가 있어.`,
+    })
   }
 
   setToken(token) {
@@ -295,21 +310,23 @@ class BackendApis {
     )
   }
 
-  // Google Gemini API method for multi-turn conversation (chat)
-  async startChatConversation(initialHistory, message) {
-    const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+  // Google Gemini API와의 대화 시작 메서드
+  async startChatConversation(history, message) {
+    const generationConfig = {
+      temperature: 1,
+      topP: 0.95,
+      topK: 64,
+      maxOutputTokens: 8192,
+      responseMimeType: 'text/plain',
+    }
 
-    const chat = model.startChat({
-      history: initialHistory,
-      generationConfig: {
-        maxOutputTokens: 100,
-      },
+    const chatSession = this.model.startChat({
+      generationConfig,
+      history,
     })
 
-    const result = await chat.sendMessage(message)
-    const response = await result.response
-    const text = await response.text()
-    return text
+    const result = await chatSession.sendMessage(message)
+    return result.response.text()
   }
 }
 

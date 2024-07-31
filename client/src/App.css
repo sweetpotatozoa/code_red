@@ -4,6 +4,15 @@
   box-sizing: border-box;
   color: #1c0f24;
 }
+/* Chrome, Safari, Edge, Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Firefox */
+body {
+  scrollbar-width: none; /* 스크롤바 너비를 없애는 설정 */
+}
 
 body {
   display: flex;
