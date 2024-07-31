@@ -1,6 +1,6 @@
 import styles from './Templates.module.css'
 import { useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import backendApis from '../../utils/backendApis'
 import SurveyPreview from '../../components/Surveys/SurveyPreview'
 
@@ -13,12 +13,25 @@ const Templates = () => {
   const [message, setMessage] = useState('')
   const [response, setResponse] = useState('')
   const [history, setHistory] = useState([
-    { role: 'user', parts: [{ text: 'Hello, I have 2 dogs in my house.' }] },
+    { role: 'user', parts: [{ text: '설문조사 만드는걸 도와줄래?' }] },
     {
       role: 'model',
-      parts: [{ text: 'Great to meet you. What would you like to know?' }],
+      parts: [
+        {
+          text: '안녕하세요? 저에게 고민을 말씀해주시면 설문조사 생성을 도와드릴게요 :)',
+        },
+      ],
     },
   ])
+
+  const chatLogRef = useRef(null)
+
+  useEffect(() => {
+    // history가 변경될 때마다 스크롤을 아래로 이동
+    if (chatLogRef.current) {
+      chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight
+    }
+  }, [history])
 
   const handleSendMessage = async () => {
     if (!message) return
@@ -116,18 +129,29 @@ const Templates = () => {
           <div className={styles.mainTitle}>새 설문조사 만들기</div>
           <div>
             <h1>Chat with AI</h1>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder='Type your message here'
-            />
-            <button onClick={handleSendMessage}>Send</button>
-            {response && (
-              <div>
-                <h2>AI Response:</h2>
-                <p>{response}</p>
-              </div>
-            )}
+            <div ref={chatLogRef} className={styles.chatLog}>
+              {history.map((entry, index) => (
+                <div
+                  key={index}
+                  className={
+                    entry.role === 'user'
+                      ? styles.userMessage
+                      : styles.modelMessage
+                  }
+                >
+                  {entry.parts[0].text}
+                </div>
+              ))}
+            </div>
+            <div className={styles.inputBox}>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder='Type your message here'
+                className={styles.input}
+              />
+              <button onClick={handleSendMessage}>Send</button>
+            </div>
           </div>
         </div>
         <div className={styles.display}>
