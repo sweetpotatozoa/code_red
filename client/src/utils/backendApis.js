@@ -48,7 +48,7 @@ class BackendApis {
       처음에는, 고객의 설문조사 목적이 무엇인지 먼저 물어봐줘. 
       예를 들어, 설문조사 목적은 '유료고객 이탈 막기, 유료전환 일으키기, 인터뷰 요청하기' 등등이 될 수 있어.
       그 다음에는, 유저에게 해당 목적에 맞는 설문 질문 5개와 각각 선택지 5개를 추천해줘. 
-      그 다음에 고객과 소통하며 설문을 조금씩 바꿔나가.
+      그 다음에 고객과 소통하며 설문을 조금씩 바꿔나가. 추천을 마무리할 때 고객에게 수정하고 싶은 부분이 존재하는지 질문해줘. 그리고 존재한다면 어떤 방향으로 수정되길 원하는지 설명해달라고 부탁해.
       설문 답을 받는 유형은 '객관식(중복 불가), 객관식(중복 가능), 주관식, 별점, 외부링크, 안내'가 있어.`,
     })
   }
@@ -326,7 +326,14 @@ class BackendApis {
     })
 
     const result = await chatSession.sendMessage(message)
-    return result.response.text()
+    let text = await result.response.text()
+
+    // 응답 텍스트 처리
+    text = text
+      .replace(/\*\*/g, '') // '**' 제거
+      .replace(/\n/g, '<br />') // 줄바꿈 처리
+
+    return text
   }
 }
 

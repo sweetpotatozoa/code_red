@@ -209,3 +209,13 @@
   border: 1px solid #e5e5ea; /* 테두리 설정 */
   margin-right: 32px;
 }
+
+.sendButton {
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #e5ebf3;
+  color: #6c7b90;
+  padding: 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
