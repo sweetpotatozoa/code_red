@@ -1,5 +1,7 @@
 const API_URI = process.env.REACT_APP_API_URI
 
+const { GoogleGenerativeAI } = require('@google/generative-ai')
+
 const fetcher = async (
   url,
   token,
@@ -33,6 +35,7 @@ const fetcher = async (
 class BackendApis {
   constructor() {
     this.token = localStorage.getItem('token')
+    this.genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY)
   }
 
   setToken(token) {
@@ -290,6 +293,23 @@ class BackendApis {
       this.getToken(),
       'PUT',
     )
+  }
+
+  // Google Gemini API method for multi-turn conversation (chat)
+  async startChatConversation(initialHistory, message) {
+    const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+
+    const chat = model.startChat({
+      history: initialHistory,
+      generationConfig: {
+        maxOutputTokens: 100,
+      },
+    })
+
+    const result = await chat.sendMessage(message)
+    const response = await result.response
+    const text = await response.text()
+    return text
   }
 }
 
