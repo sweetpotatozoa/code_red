@@ -2,7 +2,7 @@ import styles from './Templates.module.css'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import backendApis from '../../utils/backendApis'
-import TemplatePreview from '../../components/TemplatePreview/TemplatePreview'
+import SurveyPreview from '../../components/Surveys/SurveyPreview'
 
 const Templates = () => {
   const navigate = useNavigate()
@@ -10,6 +10,29 @@ const Templates = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null)
   const [currentStepId, setCurrentStepId] = useState(null)
   const [showContainer, setShowContainer] = useState(true)
+
+  const [message, setMessage] = useState('')
+  const [response, setResponse] = useState('')
+  const [history, setHistory] = useState([
+    { role: 'user', parts: [{ text: 'Hello, I have 2 dogs in my house.' }] },
+    {
+      role: 'model',
+      parts: [{ text: 'Great to meet you. What would you like to know?' }],
+    },
+  ])
+
+  const handleSendMessage = async () => {
+    const result = await backendApis.startChatConversation(history, message)
+    setResponse(result)
+
+    // 대화 내역에 추가
+    setHistory([
+      ...history,
+      { role: 'user', parts: [{ text: message }] },
+      { role: 'model', parts: [{ text: result }] },
+    ])
+    setMessage('')
+  }
 
   // 뒤로가기 버튼
   const goBack = () => {
@@ -72,6 +95,21 @@ const Templates = () => {
       <div className={styles.main}>
         <div className={styles.choice}>
           <div className={styles.mainTitle}>새 설문조사 만들기</div>
+          <div>
+            <h1>Chat with AI</h1>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder='Type your message here'
+            />
+            <button onClick={handleSendMessage}>Send</button>
+            {response && (
+              <div>
+                <h2>AI Response:</h2>
+                <p>{response}</p>
+              </div>
+            )}
+          </div>
           <div className={styles.options}>
             {templates.map((template) => (
               <div
@@ -107,7 +145,7 @@ const Templates = () => {
               <div className={styles.yourWeb}>나의 서비스</div>
             </div>
             {selectedTemplate && (
-              <TemplatePreview
+              <SurveyPreview
                 selectedTemplate={selectedTemplate}
                 currentStepId={currentStepId}
                 setCurrentStepId={setCurrentStepId}
