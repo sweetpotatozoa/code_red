@@ -10,7 +10,6 @@ const Templates = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null)
   const [currentStepId, setCurrentStepId] = useState(null)
   const [showContainer, setShowContainer] = useState(true)
-
   const [message, setMessage] = useState('')
   const [response, setResponse] = useState('')
   const [history, setHistory] = useState([
@@ -22,15 +21,35 @@ const Templates = () => {
   ])
 
   const handleSendMessage = async () => {
-    const result = await backendApis.startChatConversation(history, message)
-    setResponse(result)
+    if (!message) return
 
-    // 대화 내역에 추가
-    setHistory([
-      ...history,
-      { role: 'user', parts: [{ text: message }] },
-      { role: 'model', parts: [{ text: result }] },
-    ])
+    const userMessage = { role: 'user', parts: [{ text: message }] }
+    setHistory((prevHistory) => [...prevHistory, userMessage])
+
+    const result = await backendApis.startChatConversation(history, message)
+
+    // 응답을 '/////'를 기준으로 분리
+    const [conversationPart, jsonPart] = result.split('/////')
+
+    // 대화 부분을 히스토리에 추가
+    const modelResponse = { role: 'model', parts: [{ text: conversationPart }] }
+    setHistory((prevHistory) => [...prevHistory, modelResponse])
+
+    setResponse(conversationPart)
+
+    // JSON 부분을 파싱하여 설문조사 미리보기에 반영
+    if (jsonPart) {
+      try {
+        const parsedData = JSON.parse(jsonPart)
+        if (parsedData.steps) {
+          setSelectedTemplate(parsedData)
+          setCurrentStepId(parsedData.steps[0].id) // 첫 번째 스텝의 ID 설정
+        }
+      } catch (e) {
+        console.error('Failed to parse JSON:', e)
+      }
+    }
+
     setMessage('')
   }
 
@@ -109,29 +128,6 @@ const Templates = () => {
                 <p>{response}</p>
               </div>
             )}
-          </div>
-          <div className={styles.options}>
-            {templates.map((template) => (
-              <div
-                className={`${styles.option} ${
-                  selectedTemplate === template ? styles.selected : ''
-                }`}
-                key={template.id}
-                onClick={() => templateClickHandler(template)}
-              >
-                <div className={styles.optionTitle}>{template.title}</div>
-                <div className={styles.optionContent}>
-                  {template.description}
-                </div>
-                {selectedTemplate === template && (
-                  <div className={styles.smallBottom}>
-                    <div className={styles.button} onClick={createSurvey}>
-                      선택하기
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
           </div>
         </div>
         <div className={styles.display}>
