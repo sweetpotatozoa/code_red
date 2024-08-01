@@ -13,7 +13,7 @@ const Templates = () => {
   const [message, setMessage] = useState('')
   const [response, setResponse] = useState('')
   const [history, setHistory] = useState([
-    { role: 'user', parts: [{ text: '설문조사 만드는걸 도와줄래?' }] },
+    { role: 'user', parts: [{ text: '설문조사 만드는 걸 도와줄래?' }] },
     {
       role: 'model',
       parts: [
@@ -64,6 +64,13 @@ const Templates = () => {
     }
 
     setMessage('')
+  }
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      handleSendMessage()
+    }
   }
 
   // 뒤로가기 버튼
@@ -138,19 +145,21 @@ const Templates = () => {
                       ? styles.userMessage
                       : styles.modelMessage
                   }
-                >
-                  {entry.parts[0].text}
-                </div>
+                  dangerouslySetInnerHTML={{ __html: entry.parts[0].text }} // HTML을 렌더링하도록 설정
+                />
               ))}
             </div>
             <div className={styles.inputBox}>
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder='Type your message here'
+                onKeyDown={handleKeyDown} // 엔터 키 이벤트 핸들러 추가
+                placeholder='메세지를 입력하세요!'
                 className={styles.input}
               />
-              <button onClick={handleSendMessage}>Send</button>
+              <button className={styles.sendButton} onClick={handleSendMessage}>
+                전송
+              </button>
             </div>
           </div>
         </div>
