@@ -40,10 +40,12 @@ const Templates = () => {
 
     const result = await backendApis.startChatConversation(history, message)
 
+    console.log('result:', result)
+
     setMessage('')
 
     // 응답을 '/////'를 기준으로 분리
-    const [conversationPart, jsonPart] = result.split('/////')
+    const [conversationPart, jsonPart] = result.split('////')
 
     console.log('jsonPart:', jsonPart)
 
@@ -71,7 +73,6 @@ const Templates = () => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
       handleSendMessage()
-      setMessage('')
     }
   }
 
