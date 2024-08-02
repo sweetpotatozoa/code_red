@@ -472,6 +472,12 @@ class AdminSurveyService {
     await this.checkUserIdExist(userId)
     return UsersRepo.skipOnboarding(userId)
   }
+
+  //ai로 만든 설문조사 생성
+  async createAiSurvey(userId, surveyData) {
+    await this.checkUserIdExist(userId)
+    return SurveysRepo.createSurveyByAI(userId, surveyData)
+  }
 }
 
 module.exports = new AdminSurveyService()

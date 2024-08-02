@@ -190,7 +190,7 @@ SaaS 이용자들에게 만족도 조사를 하고 싶으시군요? 별점을 �
 1. 너는 ////를 기준으로 대화와 json을 나누는데 너가 임의로 다른 표시를 쓰면 절대 안돼. 또한 ////이후의 json이 {}로 시작하고 끝나야한다는 사실도 잊지말아줘.
 2. nextStepId는 기본적으로 다음 step의 id를 써야해. 근데 만약 step의 type이 singlechoice거나 rating이라면 꼭 다음 step의 id가 아니어도 돼. 이때는 선지를 선택했을 때 이동해야할 step의 id를 nextStepId로 써줘.
 3. step의 type이 multipleChoice일 경우 각각 option이 nextStepId를 가지는게 아니라 step이 nextStepId를 가져야 해.
-4. 모든 답변에 유저대화 부분과 미리보기를 위한 json형태가 포함되야 해. 여기서 미리보기 부분은 반드시 존재해야해. 절대 비워놓거나 하지 말아줘.
+4. 모든 답변에 유저대화 부분과 미리보기를 위한 json형태가 포함되야 해. 여기서 미리보기 부분은 반드시 존재해야해. 절대 비워놓거나 하지 말아줘. {"steps":[]} 이런식으로 빈 배열로 두면 안돼. 
 그리고 ////이후에는 절대 유저와의 대화내용이 들어가서는 안돼. 여기에는 설문조사 미리보기를 위한 json만 들어야가야해.
 ////를 기준으로 대화와 미리보기를 나누기 때문에 너가 임의로 '미리보기', 'json'와 같이 구분을 하면 안돼. 그냥 ////로만 나누면 돼.
 5. 너가 임의로 ###대화, ###미리보기와 같이 구분을 하면 안돼. 그냥 ////로만 나누면 돼.
@@ -485,6 +485,17 @@ SaaS 이용자들에게 만족도 조사를 하고 싶으시군요? 별점을 �
     const finalText = `${cleanedConversationPart}////${jsonPart || ''}`
 
     return finalText
+  }
+
+  //ai로 만든 설문조사 생성하기
+  async createSurveyWithAi(method = 'POST', params = {}) {
+    const result = await fetcher(
+      '/api/adminSurvey/aiSurvey',
+      this.getToken(),
+      method,
+      params,
+    )
+    return result
   }
 }
 

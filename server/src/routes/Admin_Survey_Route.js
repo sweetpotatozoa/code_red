@@ -108,11 +108,15 @@ router.get(
   '/download/:id',
   auth,
   wrapAsync(AdminSurveyController.downloadResponses),
-),
-  // 설문조사 응답 요약
-  router.get(
-    '/:surveyId',
-    auth,
-    wrapAsync(AdminSurveyController.getSurveySummary),
-  ),
-  (module.exports = router)
+)
+// 설문조사 응답 요약
+router.get(
+  '/:surveyId',
+  auth,
+  wrapAsync(AdminSurveyController.getSurveySummary),
+)
+
+// ai로 만든 설문조사 생성
+router.post('/aiSurvey', auth, wrapAsync(AdminSurveyController.createAiSurvey))
+
+module.exports = router
