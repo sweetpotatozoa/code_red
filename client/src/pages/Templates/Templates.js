@@ -137,7 +137,7 @@ const Templates = () => {
         <div className={styles.bigButton} onClick={goBack}>
           ◀︎ 뒤로가기
         </div>
-        <div className={styles.bigButtonBlack} onClick={goBack}>
+        <div className={styles.bigButtonBlack} onClick={handleSave}>
           다음 ▶️
         </div>
       </div>
