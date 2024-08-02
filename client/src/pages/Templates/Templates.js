@@ -11,6 +11,7 @@ const Templates = () => {
   const [showContainer, setShowContainer] = useState(true)
   const [message, setMessage] = useState('')
   const [response, setResponse] = useState('')
+  const [isSending, setIsSending] = useState(false)
   const [history, setHistory] = useState([
     { role: 'user', parts: [{ text: '설문조사 만드는 걸 도와줄래?' }] },
     {
@@ -33,16 +34,17 @@ const Templates = () => {
   }, [history])
 
   const handleSendMessage = async () => {
-    if (!message) return
+    if (!message || isSending) return
 
+    setIsSending(true) // 전송 중 상태로 설정
     const userMessage = { role: 'user', parts: [{ text: message }] }
     setHistory((prevHistory) => [...prevHistory, userMessage])
+
+    setMessage('') // 메시지 초기화
 
     const result = await backendApis.startChatConversation(history, message)
 
     console.log('result:', result)
-
-    setMessage('')
 
     // 응답을 '////'를 기준으로 분리
     const [conversationPart, jsonPart] = result.split('////')
@@ -67,12 +69,16 @@ const Templates = () => {
         console.error('Failed to parse JSON:', e)
       }
     }
+    setIsSending(false) // 전송 중 상태 해제
+    handleRefresh()
   }
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
-      handleSendMessage()
+      const messageToSend = message.trim() // 혹시 모를 공백 제거
+      setMessage('') // 메시지 입력창을 즉시 지움
+      handleSendMessage(messageToSend) // 메시지 전송
     }
   }
 
