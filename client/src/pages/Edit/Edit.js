@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
+// Edit.js
+
+import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import usePrompt from '../../utils/usePrompt'
 import BackendApis from '../../utils/backendApis'
@@ -7,11 +9,13 @@ import Surveys from '../../components/Surveys/Surveys'
 import Triggers from '../../components/Triggers/Triggers'
 import Delay from '../../components/Delay/Delay'
 import SurveyPreview from '../../components/Surveys/SurveyPreview'
+import { useSurvey } from '../../components/context/SurveyContext'
 
 const Edit = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [survey, setSurvey] = useState(null)
+  const { latestSurvey } = useSurvey()
+  const [survey, setSurvey] = useState(latestSurvey || null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [invalidSteps, setInvalidSteps] = useState({})
@@ -21,7 +25,28 @@ const Edit = () => {
   const [editingStepId, setEditingStepId] = useState(null)
 
   useEffect(() => {
-    // 외부 클릭 핸들러를 설정하여 편집 상태를 해제
+    if (!latestSurvey) {
+      const fetchSurvey = async () => {
+        try {
+          const data = await BackendApis.editSurvey(id)
+          setSurvey(data)
+          setLoading(false)
+          if (data.steps && data.steps.length > 0) {
+            setCurrentStepId(data.steps[0].id)
+          }
+        } catch (err) {
+          setError('설문조사를 불러오는데 실패했습니다.')
+          setLoading(false)
+        }
+      }
+
+      fetchSurvey()
+    } else {
+      setLoading(false)
+    }
+  }, [latestSurvey, id])
+
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (editingStepId && !event.target.closest(`.${styles.editing}`)) {
         setEditingStepId(null)
@@ -34,36 +59,12 @@ const Edit = () => {
     }
   }, [editingStepId])
 
-  const message =
-    '저장하지 않은 내용은 사라질 수 있습니다. 정말 나가시겠습니까?'
-
   useEffect(() => {
-    // 설문조사 데이터를 불러오는 함수
-    const fetchSurvey = async () => {
-      try {
-        const data = await BackendApis.editSurvey(id)
-        setSurvey(data)
-        setLoading(false)
-        if (data.steps && data.steps.length > 0) {
-          setCurrentStepId(data.steps[0].id)
-        }
-      } catch (err) {
-        setError('설문조사를 불러오는데 실패했습니다.')
-        setLoading(false)
-      }
-    }
-
-    fetchSurvey()
-  }, [id])
-
-  useEffect(() => {
-    // survey 상태가 변경될 때마다 validateSteps 함수 실행
     if (survey) {
       validateSteps()
     }
   }, [survey])
 
-  // 스텝 유효성 검사 함수
   const validateSteps = () => {
     const invalid = {}
     survey.steps.forEach((step, index) => {
@@ -185,6 +186,9 @@ const Edit = () => {
       setShowPreviewContainer(true)
     }
   }
+
+  const message =
+    '저장하지 않은 내용은 사라질 수 있습니다. 정말 나가시겠습니까?'
 
   const handleBeforeUnload = useCallback(
     (event) => {

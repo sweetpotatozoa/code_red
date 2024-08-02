@@ -32,6 +32,7 @@ const fetcher = async (
     const data = await res.json()
     return data
   } catch (err) {
+    console.error('Fetch error:', err)
     return null
   }
 }
@@ -49,6 +50,10 @@ class BackendApis {
 이때 유저가 어떤 부분에 대한 구체적인 수정을 요청했을 때는 그에 맞게 설문을 수정하되, 다른 부분은 유지하도록 해야해. 물론 너의 대답은 여전히 유저와의 대화와 설문조사 미리보기를 위한 json형태로 이루어져야 해.
 설문 답을 받는 유형은 '객관식(중복 불가), 객관식(중복 가능), 주관식, 별점, 외부링크, 안내'가 있어.
 너의 모든 대답은 유저와의 대화와 설문조사 미리보기를 위한 json형태 이 2가지로 이루어져있어야 해. 그리고 이건 '////'로 구분돼야 해.
+1. 유저와의 대화 : 유저와 상호작용을 하는 부분. 이 부분에서 모든 대화를 끝낸다. 유저와의 대화를 위한 내용만 말한다.
+2. 미리보기를 위한 json형태 : json의 내용만 담고 있다. 다른 자연어는 담고 있지 않다.
+
+
 
 [대답예시]
 사용자의 글 : SaaS 서비스의 이용자들에게 만족도 조사를 하고 싶어.
@@ -301,6 +306,17 @@ SaaS 이용자들에게 만족도 조사를 하고 싶으시군요? 별점을 �
       this.getToken(),
       method,
       params,
+    )
+    return result
+  }
+
+  // 설문조사 데이터를 저장하고 MongoDB ObjectId 반환
+  async saveSurvey(surveyData) {
+    const result = await fetcher(
+      '/api/adminSurvey/saveSurvey',
+      this.getToken(),
+      'POST',
+      surveyData,
     )
     return result
   }

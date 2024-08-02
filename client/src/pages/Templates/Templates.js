@@ -1,17 +1,19 @@
+import React, { useState, useEffect, useRef } from 'react'
 import styles from './Templates.module.css'
 import { useNavigate } from 'react-router-dom'
-import { useState, useEffect, useRef } from 'react'
 import backendApis from '../../utils/backendApis'
 import SurveyPreview from '../../components/Surveys/SurveyPreview'
+import { useSurvey } from '../../components/context/SurveyContext'
 
 const Templates = () => {
   const navigate = useNavigate()
+  const { setLatestSurvey } = useSurvey()
   const [selectedTemplate, setSelectedTemplate] = useState(null)
   const [currentStepId, setCurrentStepId] = useState(null)
   const [showContainer, setShowContainer] = useState(true)
   const [message, setMessage] = useState('')
   const [response, setResponse] = useState('')
-  const [loading, setLoading] = useState(false) // 로딩 상태 추가
+  const [loading, setLoading] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [history, setHistory] = useState([
     { role: 'user', parts: [{ text: '설문조사 만드는 걸 도와줄래?' }] },
@@ -28,7 +30,6 @@ const Templates = () => {
   const chatLogRef = useRef(null)
 
   useEffect(() => {
-    // history가 변경될 때마다 스크롤을 아래로 이동
     if (chatLogRef.current) {
       chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight
     }
@@ -37,36 +38,28 @@ const Templates = () => {
   const handleSendMessage = async () => {
     if (!message || isSending) return
 
-    setIsSending(true) // 전송 중 상태로 설정
+    setIsSending(true)
     const userMessage = { role: 'user', parts: [{ text: message }] }
     setHistory((prevHistory) => [...prevHistory, userMessage])
 
-    // 로딩 메시지 추가
     const loadingMessage = {
       role: 'model',
       parts: [{ text: '설문조사를 생성하고 있습니다!' }],
     }
     setHistory((prevHistory) => [...prevHistory, loadingMessage])
-    setLoading(true) // 로딩 시작
-    setMessage('') // 메시지 초기화
+    setLoading(true)
+    setMessage('')
 
     try {
       const result = await backendApis.startChatConversation(history, message)
 
-      console.log('result:', result)
-
-      // 응답을 '////'를 기준으로 분리
       const [conversationPart, jsonPart] = result.split('////')
 
-      console.log('jsonPart:', jsonPart)
-
-      // 실제 응답을 히스토리에 추가
       const modelResponse = {
         role: 'model',
         parts: [{ text: conversationPart }],
       }
       setHistory((prevHistory) => {
-        // 로딩 메시지를 제거하고 실제 응답을 추가
         const newHistory = prevHistory.filter(
           (entry) => entry.parts[0].text !== '설문조사를 생성하고 있습니다!',
         )
@@ -75,47 +68,61 @@ const Templates = () => {
 
       setResponse(conversationPart)
 
-      // JSON 부분을 파싱하여 설문조사 미리보기에 반영
       if (jsonPart) {
         try {
           const parsedData = JSON.parse(jsonPart)
-          if (parsedData.steps) {
+
+          // 응답 객체를 로그로 출력하여 데이터를 검토합니다.
+          console.log('Parsed Data:', parsedData)
+
+          // ID와 steps가 있는지 확인합니다.
+          if (parsedData.id && parsedData.steps) {
             setSelectedTemplate(parsedData)
-            setCurrentStepId(parsedData.steps[0].id) // 첫 번째 스텝의 ID 설정
+            setCurrentStepId(parsedData.steps[0].id)
+
+            // 최신 설문조사를 공유 상태에 저장
+            setLatestSurvey(parsedData)
+          } else {
+            console.error('ID가 없습니다. 응답 형식을 확인하세요:', parsedData)
           }
         } catch (e) {
-          console.error('Failed to parse JSON:', e)
+          console.error('JSON 파싱 실패:', e)
         }
       }
     } catch (error) {
-      console.error('Error fetching chat response:', error)
+      console.error('채팅 응답 가져오기 오류:', error)
     } finally {
-      setLoading(false) // 로딩 완료
+      setLoading(false)
     }
-    setIsSending(false) // 전송 중 상태 해제
+    setIsSending(false)
     handleRefresh()
   }
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
-      const messageToSend = message.trim() // 혹시 모를 공백 제거
-      setMessage('') // 메시지 입력창을 즉시 지움
-      handleSendMessage(messageToSend) // 메시지 전송
+      const messageToSend = message.trim()
+      setMessage('')
+      handleSendMessage(messageToSend)
     }
   }
 
-  // 뒤로가기 버튼
   const goBack = () => {
     navigate('/')
   }
 
-  // 새로고침
   const handleRefresh = () => {
     if (selectedTemplate && selectedTemplate.steps.length > 0) {
       setCurrentStepId(selectedTemplate.steps[0].id)
     }
     setShowContainer(true)
+  }
+
+  const goToEditPage = () => {
+    if (selectedTemplate) {
+      // 설문조사 ID로 /edit/{id} 경로로 이동
+      navigate(`/edit/${selectedTemplate.id}`)
+    }
   }
 
   return (
@@ -141,9 +148,9 @@ const Templates = () => {
                           '설문조사를 생성하고 있습니다!',
                         )
                           ? ` ${styles.loadingMessage}`
-                          : '') // 로딩 메시지일 경우 애니메이션 적용
+                          : '')
                   }
-                  dangerouslySetInnerHTML={{ __html: entry.parts[0].text }} // HTML을 렌더링하도록 설정
+                  dangerouslySetInnerHTML={{ __html: entry.parts[0].text }}
                 />
               ))}
             </div>
@@ -151,7 +158,7 @@ const Templates = () => {
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={handleKeyDown} // 엔터 키 이벤트 핸들러 추가
+                onKeyDown={handleKeyDown}
                 placeholder='메세지를 입력하세요!'
                 className={styles.input}
               />
@@ -185,6 +192,11 @@ const Templates = () => {
             <div className={styles.bigButton} onClick={handleRefresh}>
               새로고침
             </div>
+            {selectedTemplate && (
+              <div className={styles.bigButton} onClick={goToEditPage}>
+                설문조사 편집하기
+              </div>
+            )}
           </div>
         </div>
       </div>

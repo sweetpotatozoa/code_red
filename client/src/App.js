@@ -1,3 +1,5 @@
+// App.js
+
 import './App.css'
 import { Route, Routes } from 'react-router-dom'
 import PrivateRoute from './components/PrivateRoute/PrivateRoute'
@@ -11,6 +13,7 @@ import Templates from './pages/Templates/Templates'
 import Edit from './pages/Edit/Edit'
 import { useMediaQuery } from 'react-responsive'
 import { useEffect } from 'react'
+import { SurveyProvider } from './components/context/SurveyContext' // SurveyContext 임포트
 
 function App() {
   const isMobile = useMediaQuery({ query: '(max-width: 768px)' })
@@ -31,67 +34,73 @@ function App() {
     }
   }, [isMobile])
 
-  return isMobile ? (
-    <div style={{ textAlign: 'center', marginTop: '20px' }}>
-      <p style={{ fontSize: '30px', color: 'black', fontWeight: 'bold' }}>
-        아직 모바일을 지원하지 않습니다.
-        <br />
-        PC로 접속해주세요 :)
-      </p>
-    </div>
-  ) : (
-    <Routes>
-      <Route path='/login' element={<Login />} />
-      <Route path='/register' element={<Register />} />
-      <Route
-        path='/'
-        element={
-          <PrivateRoute>
-            <Home />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path='/onboarding'
-        element={
-          <PrivateRoute>
-            <Onboarding />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path='/responses/:id'
-        element={
-          <PrivateRoute>
-            <Responses />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path='/summary/:id'
-        element={
-          <PrivateRoute>
-            <Summary />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path='/templates'
-        element={
-          <PrivateRoute>
-            <Templates />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path='/edit/:id'
-        element={
-          <PrivateRoute>
-            <Edit />
-          </PrivateRoute>
-        }
-      />
-    </Routes>
+  return (
+    <SurveyProvider>
+      {' '}
+      {/* SurveyProvider로 전체 애플리케이션 감싸기 */}
+      {isMobile ? (
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <p style={{ fontSize: '30px', color: 'black', fontWeight: 'bold' }}>
+            아직 모바일을 지원하지 않습니다.
+            <br />
+            PC로 접속해주세요 :)
+          </p>
+        </div>
+      ) : (
+        <Routes>
+          <Route path='/login' element={<Login />} />
+          <Route path='/register' element={<Register />} />
+          <Route
+            path='/'
+            element={
+              <PrivateRoute>
+                <Home />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path='/onboarding'
+            element={
+              <PrivateRoute>
+                <Onboarding />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path='/responses/:id'
+            element={
+              <PrivateRoute>
+                <Responses />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path='/summary/:id'
+            element={
+              <PrivateRoute>
+                <Summary />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path='/templates'
+            element={
+              <PrivateRoute>
+                <Templates />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path='/edit/:id'
+            element={
+              <PrivateRoute>
+                <Edit />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      )}
+    </SurveyProvider>
   )
 }
 
