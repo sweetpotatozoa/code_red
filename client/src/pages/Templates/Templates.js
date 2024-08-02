@@ -48,7 +48,6 @@ const Templates = () => {
     }
     setHistory((prevHistory) => [...prevHistory, loadingMessage])
     setLoading(true) // 로딩 시작
-    
     setMessage('') // 메시지 초기화
 
     try {
