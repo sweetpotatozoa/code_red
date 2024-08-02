@@ -7,8 +7,10 @@ import Register from './pages/Auth/Register/Register'
 import Onboarding from './pages/Onboarding/Onboarding'
 import Responses from './pages/Responses/Responses'
 import Summary from './pages/Summary/Summary'
-import Templates from './pages/Templates/Templates'
 import Edit from './pages/Edit/Edit'
+import Create from './pages/Create/Create'
+import Templates from './pages/Templates/Templates'
+import CreateWithAi from './pages/CreateWithAi/CreateWithAi'
 import { useMediaQuery } from 'react-responsive'
 import { useEffect } from 'react'
 
@@ -88,6 +90,22 @@ function App() {
         element={
           <PrivateRoute>
             <Edit />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path='/create'
+        element={
+          <PrivateRoute>
+            <Create />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path='/createWithAi'
+        element={
+          <PrivateRoute>
+            <CreateWithAi />
           </PrivateRoute>
         }
       />

@@ -1,0 +1,261 @@
+.container {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  background-color: #f9fafc;
+  min-width: 1420px;
+  height: 732px;
+  overflow-x: auto;
+  flex-direction: column;
+}
+
+.header {
+  background-color: #ffffff;
+  padding: 16px;
+  width: 100%;
+  display: flex;
+  border: 1px solid #e5ebf3;
+  justify-content: space-between;
+}
+
+.bigButton {
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #e5ebf3;
+  color: #6c7b90;
+  padding: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.bigButtonBlack {
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #1c0f24;
+  color: #ffffff;
+  padding: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.main {
+  display: flex;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  width: 700px;
+  margin-right: 20px;
+  border-right: 1px solid #e5ebf3;
+  height: 642px;
+}
+
+.mainTitle {
+  font-size: 36px;
+  font-weight: bold;
+  padding: 32px 16px;
+}
+
+.options {
+  display: flex;
+  width: 100%;
+  padding: 0 16px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  width: 324px;
+  padding: 16px;
+  border: 1px solid #e5ebf3;
+  background-color: #ffffff;
+  border-radius: 10px;
+  margin-top: 16px;
+}
+
+.optionTitle {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.optionContent {
+  font-size: 14px;
+}
+
+.display {
+  display: flex;
+  flex-direction: column;
+  width: 700px;
+  justify-content: center;
+}
+
+.website {
+  display: flex;
+  flex-direction: column;
+  background-color: #f2f3f6;
+  height: 518px;
+  margin-right: 16px;
+  margin-top: 32px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  position: relative;
+  padding: 16px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  padding: 0px 16px;
+}
+
+.macButton {
+  height: 16px;
+}
+
+.yourWeb {
+  font-size: 16px;
+  font-weight: bold;
+  margin-left: 16px;
+}
+
+.bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 16px;
+  padding-bottom: 16px;
+}
+
+.selected {
+  background-color: #f1f3f6;
+}
+
+.option:hover {
+  background-color: #f1f3f6;
+  cursor: pointer;
+}
+
+.smallBottom {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #11192c;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 32px;
+  font-weight: bold;
+}
+
+.chatLog {
+  height: 350px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.userMessage {
+  background-color: #9a4dff;
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  max-width: 70%;
+  word-wrap: break-word;
+  display: inline-block;
+  align-self: flex-end; /* 오른쪽 정렬 */
+  margin-left: auto; /* 줄 바꿈 시 오른쪽 정렬 유지 */
+}
+
+.modelMessage {
+  background-color: #e5e5ea;
+  color: black;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  max-width: 70%;
+  word-wrap: break-word;
+  display: inline-block;
+  align-self: flex-start; /* 왼쪽 정렬 */
+}
+
+.inputBox {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+}
+
+.input {
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 10px;
+  margin-left: 10px;
+  width: 80%;
+  height: 40px; /* 고정 높이 설정 */
+  line-height: 20px; /* 텍스트 높이 설정 */
+  font-size: 16px;
+  resize: none; /* 크기 조절 핸들러 제거 */
+  border: none; /* 기본 테두리 제거 */
+  outline: none; /* 포커스 시 outline 제거 */
+  box-sizing: border-box; /* 패딩 포함하여 크기 계산 */
+  display: flex;
+  align-items: center; /* Flexbox로 수직 중앙 정렬 */
+  padding-top: 10px; /* 텍스트 상단 패딩 */
+  padding-bottom: 10px; /* 텍스트 하단 패딩 */
+  border: 1px solid #e5e5ea; /* 테두리 설정 */
+  margin-right: 32px;
+}
+
+.sendButton {
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #e5ebf3;
+  color: #6c7b90;
+  padding: 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.loadingMessage {
+  font-style: italic;
+  color: #999;
+  animation: blink 1.5s infinite;
+}
+
+.choiceButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 100px;
+  width: 100%;
+  margin-left: 16px;
+}
+
+.choiceButtons div img {
+  cursor: pointer;
+  width: 90%;
+}

@@ -475,8 +475,9 @@ class AdminSurveyService {
 
   //ai로 만든 설문조사 생성
   async createAiSurvey(userId, surveyData) {
+    console.log(surveyData)
     await this.checkUserIdExist(userId)
-    return SurveysRepo.createSurveyByAI(userId, surveyData)
+    return SurveysRepo.createAiSurvey(userId, surveyData)
   }
 }
 

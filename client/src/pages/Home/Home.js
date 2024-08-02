@@ -52,7 +52,7 @@ const Home = () => {
   }
   //새 설문조사 만들기
   const newSurveyHandler = () => {
-    navigate('/templates')
+    navigate('/create')
   }
 
   //설정 모달 취소하기

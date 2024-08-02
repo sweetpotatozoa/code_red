@@ -496,6 +496,7 @@ SaaS 이용자들에게 만족도 조사를 하고 싶으시군요? 별점을 �
       method,
       params,
     )
+    console.log(result)
     return result
   }
 }

@@ -4,10 +4,10 @@ const auth = require('../middleware/auth')
 const wrapAsync = require('../utils/wrapAsync')
 const AdminSurveyController = require('../controllers/Admin_Survey_Controller')
 
-// const fakeAuth = (req, res, next) => {
-//   req.user = { id: '6676c3246488a1214054ca26' }
-//   next()
-// }
+const fakeAuth = (req, res, next) => {
+  req.user = { id: '66a9be259b5c77304bee6d0a' }
+  next()
+}
 
 // userId를 이용하여 설문조사 목록을 가져옴.
 router.get('/', auth, wrapAsync(AdminSurveyController.getSurveys))
@@ -17,6 +17,13 @@ router.post(
   '/saveOnboardingInfo',
   auth,
   wrapAsync(AdminSurveyController.saveOnboardingInfo),
+)
+
+//aiSurvey 생성
+router.post(
+  '/aiSurvey',
+  fakeAuth,
+  wrapAsync(AdminSurveyController.createAiSurvey),
 )
 
 // 연결상태 확인하기
@@ -115,8 +122,5 @@ router.get(
   auth,
   wrapAsync(AdminSurveyController.getSurveySummary),
 )
-
-// ai로 만든 설문조사 생성
-router.post('/aiSurvey', auth, wrapAsync(AdminSurveyController.createAiSurvey))
 
 module.exports = router
