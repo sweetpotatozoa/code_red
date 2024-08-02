@@ -173,6 +173,7 @@ const Templates = () => {
             </div>
             {selectedTemplate && (
               <SurveyPreview
+                key={currentStepId} // 이 부분을 추가하여 key로 강제 리렌더링을 유도
                 selectedTemplate={selectedTemplate}
                 currentStepId={currentStepId}
                 setCurrentStepId={setCurrentStepId}
