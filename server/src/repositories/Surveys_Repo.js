@@ -138,6 +138,12 @@ class SurveysRepo {
     )
     return result.value
   }
+
+  //ai로 만든 설문조사 생성
+  async createAiSurvey(survey) {
+    const result = await this.collection.insertOne(survey)
+    return result.insertedId
+  }
 }
 
 module.exports = new SurveysRepo()

@@ -118,11 +118,27 @@ const Templates = () => {
     setShowContainer(true)
   }
 
+  // 저장하고 edit 페이지로 이동
+  const handleSave = async () => {
+    if (selectedTemplate) {
+      try {
+        const surveyId = await backendApis.createSurveyWithAi(selectedTemplate)
+        navigate(`/edit/${surveyId}`)
+      } catch (err) {
+        console.error('Failed to save survey:', err)
+        alert('설문조사 저장에 실패했습니다.')
+      }
+    }
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.bigButton} onClick={goBack}>
           ◀︎ 뒤로가기
+        </div>
+        <div className={styles.bigButtonBlack} onClick={goBack}>
+          다음 ▶️
         </div>
       </div>
       <div className={styles.main}>
@@ -173,6 +189,7 @@ const Templates = () => {
             </div>
             {selectedTemplate && (
               <SurveyPreview
+                key={currentStepId} // 이 부분을 추가하여 key로 강제 리렌더링을 유도
                 selectedTemplate={selectedTemplate}
                 currentStepId={currentStepId}
                 setCurrentStepId={setCurrentStepId}

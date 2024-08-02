@@ -441,6 +441,23 @@ class AdminSurveyController {
       res.status(status).json({ message })
     }
   }
+
+  // ai로 만든 설문조사 생성하기
+  async createAiSurvey(req, res) {
+    const userId = req.user.id
+    const surveyData = req.body
+    if (!userId || !isObjectId(userId)) {
+      res.status(400).json({ message: 'Invalid user id' })
+      return
+    }
+    try {
+      const result = await AdminSurveyService.createAiSurvey(userId, surveyData)
+      res.status(201).json(result)
+    } catch (err) {
+      const { status, message } = errorHandler(err, 'createAiSurvey')
+      res.status(status).json({ message })
+    }
+  }
 }
 
 module.exports = new AdminSurveyController()
