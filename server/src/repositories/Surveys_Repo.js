@@ -140,8 +140,21 @@ class SurveysRepo {
   }
 
   //ai로 만든 설문조사 생성
-  async createAiSurvey(survey) {
-    const result = await this.collection.insertOne(survey)
+  async createAiSurvey(userId, survey) {
+    const newSurvey = {
+      ...survey,
+      userId: new ObjectId(userId),
+      views: 0,
+      triggers: [],
+      delay: {},
+      isDeploy: false,
+      updateAt: new Date(),
+      createdAt: new Date(),
+      title: 'AI로 만든 설문조사',
+      description: 'AI가 만든 설문조사입니다.',
+      type: 'AI',
+    }
+    const result = await this.collection.insertOne(newSurvey)
     return result.insertedId
   }
 }
