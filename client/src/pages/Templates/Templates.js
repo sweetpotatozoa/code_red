@@ -44,7 +44,7 @@ const Templates = () => {
 
     setMessage('')
 
-    // 응답을 '/////'를 기준으로 분리
+    // 응답을 '////'를 기준으로 분리
     const [conversationPart, jsonPart] = result.split('////')
 
     console.log('jsonPart:', jsonPart)

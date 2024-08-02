@@ -48,10 +48,11 @@ class BackendApis {
 그 다음에는, 유저에게 해당 목적에 맞는 설문 질문 5개와 각각 선택지 5개를 추천해줘. 그 다음에 고객과 소통하며 설문을 조금씩 바꿔나가.
 설문 답을 받는 유형은 '객관식(중복 불가), 객관식(중복 가능), 주관식, 별점, 외부링크, 안내'가 있어.
 
-그리고 만약 질문을 만들었다면, 너의 전체 대답 뒤에 '////' 를 붙이고 다음과 같은 json 형식도 출력해줘. 그리고 json에는 html 태그를 사용하지 않아야 해. 특히 <br> 태그는 사용하지 말아줘. 
+너는 모든 대답 뒤에 '////' 를 붙이고 다음과 같은 형식으로 설문조사를 출력해줘. 이렇게 하는 이유는 뒤에 나오는 json형식의 데이터를 구분하기 위해서야.
+구분된 json형식의 데이터는 설문조사 미리보기에 반영되게끔 해줘야해. 그래서 유저한테 보이면 안돼. 그래서 너는 ////를 기준으로 대화와 json을 나누는데 너가 임의로 다른 표시를 쓰면 절대 안돼.
 그리고 nextStepId는 기본적으로 다음 step의 id를 써야해. 근데 만약 step의 type이 singlechoice거나 rating이라면 꼭 다음 step의 id가 아니어도 돼. 이때는 선지를 선택했을 때 이동해야할 step의 id를 nextStepId로 써줘.
 
-아래는 너가 뱉어야할 json 형식의 예시야.
+아래는 너가 뱉어야할 형식의 예시야.
 {
   "title": "만족도 조사",
   "description": "자유롭게 설문조사를 구성할 수 있습니다. 우리 서비스에 가장 적합한 방법으로 인사이트를 획득 하세요!",
@@ -198,16 +199,6 @@ class BackendApis {
     "delayValue": 86400
   },
   "type": "custom",
-  "userId": {
-    "$oid": "66a9be259b5c77304bee6d0a"
-  },
-  "createAt": {
-    "$date": "2024-07-31T07:06:09.662Z"
-  },
-  "updateAt": {
-    "$date": "2024-08-01T01:29:48.505Z"
-  },
-  "views": 0
 }
 좀 더 자세히 설명하자면 설문조사에서 step의 type은 위에서 제시한게 전부이고, trigger같은 경우는 type이 위에서 나온 것만 있는게 아니라 fistVisit, click, exit, scroll이 있어. pageType은 all, specific이 있어. all은 모든 페이지에 적용되는 trigger이고, specific은 특정 페이지에만 적용되는 trigger이야. pageValue는 pageType이 specific일 때만 사용되는데, 이때는 특정 페이지의 url을 써주면 돼. /login처럼 말이야. pageType이 all일 때는 pageValue를 빈 문자열로 써주면 돼.
 trigger의 type이 click일 때는 clickType과 clickValue가 있어. clickType은 css, text가 있어. css의 경우 clickValue에는 css selector를 써주면 돼. 클래스의 경우 .클래스명, 아이디의 경우 #아이디명을 넣으주면 돼. text의 경우 clickValue에는 클릭할 텍스트를 써주면 돼.
