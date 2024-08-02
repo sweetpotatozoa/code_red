@@ -11,6 +11,7 @@ const Templates = () => {
   const [showContainer, setShowContainer] = useState(true)
   const [message, setMessage] = useState('')
   const [response, setResponse] = useState('')
+  const [loading, setLoading] = useState(false) // 로딩 상태 추가
   const [isSending, setIsSending] = useState(false)
   const [history, setHistory] = useState([
     { role: 'user', parts: [{ text: '설문조사 만드는 걸 도와줄래?' }] },
@@ -40,34 +41,57 @@ const Templates = () => {
     const userMessage = { role: 'user', parts: [{ text: message }] }
     setHistory((prevHistory) => [...prevHistory, userMessage])
 
+    // 로딩 메시지 추가
+    const loadingMessage = {
+      role: 'model',
+      parts: [{ text: '설문조사를 생성하고 있습니다!' }],
+    }
+    setHistory((prevHistory) => [...prevHistory, loadingMessage])
+    setLoading(true) // 로딩 시작
+    
     setMessage('') // 메시지 초기화
 
-    const result = await backendApis.startChatConversation(history, message)
+    try {
+      const result = await backendApis.startChatConversation(history, message)
 
-    console.log('result:', result)
+      console.log('result:', result)
 
-    // 응답을 '////'를 기준으로 분리
-    const [conversationPart, jsonPart] = result.split('////')
+      // 응답을 '////'를 기준으로 분리
+      const [conversationPart, jsonPart] = result.split('////')
 
-    console.log('jsonPart:', jsonPart)
+      console.log('jsonPart:', jsonPart)
 
-    // 대화 부분을 히스토리에 추가
-    const modelResponse = { role: 'model', parts: [{ text: conversationPart }] }
-    setHistory((prevHistory) => [...prevHistory, modelResponse])
-
-    setResponse(conversationPart)
-
-    // JSON 부분을 파싱하여 설문조사 미리보기에 반영
-    if (jsonPart) {
-      try {
-        const parsedData = JSON.parse(jsonPart)
-        if (parsedData.steps) {
-          setSelectedTemplate(parsedData)
-          setCurrentStepId(parsedData.steps[0].id) // 첫 번째 스텝의 ID 설정
-        }
-      } catch (e) {
-        console.error('Failed to parse JSON:', e)
+      // 실제 응답을 히스토리에 추가
+      const modelResponse = {
+        role: 'model',
+        parts: [{ text: conversationPart }],
       }
+      setHistory((prevHistory) => {
+        // 로딩 메시지를 제거하고 실제 응답을 추가
+        const newHistory = prevHistory.filter(
+          (entry) => entry.parts[0].text !== '설문조사를 생성하고 있습니다!',
+        )
+        return [...newHistory, modelResponse]
+      })
+
+      setResponse(conversationPart)
+
+      // JSON 부분을 파싱하여 설문조사 미리보기에 반영
+      if (jsonPart) {
+        try {
+          const parsedData = JSON.parse(jsonPart)
+          if (parsedData.steps) {
+            setSelectedTemplate(parsedData)
+            setCurrentStepId(parsedData.steps[0].id) // 첫 번째 스텝의 ID 설정
+          }
+        } catch (e) {
+          console.error('Failed to parse JSON:', e)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching chat response:', error)
+    } finally {
+      setLoading(false) // 로딩 완료
     }
     setIsSending(false) // 전송 중 상태 해제
     handleRefresh()
@@ -113,7 +137,12 @@ const Templates = () => {
                   className={
                     entry.role === 'user'
                       ? styles.userMessage
-                      : styles.modelMessage
+                      : styles.modelMessage +
+                        (entry.parts[0].text.includes(
+                          '설문조사를 생성하고 있습니다!',
+                        )
+                          ? ` ${styles.loadingMessage}`
+                          : '') // 로딩 메시지일 경우 애니메이션 적용
                   }
                   dangerouslySetInnerHTML={{ __html: entry.parts[0].text }} // HTML을 렌더링하도록 설정
                 />
