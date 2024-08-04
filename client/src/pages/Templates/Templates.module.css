@@ -40,6 +40,12 @@
   height: 642px;
 }
 
+.titleContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .mainTitle {
   font-size: 36px;
   font-weight: bold;

@@ -45,16 +45,31 @@
 .choice {
   display: flex;
   flex-direction: column;
+  /* align-items: center; */
   width: 700px;
   margin-right: 20px;
   border-right: 1px solid #e5ebf3;
   height: 642px;
 }
 
+.titleContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .mainTitle {
   font-size: 36px;
   font-weight: bold;
   padding: 32px 16px;
+}
+
+.gemini {
+  width: 20%;
+  height: auto;
+  padding-top: 28px;
+  padding-bottom: 36px;
+  padding-left: 16px;
 }
 
 .options {
@@ -158,7 +173,7 @@
 }
 
 .chatLog {
-  height: 350px;
+  height: 440px;
   overflow-y: auto;
   background-color: #f9f9f9;
   padding: 15px;
@@ -196,7 +211,8 @@
 .inputBox {
   display: flex;
   align-items: center;
-  width: 98%;
+  justify-content: center;
+  width: 100%;
   padding: 10px;
   background-color: #e5ebf3;
 }

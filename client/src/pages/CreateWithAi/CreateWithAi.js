@@ -19,7 +19,7 @@ const Templates = () => {
       role: 'model',
       parts: [
         {
-          text: '안녕하세요? 저에게 고민을 말씀해주시면 설문조사 생성을 도와드릴게요 :)',
+          text: '안녕하세요? 저에게 고민을 말씀해 주시면 설문조사 생성을 도와드릴게요 :)',
         },
       ],
     },
@@ -147,7 +147,10 @@ const Templates = () => {
       </div>
       <div className={styles.main}>
         <div className={styles.choice}>
-          <div className={styles.mainTitle}>AI와 함께 설문조사 만들기</div>
+          <div className={styles.titleContainer}>
+            <img className={styles.gemini} src='/gemini.svg' alt='Gemini' />
+            <div className={styles.mainTitle}>캐치봇과 함께 만들기</div>
+          </div>
           <div>
             <div ref={chatLogRef} className={styles.chatLog}>
               {history.map((entry, index) => (
@@ -172,7 +175,7 @@ const Templates = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={handleKeyDown} // 엔터 키 이벤트 핸들러 추가
-                placeholder='캐치봇과 대화하며 설문조사를 만들어보세요!'
+                placeholder='캐치봇과 대화하며 설문조사를 만들어 보세요!'
                 className={styles.input}
               />
               <button className={styles.sendButton} onClick={handleSendMessage}>

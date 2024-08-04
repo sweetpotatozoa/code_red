@@ -71,7 +71,9 @@ const Templates = () => {
       </div>
       <div className={styles.main}>
         <div className={styles.choice}>
-          <div className={styles.mainTitle}>새 설문조사 만들기</div>
+          <div className={styles.titleContainer}>
+            <div className={styles.mainTitle}>템플릿 선택하기</div>
+          </div>
           <div className={styles.options}>
             {templates.map((template) => (
               <div
