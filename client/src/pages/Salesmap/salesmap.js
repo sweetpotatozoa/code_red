@@ -1,8 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import styles from './Home.module.css' // 일단 Home 스타일 재사용
+import styles from './salesmap.module.css' // 일단 Home 스타일 재사용
 import { useState } from 'react'
-
-import backendApis from '../../utils/backendApis'
 
 const Salesmap = () => {
   const [userInfo, setUserInfo] = useState('')
