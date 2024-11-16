@@ -22,3 +22,10 @@ a {
 button {
   border: none;
 }
+
+/* Salesmap 페이지일 때만 적용되는 스타일 */
+body.salesmap-page {
+  display: block;
+  min-width: initial;
+  width: 100%;
+}

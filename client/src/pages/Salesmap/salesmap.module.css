@@ -2,9 +2,3 @@
   width: 100%;
   min-height: 100vh;
 }
-
-/* body 스타일 재정의 */
-:global(body) {
-  min-width: auto !important; /* 1420px 제한 해제 */
-  display: block !important; /* flex 해제 */
-}

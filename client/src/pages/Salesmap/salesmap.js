@@ -1,8 +1,11 @@
 import { useEffect } from 'react'
-import styles from './salesmap.module.css'
+import styles from './Salesmap.module.css'
 
 const Salesmap = () => {
   useEffect(() => {
+    // 페이지 진입시 클래스 추가
+    document.body.classList.add('salesmap-page')
+
     // 스크립트를 동적으로 추가
     const script = document.createElement('script')
     script.src = 'https://salesmap.kr/web-form-loader-v3.js'
@@ -14,7 +17,8 @@ const Salesmap = () => {
     document.body.appendChild(script)
 
     return () => {
-      // 클린업
+      // 클린업: 페이지 나갈때 클래스와 스크립트 제거
+      document.body.classList.remove('salesmap-page')
       const scriptElement = document.getElementById('loadFormScript')
       if (scriptElement) scriptElement.remove()
     }
