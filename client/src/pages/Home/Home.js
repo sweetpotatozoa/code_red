@@ -164,29 +164,6 @@ const Home = () => {
             <div className={styles.setting}>가이드</div>
           </a>
         </div>
-
-        {/* 외부 스크립트 추가 */}
-        <div
-          id='salesmap-web-form'
-          data-web-form='https://salesmap.kr/web-form/ebf2f1b5-b435-4ba0-9821-4b8c2ef31cb8'
-          dangerouslySetInnerHTML={{
-            __html: `
-              <script>
-                !(function (window, document) {
-                  var currentScript = document.currentScript;
-                  var scriptElement = document.createElement('script');
-                  scriptElement.onload = function () {
-                    window.SmFormSettings.loadForm();
-                  };
-                  scriptElement.id = 'loadFormScript';
-                  scriptElement.src = 'https://salesmap.kr/web-form-loader-v3.js';
-                  currentScript.parentNode.insertBefore(scriptElement, currentScript);
-                })(window, document);
-              </script>
-            `,
-          }}
-        />
-
         <div className={styles.titleBox}>
           <div className={styles.title}>설문조사</div>
           <div className={styles.button} onClick={newSurveyHandler}>
