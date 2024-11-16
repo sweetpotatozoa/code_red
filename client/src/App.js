@@ -9,6 +9,7 @@ import Responses from './pages/Responses/Responses'
 import Summary from './pages/Summary/Summary'
 import Templates from './pages/Templates/Templates'
 import Edit from './pages/Edit/Edit'
+import Salesmap from './pages/Salesmap/salesmap'
 
 function App() {
   return (
@@ -60,6 +61,14 @@ function App() {
         element={
           <PrivateRoute>
             <Edit />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path='/salesmap'
+        element={
+          <PrivateRoute>
+            <Salesmap />
           </PrivateRoute>
         }
       />
