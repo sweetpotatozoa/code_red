@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import styles from './Salesmap.module.css'
+import styles from './salesmap.module.css'
 
 const Salesmap = () => {
   useEffect(() => {
