@@ -1,5 +1,6 @@
 import './App.css'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import PrivateRoute from './components/PrivateRoute/PrivateRoute'
 import Home from './pages/Home/Home'
 import Login from './pages/Auth/Login/Login'
@@ -12,68 +13,93 @@ import Edit from './pages/Edit/Edit'
 import Salesmap from './pages/Salesmap/salesmap'
 
 function App() {
-  return (
-    <Routes>
-      <Route path='/login' element={<Login />} />
-      <Route path='/register' element={<Register />} />
-      <Route
-        path='/'
-        element={
-          <PrivateRoute>
-            <Home />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path='/onboarding'
-        element={
-          <PrivateRoute>
-            <Onboarding />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path='/responses/:id'
-        element={
-          <PrivateRoute>
-            <Responses />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path='/summary/:id'
-        element={
-          <PrivateRoute>
-            <Summary />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path='/templates'
-        element={
-          <PrivateRoute>
-            <Templates />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path='/edit/:id'
-        element={
-          <PrivateRoute>
-            <Edit />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path='/salesmap'
-        element={
-          <PrivateRoute>
-            <Salesmap />
-          </PrivateRoute>
-        }
-      />
-    </Routes>
-  )
+ const location = useLocation()
+
+ useEffect(() => {
+   // GA 스크립트 로드
+   const script = document.createElement('script')
+   script.src = `https://www.googletagmanager.com/gtag/js?id=G-WGX1YS6SP3`
+   script.async = true
+   document.head.appendChild(script)
+
+   // GA 초기화
+   window.dataLayer = window.dataLayer || []
+   function gtag(){window.dataLayer.push(arguments)}
+   gtag('js', new Date())
+   gtag('config', 'G-WGX1YS6SP3')
+ }, [])
+
+ // 페이지 변경 추적
+ useEffect(() => {
+   if (window.gtag) {
+     window.gtag('event', 'page_view', {
+       page_path: location.pathname
+     })
+   }
+ }, [location])
+
+ return (
+   <Routes>
+     <Route path='/login' element={<Login />} />
+     <Route path='/register' element={<Register />} />
+     <Route
+       path='/'
+       element={
+         <PrivateRoute>
+           <Home />
+         </PrivateRoute>
+       }
+     />
+     <Route
+       path='/onboarding'
+       element={
+         <PrivateRoute>
+           <Onboarding />
+         </PrivateRoute>
+       }
+     />
+     <Route
+       path='/responses/:id'
+       element={
+         <PrivateRoute>
+           <Responses />
+         </PrivateRoute>
+       }
+     />
+     <Route
+       path='/summary/:id'
+       element={
+         <PrivateRoute>
+           <Summary />
+         </PrivateRoute>
+       }
+     />
+     <Route
+       path='/templates'
+       element={
+         <PrivateRoute>
+           <Templates />
+         </PrivateRoute>
+       }
+     />
+     <Route
+       path='/edit/:id'
+       element={
+         <PrivateRoute>
+           <Edit />
+         </PrivateRoute>
+       }
+     />
+     <Route
+       path='/salesmap'
+       element={
+         <PrivateRoute>
+           <Salesmap />
+         </PrivateRoute>
+       }
+     />
+   </Routes>
+ )
 }
 
 export default App
