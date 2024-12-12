@@ -40,10 +40,10 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path='/login' element={<Login />} />
+      <Route path='/register' element={<Register />} />
       <Route
-        path="/"
+        path='/'
         element={
           <PrivateRoute>
             <Home />
@@ -51,7 +51,7 @@ function App() {
         }
       />
       <Route
-        path="/onboarding"
+        path='/onboarding'
         element={
           <PrivateRoute>
             <Onboarding />
@@ -59,7 +59,7 @@ function App() {
         }
       />
       <Route
-        path="/responses/:id"
+        path='/responses/:id'
         element={
           <PrivateRoute>
             <Responses />
@@ -67,7 +67,7 @@ function App() {
         }
       />
       <Route
-        path="/summary/:id"
+        path='/summary/:id'
         element={
           <PrivateRoute>
             <Summary />
@@ -75,7 +75,7 @@ function App() {
         }
       />
       <Route
-        path="/templates"
+        path='/templates'
         element={
           <PrivateRoute>
             <Templates />
@@ -83,7 +83,7 @@ function App() {
         }
       />
       <Route
-        path="/edit/:id"
+        path='/edit/:id'
         element={
           <PrivateRoute>
             <Edit />
@@ -91,7 +91,7 @@ function App() {
         }
       />
       <Route
-        path="/salesmap"
+        path='/salesmap'
         element={
           <PrivateRoute>
             <Salesmap />

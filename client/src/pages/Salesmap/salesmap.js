@@ -39,8 +39,8 @@ const Salesmap = () => {
   return (
     <div className={styles.container}>
       <div
-        id="salesmap-web-form"
-        data-web-form="https://salesmap.kr/web-form/ebf2f1b5-b435-4ba0-9821-4b8c2ef31cb8"
+        id='salesmap-web-form'
+        data-web-form='https://salesmap.kr/web-form/ebf2f1b5-b435-4ba0-9821-4b8c2ef31cb8'
       />
     </div>
   )
