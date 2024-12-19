@@ -12,6 +12,7 @@ import Summary from './pages/Summary/Summary'
 import Templates from './pages/Templates/Templates'
 import Edit from './pages/Edit/Edit'
 import Salesmap from './pages/Salesmap/salesmap'
+import Mermaid from './pages/MermaidG/mermaid'
 
 function App() {
   const location = useLocation()
@@ -42,6 +43,7 @@ function App() {
     <Routes>
       <Route path='/login' element={<Login />} />
       <Route path='/register' element={<Register />} />
+      <Route path='/mermaid' element={<Mermaid />} />
       <Route
         path='/'
         element={
