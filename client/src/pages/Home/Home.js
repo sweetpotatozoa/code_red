@@ -34,6 +34,9 @@ const Home = () => {
         const customerInfo = await backendApis.getUserInfo()
         setUserInfo(customerInfo)
 
+        // 여기에 StepBy 가이드 시작 코드를 추가
+        StepBy.startGuide('9deb9d32-4c26-4a94-94b7-35bdfa05d57b', 'v1')
+
         // 사용자 정보의 isOnboarding 상태 확인
         if (!customerInfo.isOnboarding) {
           navigate('/onboarding')
