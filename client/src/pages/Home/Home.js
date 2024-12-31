@@ -52,6 +52,12 @@ const Home = () => {
   }
   //새 설문조사 만들기
   const newSurveyHandler = () => {
+    window.userpilot.track('create_new_survey_clicked', {
+      timestamp: new Date().toISOString(),
+      // 필요한 경우 추가 속성을 여기에 넣을 수 있습니다
+      userType: userInfo.type,
+      isConnected: userInfo.isConnect,
+    })
     navigate('/templates')
   }
 
