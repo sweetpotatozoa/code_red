@@ -1,4 +1,3 @@
-// salesmap.js
 import { useEffect } from 'react'
 import styles from './salesmap.module.css'
 
@@ -7,13 +6,17 @@ const Salesmap = () => {
     document.body.classList.add('salesmap-page')
 
     const script = document.createElement('script')
-    script.src = 'https://salesmap.kr/web-form-loader-v3.js'
+    script.src = 'https://salesmap.kr/meeting-form-loader.js'
     script.id = 'loadFormScript'
     script.async = true
     script.onload = () => {
       window.SmFormSettings && window.SmFormSettings.loadForm()
     }
-    document.body.appendChild(script)
+
+    const formDiv = document.getElementById('salesmap-meeting-form')
+    if (formDiv) {
+      formDiv.parentNode.insertBefore(script, formDiv)
+    }
 
     const handleFormSubmit = (event) => {
       if (
@@ -39,8 +42,8 @@ const Salesmap = () => {
   return (
     <div className={styles.container}>
       <div
-        id='salesmap-web-form'
-        data-web-form='https://salesmap.kr/web-form/ebf2f1b5-b435-4ba0-9821-4b8c2ef31cb8'
+        id='salesmap-meeting-form'
+        data-meeting-form='https://dev.salesmap.kr/meeting/29e0a3fd-18a6-44fc-8ba0-2b9ed4664908/01949103-8b2b-7dd3-9485-33ea331d8aec'
       />
     </div>
   )
