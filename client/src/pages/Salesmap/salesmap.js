@@ -7,17 +7,18 @@ const SalesMap = () => {
   const containerRef = useRef(null)
 
   useEffect(() => {
-    // referrer가 있고, 현재 URL에 referrel 파라미터가 없을 때만 추가
     const referrel = document.referrer
     if (referrel && !location.search.includes('referrel')) {
-      // URLSearchParams를 사용해 현재 URL의 모든 파라미터를 유지
-      const searchParams = new URLSearchParams(location.search)
-      searchParams.append('referrel', referrel)
+      // 현재 search string에서 첫 '?' 제거
+      const currentSearch = location.search.substring(1)
 
-      // 파라미터들을 포함한 새로운 URL로 이동
-      navigate(`${location.pathname}?${searchParams.toString()}`, {
-        replace: true,
-      })
+      // referrel 파라미터 추가
+      const newSearch = currentSearch
+        ? `${currentSearch}&referrel=${referrel}`
+        : `referrel=${referrel}`
+
+      // 새로운 URL로 이동
+      navigate(`${location.pathname}?${newSearch}`, { replace: true })
     }
 
     const existingScript = document.getElementById('loadFormScript')
