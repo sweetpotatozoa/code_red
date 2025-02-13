@@ -1,52 +1,48 @@
-import { useEffect } from 'react'
-import styles from './salesmap.module.css'
+import { useEffect, useRef } from 'react'
 
-const Salesmap = () => {
+const SalesMap = () => {
+  const containerRef = useRef(null)
+
   useEffect(() => {
-    document.body.classList.add('salesmap-page')
-
-    const script = document.createElement('script')
-    script.src = 'https://salesmap.kr/meeting-form-loader.js'
-    script.id = 'loadFormScript'
-    script.async = true
-    script.onload = () => {
-      window.SmFormSettings && window.SmFormSettings.loadForm()
+    // 기존 스크립트가 있다면 제거
+    const existingScript = document.getElementById('loadFormScript')
+    if (existingScript) {
+      existingScript.remove()
     }
 
-    const formDiv = document.getElementById('salesmap-meeting-form')
-    if (formDiv) {
-      formDiv.parentNode.insertBefore(script, formDiv)
-    }
-
-    const handleFormSubmit = (event) => {
-      if (
-        event.data.type === 'salesmapWebFormCallback' &&
-        event.data.eventName === 'onFormSubmitted'
-      ) {
-        window.gtag('event', 'form_submit_success', {
-          event_category: 'salesmap_form',
-        })
+    // 스크립트 엘리먼트 생성 및 추가
+    const scriptElement = document.createElement('script')
+    scriptElement.id = 'loadFormScript'
+    scriptElement.src = 'https://salesmap.kr/web-form-loader-v3.js'
+    scriptElement.onload = () => {
+      if (window.SmFormSettings) {
+        window.SmFormSettings.loadForm()
       }
     }
 
-    window.addEventListener('message', handleFormSubmit)
+    // referrer 정보가 필요한 경우 URL에 추가
+    const formUrl = document.referrer
+      ? `https://salesmap.kr/web-form/a64935d8-524d-4f2b-b2ff-57f83b5a14eb?referrer=${encodeURIComponent(
+          document.referrer,
+        )}`
+      : 'https://salesmap.kr/web-form/a64935d8-524d-4f2b-b2ff-57f83b5a14eb'
 
+    // div 엘리먼트에 data-web-form 속성 설정
+    if (containerRef.current) {
+      containerRef.current.setAttribute('data-web-form', formUrl)
+    }
+
+    document.body.appendChild(scriptElement)
+
+    // 컴포넌트 언마운트 시 정리
     return () => {
-      document.body.classList.remove('salesmap-page')
-      const scriptElement = document.getElementById('loadFormScript')
-      if (scriptElement) scriptElement.remove()
-      window.removeEventListener('message', handleFormSubmit)
+      if (scriptElement) {
+        scriptElement.remove()
+      }
     }
   }, [])
 
-  return (
-    <div className={styles.container}>
-      <div
-        id='salesmap-meeting-form'
-        data-meeting-form='https://dev.salesmap.kr/meeting/29e0a3fd-18a6-44fc-8ba0-2b9ed4664908/01949103-8b2b-7dd3-9485-33ea331d8aec'
-      />
-    </div>
-  )
+  return <div ref={containerRef} id='salesmap-web-form' />
 }
 
-export default Salesmap
+export default SalesMap
