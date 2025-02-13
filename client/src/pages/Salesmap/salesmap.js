@@ -1,4 +1,3 @@
-// SalesMap.js - 웹폼과 페이지 로직을 하나의 파일로 합친 버전
 import { useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
@@ -8,18 +7,19 @@ const SalesMap = () => {
   const containerRef = useRef(null)
 
   useEffect(() => {
-    // referrel 파라미터 처리
-    if (!location.search.includes('referrel')) {
-      const referrel = document.referrer || ''
-      const currentSearch = location.search
-      const newSearch = currentSearch
-        ? `${currentSearch}&referrel=${encodeURIComponent(referrel)}`
-        : `?referrel=${encodeURIComponent(referrel)}`
+    // referrer가 있고, 현재 URL에 referrel 파라미터가 없을 때만 추가
+    const referrel = document.referrer
+    if (referrel && !location.search.includes('referrel')) {
+      // URLSearchParams를 사용해 현재 URL의 모든 파라미터를 유지
+      const searchParams = new URLSearchParams(location.search)
+      searchParams.append('referrel', referrel)
 
-      navigate(`${location.pathname}${newSearch}`, { replace: true })
+      // 파라미터들을 포함한 새로운 URL로 이동
+      navigate(`${location.pathname}?${searchParams.toString()}`, {
+        replace: true,
+      })
     }
 
-    // 웹폼 스크립트 처리
     const existingScript = document.getElementById('loadFormScript')
     if (existingScript) {
       existingScript.remove()
@@ -43,7 +43,6 @@ const SalesMap = () => {
 
     document.body.appendChild(scriptElement)
 
-    // 클린업
     return () => {
       if (scriptElement) {
         scriptElement.remove()
