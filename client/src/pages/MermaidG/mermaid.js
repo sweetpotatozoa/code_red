@@ -1,8 +1,9 @@
 import React from 'react'
+import styles from './mermaid.module.css'
 
 const ScoreCalculator = () => {
   return (
-    <div>
+    <div className={styles.calculatorContainer}>
       <button
         onClick={() =>
           (window.location.href = 'https://www.catchtalk.co.kr/salesmap')
