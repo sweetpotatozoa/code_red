@@ -9,16 +9,28 @@ const SalesMap = () => {
   useEffect(() => {
     const referrel = document.referrer
     if (referrel && !location.search.includes('referrel')) {
-      // 현재 search string에서 첫 '?' 제거
-      const currentSearch = location.search.substring(1)
+      // URL 파라미터 파싱을 위한 URLSearchParams 사용
+      const searchParams = new URLSearchParams(window.location.search)
 
-      // referrel 파라미터 추가
-      const newSearch = currentSearch
-        ? `${currentSearch}&referrel=${referrel}`
-        : `referrel=${referrel}`
+      // 이전 페이지의 기본 URL만 추출 (파라미터 제외)
+      const prevUrl = new URL(referrel)
+      const cleanReferrel = prevUrl.origin + prevUrl.pathname
+
+      // UTM 파라미터가 있다면 복사
+      const prevParams = new URLSearchParams(prevUrl.search)
+      for (const [key, value] of prevParams.entries()) {
+        if (key.startsWith('utm_')) {
+          searchParams.set(key, value)
+        }
+      }
+
+      // referrel 추가 (파라미터가 없는 깨끗한 URL)
+      searchParams.set('referrel', cleanReferrel)
 
       // 새로운 URL로 이동
-      navigate(`${location.pathname}?${newSearch}`, { replace: true })
+      navigate(`${location.pathname}?${searchParams.toString()}`, {
+        replace: true,
+      })
     }
 
     const existingScript = document.getElementById('loadFormScript')
