@@ -13,23 +13,15 @@ const SalesMap = () => {
       const prevUrl = new URL(referrel)
       const cleanReferrel = prevUrl.origin + prevUrl.pathname
 
-      // 현재 UTM 파라미터 유지
-      const currentParams = new URLSearchParams(window.location.search)
-      const utmParams = []
+      // 현재 search string에서 첫 '?' 제거
+      const currentSearch = location.search.substring(1)
 
-      // 이전 페이지의 UTM 파라미터 복사
-      const prevParams = new URLSearchParams(prevUrl.search)
-      for (const [key, value] of prevParams.entries()) {
-        if (key.startsWith('utm_')) {
-          utmParams.push(`${key}=${value}`)
-        }
-      }
+      // 현재 UTM은 유지하고 referrel만 추가
+      const newSearch = currentSearch
+        ? `${currentSearch}&referrel=${cleanReferrel}`
+        : `referrel=${cleanReferrel}`
 
-      // 최종 URL 생성
-      const queryString = [...utmParams, `referrel=${cleanReferrel}`].join('&')
-      navigate(`${location.pathname}${queryString ? '?' + queryString : ''}`, {
-        replace: true,
-      })
+      navigate(`${location.pathname}?${newSearch}`, { replace: true })
     }
 
     const existingScript = document.getElementById('loadFormScript')
