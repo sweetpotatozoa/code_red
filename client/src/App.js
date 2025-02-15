@@ -92,14 +92,7 @@ function App() {
           </PrivateRoute>
         }
       />
-      <Route
-        path='/salesmap'
-        element={
-          <PrivateRoute>
-            <Salesmap />
-          </PrivateRoute>
-        }
-      />
+      <Route path='/salesmap' element={<Salesmap />} />
     </Routes>
   )
 }
