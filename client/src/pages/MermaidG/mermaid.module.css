@@ -18,3 +18,16 @@
 .calculatorContainer button:hover {
   background-color: #0052a3;
 }
+.input {
+  padding: 8px;
+  margin-right: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 400px; /* 긴 URL을 위해 더 넓게 */
+}
+
+.calculatorContainer {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+}
