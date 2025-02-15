@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react'
 import styles from './mermaid.module.css'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 const ScoreCalculator = () => {
   const [targetUrl, setTargetUrl] = useState('')
+  const location = useLocation()
 
   const linkProps = useMemo(() => {
     if (!targetUrl) {
@@ -14,16 +15,19 @@ const ScoreCalculator = () => {
       targetUrl.startsWith('/') || targetUrl.includes('catchtalk.co.kr')
 
     if (isInternalLink) {
-      // 내부 링크인 경우 pathname과 search params 추출
       const path = targetUrl.startsWith('/')
         ? targetUrl
         : new URL(targetUrl).pathname + new URL(targetUrl).search
-      return { to: path, isInternal: true }
+      return {
+        to: path,
+        isInternal: true,
+        // 현재 경로 정보를 state로 전달
+        state: { prevPath: location.pathname + location.search },
+      }
     }
 
-    // 외부 링크인 경우
     return { href: targetUrl, isInternal: false }
-  }, [targetUrl])
+  }, [targetUrl, location])
 
   const LinkComponent = linkProps.isInternal ? Link : 'a'
 
