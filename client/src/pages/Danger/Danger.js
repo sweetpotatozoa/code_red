@@ -1,7 +1,7 @@
 import React from 'react'
-import styles from './mermaid.module.css'
+import styles from './Danger.module.css'
 
-const ScoreCalculator = () => {
+const Danger = () => {
   return (
     <div className={styles.calculatorContainer}>
       <div
@@ -28,4 +28,4 @@ const ScoreCalculator = () => {
   )
 }
 
-export default ScoreCalculator
+export default Danger
