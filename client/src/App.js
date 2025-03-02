@@ -13,7 +13,7 @@ import Templates from './pages/Templates/Templates'
 import Edit from './pages/Edit/Edit'
 import Salesmap from './pages/Salesmap/salesmap'
 import Mermaid from './pages/MermaidG/mermaid'
-import { DiagramNotFoundError } from 'mermaid/dist/diagram-api/diagramAPI.js'
+import Danger from './pages/Danger/Danger'
 
 function App() {
   const location = useLocation()
