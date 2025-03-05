@@ -1,49 +1,64 @@
-// salesmap.js
-import { useEffect } from 'react'
-import styles from './salesmap.module.css'
+import { useEffect, useRef } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
-const Salesmap = () => {
+const SalesMap = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const containerRef = useRef(null)
+
   useEffect(() => {
-    document.body.classList.add('salesmap-page')
+    const referrel = document.referrer
+    if (referrel && !location.search.includes('referrel')) {
+      // 이전 페이지의 기본 URL만 추출 (파라미터 제외)
+      const prevUrl = new URL(referrel)
+      const cleanReferrel = prevUrl.origin + prevUrl.pathname
 
-    const script = document.createElement('script')
-    script.src = 'https://salesmap.kr/web-form-loader-v3.js'
-    script.id = 'loadFormScript'
-    script.async = true
-    script.onload = () => {
-      window.SmFormSettings && window.SmFormSettings.loadForm()
+      // 현재 search string에서 첫 '?' 제거
+      const currentSearch = location.search.substring(1)
+
+      // 현재 UTM은 유지하고 referrel만 추가
+      const newSearch = currentSearch
+        ? `${currentSearch}&referrel=${cleanReferrel}`
+        : `referrel=${cleanReferrel}`
+
+      navigate(`${location.pathname}?${newSearch}`, { replace: true })
     }
-    document.body.appendChild(script)
 
-    const handleFormSubmit = (event) => {
-      if (
-        event.data.type === 'salesmapWebFormCallback' &&
-        event.data.eventName === 'onFormSubmitted'
-      ) {
-        window.gtag('event', 'form_submit_success', {
-          event_category: 'salesmap_form',
-        })
+    const existingScript = document.getElementById('loadFormScript')
+    if (existingScript) {
+      existingScript.remove()
+    }
+
+    const scriptElement = document.createElement('script')
+    scriptElement.id = 'loadFormScript'
+    scriptElement.src = 'https://salesmap.kr/web-form-loader-v3.js'
+    scriptElement.onload = () => {
+      if (window.SmFormSettings) {
+        window.SmFormSettings.loadForm()
       }
     }
 
-    window.addEventListener('message', handleFormSubmit)
+    if (containerRef.current) {
+      containerRef.current.setAttribute(
+        'data-web-form',
+        'https://salesmap.kr/web-form/a64935d8-524d-4f2b-b2ff-57f83b5a14eb',
+      )
+    }
+
+    document.body.appendChild(scriptElement)
 
     return () => {
-      document.body.classList.remove('salesmap-page')
-      const scriptElement = document.getElementById('loadFormScript')
-      if (scriptElement) scriptElement.remove()
-      window.removeEventListener('message', handleFormSubmit)
+      if (scriptElement) {
+        scriptElement.remove()
+      }
     }
-  }, [])
+  }, [location, navigate])
 
   return (
-    <div className={styles.container}>
-      <div
-        id='salesmap-web-form'
-        data-web-form='https://salesmap.kr/web-form/ebf2f1b5-b435-4ba0-9821-4b8c2ef31cb8'
-      />
+    <div className='container'>
+      <div ref={containerRef} id='salesmap-web-form' />
     </div>
   )
 }
 
-export default Salesmap
+export default SalesMap

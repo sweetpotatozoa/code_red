@@ -13,6 +13,7 @@ import Templates from './pages/Templates/Templates'
 import Edit from './pages/Edit/Edit'
 import Salesmap from './pages/Salesmap/salesmap'
 import Mermaid from './pages/MermaidG/mermaid'
+import Danger from './pages/Danger/Danger'
 
 function App() {
   const location = useLocation()
@@ -44,6 +45,7 @@ function App() {
       <Route path='/login' element={<Login />} />
       <Route path='/register' element={<Register />} />
       <Route path='/mermaid' element={<Mermaid />} />
+      <Route path='/danger' element={<Danger />} />
       <Route
         path='/'
         element={
@@ -92,14 +94,7 @@ function App() {
           </PrivateRoute>
         }
       />
-      <Route
-        path='/salesmap'
-        element={
-          <PrivateRoute>
-            <Salesmap />
-          </PrivateRoute>
-        }
-      />
+      <Route path='/salesmap' element={<Salesmap />} />
     </Routes>
   )
 }
