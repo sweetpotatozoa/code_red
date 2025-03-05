@@ -12,7 +12,7 @@ const SalesMapForm = () => {
     containerDiv.id = 'salesmap-web-form'
     containerDiv.setAttribute(
       'data-web-form',
-      'https://salesmap.kr/web-form/518887ea-9687-476e-a173-3def27095baa',
+      'https://salesmap.kr/web-form/1dbf76ba-2d04-4484-a90c-53eadd429a03',
     )
 
     // Append container to our ref
