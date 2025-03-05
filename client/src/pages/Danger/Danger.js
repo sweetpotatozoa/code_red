@@ -1,32 +1,63 @@
-import React from 'react'
+import { useEffect, useRef } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
-const Danger = () => {
+const SalesMapForm = () => {
+  const formContainerRef = useRef(null)
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => {
+    // Create container div with the required ID and data attribute
+    const containerDiv = document.createElement('div')
+    containerDiv.id = 'salesmap-web-form'
+    containerDiv.setAttribute(
+      'data-web-form',
+      'https://salesmap.kr/web-form/6181108f-0047-48ec-8eb6-31de88a2c3bd',
+    )
+
+    // Append container to our ref
+    if (formContainerRef.current) {
+      formContainerRef.current.appendChild(containerDiv)
+    }
+
+    // Create script element
+    const scriptElement = document.createElement('script')
+    scriptElement.src = 'https://salesmap.kr/web-form-loader-v3.js'
+    scriptElement.id = 'loadFormScript'
+
+    // Define onload callback
+    scriptElement.onload = function () {
+      if (
+        window.SmFormSettings &&
+        typeof window.SmFormSettings.loadForm === 'function'
+      ) {
+        window.SmFormSettings.loadForm()
+      }
+    }
+
+    // Append script to container
+    if (formContainerRef.current) {
+      formContainerRef.current.appendChild(scriptElement)
+    }
+
+    // Cleanup function to remove script and container when component unmounts
+    return () => {
+      const loadFormScript = document.getElementById('loadFormScript')
+      if (loadFormScript) {
+        loadFormScript.remove()
+      }
+
+      if (formContainerRef.current) {
+        formContainerRef.current.innerHTML = ''
+      }
+    }
+  }, [])
+
   return (
-    <div
-      dangerouslySetInnerHTML={{
-        __html: `
-        <!-- 디버깅용 텍스트 -->
-        <p>SalesMap 폼 로드 중...</p>
-        
-        <div id="salesmap-web-form" data-web-form="https://salesmap.kr/web-form/a64935d8-524d-4f2b-b2ff-57f83b5a14eb">
-          <script>
-            !(function (window, document) {
-              var currentScript = document.currentScript;
-              var scriptElement = document.createElement('script');
-              scriptElement.onload = function () {
-                window.SmFormSettings.loadForm();
-                console.log("SalesMap 스크립트가 로드되었습니다"); // 디버깅용
-              };
-              scriptElement.id = 'loadFormScript';
-              scriptElement.src = 'https://salesmap.kr/web-form-loader-v3.js';
-              currentScript.parentNode.insertBefore(scriptElement, currentScript);
-            })(window, document);
-          </script>
-        </div>
-        `,
-      }}
-    />
+    <div className='salesmap-form-page'>
+      <div ref={formContainerRef} className='form-container'></div>
+    </div>
   )
 }
 
-export default Danger
+export default SalesMapForm
